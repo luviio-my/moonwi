@@ -13,17 +13,24 @@
   .font-display { font-family: 'Fustat', sans-serif; }
   .font-schibsted { font-family: 'Schibsted Grotesk', sans-serif; }
   .font-inter { font-family: 'Inter', sans-serif; }
+  .font-noto { font-family: 'Noto Sans', sans-serif; }
   .video-wrap { width: 115%; height: 115%; position: absolute; top: 0; left: 50%; transform: translateX(-50%); pointer-events: none; }
   .video-wrap video { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
   .gradient-overlay {
     background: radial-gradient(ellipse 90% 80% at 50% 20%, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.05) 80%);
   }
+  /* Custom Scrollbar for Chat */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
 </style>
 </head>
 <body class="overflow-x-hidden bg-black">
 
-<div class="relative w-full min-h-screen overflow-hidden">
-
+<!-- =========================================
+     1. LANDING VIEW (Home)
+========================================= -->
+<div id="landing-view" class="relative w-full min-h-screen overflow-hidden">
   <!-- Video Background -->
   <div class="absolute inset-0 z-0">
     <div class="video-wrap">
@@ -34,110 +41,128 @@
   </div>
 
   <!-- Navigation Bar -->
-  <nav class="relative z-20 flex items-center justify-between w-full"
-       style="padding: 16px 120px;">
-    <div class="font-schibsted font-semibold text-white text-[24px] select-none" style="letter-spacing: -1.44px;">Logoipsum</div>
-    <ul class="flex items-center gap-10 hidden md:flex">
-      <li><a href="#" class="font-schibsted font-medium text-white text-[16px] hover:opacity-70 transition-opacity">Platform</a></li>
-      <li><a href="#" class="font-schibsted font-medium text-white text-[16px] hover:opacity-70 transition-opacity">Features</a></li>
-      <li><a href="#" class="font-schibsted font-medium text-white text-[16px] hover:opacity-70 transition-opacity">Projects</a></li>
-      <li><a href="#" class="font-schibsted font-medium text-white text-[16px] hover:opacity-70 transition-opacity">Contact</a></li>
+  <nav class="relative z-20 flex items-center justify-between w-full" style="padding: 16px 120px;">
+    <div class="font-schibsted font-semibold text-white text-[24px] select-none cursor-pointer" onclick="navigateHome()" style="letter-spacing: -1.44px;">Logoipsum</div>
+    <ul class="flex items-center gap-10">
+      <li><a href="#" class="font-schibsted font-medium text-white text-[16px] hover:opacity-70 transition-opacity" style="letter-spacing: -0.2px;">Platform</a></li>
+      <li class="flex items-center gap-1.5 cursor-pointer">
+        <a href="#" class="font-schibsted font-medium text-white text-[16px] hover:opacity-70 transition-opacity" style="letter-spacing: -0.2px;">Features</a>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" class="text-white opacity-80"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </li>
+      <li><a href="#" class="font-schibsted font-medium text-white text-[16px] hover:opacity-70 transition-opacity" style="letter-spacing: -0.2px;">Projects</a></li>
+      <li><a href="#" class="font-schibsted font-medium text-white text-[16px] hover:opacity-70 transition-opacity" style="letter-spacing: -0.2px;">Community</a></li>
+      <li><a href="#" class="font-schibsted font-medium text-white text-[16px] hover:opacity-70 transition-opacity" style="letter-spacing: -0.2px;">Contact</a></li>
     </ul>
     <div class="flex items-center gap-3">
-      <button class="font-schibsted font-medium text-white text-[14px] rounded-lg hover:bg-white/10 transition-colors px-4 py-2">Sign Up</button>
-      <button class="font-schibsted font-medium text-white text-[14px] rounded-lg bg-black hover:opacity-90 transition-opacity px-4 py-2 border border-white/12">Log In</button>
+      <button class="font-schibsted font-medium text-white text-[14px] rounded-lg hover:bg-white/10 transition-colors" style="width: 82px; height: 40px;">Sign Up</button>
+      <button class="font-schibsted font-medium text-white text-[14px] rounded-lg bg-black hover:opacity-90 transition-opacity" style="width: 101px; height: 40px; border: 1px solid rgba(255,255,255,0.12);">Log In</button>
     </div>
   </nav>
 
   <!-- Hero Content -->
-  <main class="relative z-10 flex flex-col items-center text-center px-4 md:px-[120px]" style="margin-top: -50px;">
-    
+  <main class="relative z-10 flex flex-col items-center text-center px-[120px]" style="margin-top: -50px;">
     <div style="height: 60px;"></div>
-
-    <!-- Badge -->
-    <div class="inline-flex items-center gap-2.5 px-2 py-2 rounded-full shadow-md bg-white max-w-fit">
-      <div class="flex items-center gap-1.5 rounded-full px-3 py-1.5 bg-[#0e1311]">
+    <div class="inline-flex items-center gap-2.5 px-2 py-2 rounded-full shadow-md" style="background: #ffffff;">
+      <div class="flex items-center gap-1.5 rounded-full px-3 py-1.5" style="background: #0e1311;">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="white"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.781 1.401 8.169L12 18.896l-7.335 3.864 1.401-8.169L.132 9.21l8.2-1.192z"/></svg>
-        <span class="font-inter font-normal text-white text-[14px]">New</span>
+        <span class="font-inter font-normal text-white text-[14px]" style="letter-spacing: -0.2px;">New</span>
       </div>
-      <span class="font-inter font-normal text-[#1a1a1a] text-[14px] pr-2">Discover what's possible</span>
+      <span class="font-inter font-normal text-[#1a1a1a] text-[14px] pr-2" style="letter-spacing: -0.2px;">Discover what's possible</span>
     </div>
-
     <div style="height: 34px;"></div>
-
-    <!-- Headline -->
-    <h1 class="font-display font-bold text-black text-[60px] md:text-[80px] leading-none tracking-tight">
-      Transform Data Quickly
-    </h1>
-
+    <h1 class="font-display font-bold text-black text-[80px] text-center" style="letter-spacing: -4.8px; line-height: 1;">Transform Data Quickly</h1>
     <div style="height: 34px;"></div>
-
-    <!-- Subtitle -->
-    <p class="font-display font-medium text-[#505050] text-[18px] md:text-[20px] max-w-[736px] leading-relaxed">
-      Upload your information and get powerful insights right away. Work smarter and achieve goals effortlessly.
-    </p>
-
+    <p class="font-display font-medium text-[#505050] text-[20px] text-center mx-auto" style="letter-spacing: -0.4px; max-width: 736px; width: 542px; line-height: 1.4;">Upload your information and get powerful insights right away. Work smarter and achieve goals effortlessly.</p>
     <div style="height: 44px;"></div>
 
-    <!-- Search Input Box (Interactive) -->
-    <div id="search-container" class="w-full rounded-[18px] flex flex-col overflow-hidden shadow-2xl cursor-pointer transition-transform hover:scale-[1.01]"
-         style="max-width: 728px; height: auto; min-height: 200px; background: rgba(0,0,0,0.24); backdrop-filter: blur(20px);">
-      
-      <!-- Top row -->
-      <div class="flex items-center justify-between px-4 pt-4 pb-2">
+    <!-- Search Input Box -->
+    <form id="landing-form" class="w-full rounded-[18px] flex flex-col overflow-hidden shadow-2xl" style="max-width: 728px; height: 200px; background: rgba(0,0,0,0.24); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+      <div class="flex items-center justify-between px-4" style="height: 40px;">
         <div class="flex items-center gap-2.5">
-          <span class="font-schibsted font-medium text-white text-[12px] opacity-90">60/450 credits</span>
-          <button class="font-schibsted font-medium text-white text-[12px] rounded-md px-2.5 py-1 hover:brightness-110 transition" style="background: rgba(90,225,76,0.89);">Upgrade</button>
+          <span class="font-schibsted font-medium text-white text-[12px]" style="letter-spacing: -0.1px; opacity: 0.9;">60/450 credits</span>
+          <button type="button" class="font-schibsted font-medium text-white text-[12px] rounded-md px-2.5 py-1 hover:brightness-110 transition" style="background: rgba(90,225,76,0.89); letter-spacing: -0.1px;">Upgrade</button>
         </div>
-        <div class="flex items-center gap-1.5 opacity-90">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M12 2l1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5z"/></svg>
-          <span class="font-schibsted font-medium text-white text-[12px]">Powered by GPT-4o</span>
+        <div class="flex items-center gap-1.5">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M12 2l1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5z"/><path d="M19 14l.7 2.3L22 17l-2.3.7L19 20l-.7-2.3L16 17l2.3-.7z" opacity="0.7"/></svg>
+          <span class="font-schibsted font-medium text-white text-[12px]" style="letter-spacing: -0.1px; opacity: 0.9;">Powered by GPT-4o</span>
         </div>
       </div>
-
-      <!-- Main Input Area -->
-      <form id="chat-form" class="flex-1 mx-3 mb-3 rounded-[12px] flex flex-col bg-white shadow-xl relative">
-        <div class="flex-1 px-4 pt-4 pb-2 relative min-h-[80px]">
-          <textarea id="user-input" 
-                    placeholder="Type question..." 
-                    rows="2"
-                    class="w-full bg-transparent border-none outline-none text-[16px] resize-none placeholder-gray-400"
-                    style="color: #000; font-family: 'Fustat', sans-serif;"></textarea>
-          
-          <!-- Send Button -->
-          <button type="submit" 
-                  class="absolute right-3 bottom-3 flex items-center justify-center rounded-full hover:scale-105 active:scale-95 transition-transform"
-                  style="width: 36px; height: 36px; background: #000000;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M12 19V5M5 12l7-7 7 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+      <div class="flex-1 mx-3 mb-3 rounded-[12px] flex flex-col" style="background: #ffffff; box-shadow: 0 4px 20px rgba(0,0,0,0.25);">
+        <div class="flex-1 px-4 pt-3 relative">
+          <input id="landing-input" type="text" placeholder="Type question..." class="w-full bg-transparent border-none outline-none text-[16px] placeholder:font-normal" style="color: #000; font-family: 'Fustat', sans-serif; letter-spacing: -0.2px;" required>
+          <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full hover:scale-105 transition-transform" style="width: 36px; height: 36px; background: #000000;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
         </div>
-        
-        <div class="flex items-center justify-between px-4 pb-3 border-t border-gray-100 pt-2">
-          <div class="flex items-center gap-2">
-            <button type="button" class="flex items-center gap-1.5 font-schibsted text-xs px-2 py-1.5 rounded-md hover:bg-gray-100 text-gray-600 transition">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
-              Attach
+        <div class="flex items-center justify-between px-4 pb-3">
+          <div class="flex items-center gap-1.5">
+            <button type="button" class="flex items-center gap-1.5 font-schibsted font-medium text-[#1a1a1a] text-[13px] px-2.5 py-1.5 rounded-[6px] hover:bg-gray-200 transition" style="background: #f8f8f8; letter-spacing: -0.1px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #505050;"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>Attach
             </button>
-            <button type="button" class="hidden sm:flex items-center gap-1.5 font-schibsted text-xs px-2 py-1.5 rounded-md hover:bg-gray-100 text-gray-600 transition">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v3"/></svg>
-              Voice
+            <button type="button" class="flex items-center gap-1.5 font-schibsted font-medium text-[#1a1a1a] text-[13px] px-2.5 py-1.5 rounded-[6px] hover:bg-gray-200 transition" style="background: #f8f8f8; letter-spacing: -0.1px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #505050;"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v3"/></svg>Voice
+            </button>
+            <button type="button" class="flex items-center gap-1.5 font-schibsted font-medium text-[#1a1a1a] text-[13px] px-2.5 py-1.5 rounded-[6px] hover:bg-gray-200 transition" style="background: #f8f8f8; letter-spacing: -0.1px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #505050;"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>Prompts
             </button>
           </div>
-          <span class="font-schibsted text-[11px] text-gray-400"><span id="char-count">0</span>/3,000</span>
+          <span id="char-count" class="font-schibsted font-medium text-[12px]" style="color: #9a9a9a; letter-spacing: -0.1px;">0/3,000</span>
         </div>
+      </div>
+    </form>
+  </main>
+</div>
+
+<!-- =========================================
+     2. CHAT VIEW (/c/[chatid])
+========================================= -->
+<div id="chat-view" class="hidden h-screen flex bg-[#212121] text-gray-100 font-schibsted">
+  
+  <!-- Sidebar -->
+  <aside class="w-64 bg-[#171717] p-2 flex flex-col border-r border-white/5">
+    <button onclick="navigateHome()" class="flex items-center gap-3 p-3 text-sm rounded hover:bg-white/5 transition-colors">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      New chat
+    </button>
+    <div class="flex-1 mt-4 overflow-y-auto">
+      <p class="text-xs text-gray-500 px-3 mb-2 uppercase tracking-wider">History</p>
+      <div id="history-list">
+        <div class="px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded cursor-pointer truncate">Current Chat</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Chat Area -->
+  <main class="flex-1 flex flex-col items-center relative">
+    
+    <div id="chat-messages" class="w-full max-w-3xl flex-1 overflow-y-auto p-6 space-y-6 pb-32">
+      <!-- Messages will be injected here -->
+    </div>
+
+    <!-- Input Area -->
+    <div class="w-full max-w-3xl p-4 absolute bottom-0 bg-gradient-to-t from-[#212121] to-transparent">
+      <form id="chat-form" class="relative">
+        <input id="chat-input" type="text" placeholder="Message AI..." class="w-full bg-[#2f2f2f] text-white border border-white/10 rounded-2xl py-4 pl-4 pr-14 outline-none focus:border-white/20 transition-colors" autocomplete="off">
+        <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-white text-black rounded-full hover:opacity-80 transition disabled:opacity-30" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </button>
       </form>
     </div>
-    
-    <p class="mt-6 text-white/40 text-sm font-inter">Press Enter to start chatting • No login required for demo</p>
+
   </main>
 </div>
 
 <script>
 /* ============================================================
-   1. Video Fade System (Preserved from original)
-   ============================================================ */
+   GLOBAL STATE & API CONFIG
+============================================================ */
+const OPENROUTER_API_KEY = "sk-or-v1-YOUR_OPENROUTER_API_KEY_HERE"; // <--- PASTE YOUR API KEY HERE
+
+let messages = []; // Holds the conversation history
+
+/* ============================================================
+   CUSTOM JS VIDEO FADE SYSTEM (From Original Code)
+============================================================ */
 (function() {
   const video = document.getElementById('hero-video');
   const FADE_DURATION = 250;
@@ -151,15 +176,14 @@
   function fadeIn() {
     cancelFade();
     const startOpacity = parseFloat(video.style.opacity || '0');
-    if (startOpacity >= 1) return;
+    if (startOpacity >= 1) { setOpacity(1); return; }
     const startTime = performance.now();
     function step(now) {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / FADE_DURATION, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       setOpacity(startOpacity + (1 - startOpacity) * eased);
-      if (progress < 1) rafId = requestAnimationFrame(step);
-      else { setOpacity(1); rafId = null; }
+      if (progress < 1) rafId = requestAnimationFrame(step); else { setOpacity(1); rafId = null; }
     }
     rafId = requestAnimationFrame(step);
   }
@@ -167,15 +191,14 @@
   function fadeOut() {
     cancelFade();
     const startOpacity = parseFloat(video.style.opacity || '1');
-    if (startOpacity <= 0) return;
+    if (startOpacity <= 0) { setOpacity(0); return; }
     const startTime = performance.now();
     function step(now) {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / FADE_DURATION, 1);
       const eased = progress * progress * progress;
       setOpacity(startOpacity + (0 - startOpacity) * eased);
-      if (progress < 1) rafId = requestAnimationFrame(step);
-      else { setOpacity(0); rafId = null; }
+      if (progress < 1) rafId = requestAnimationFrame(step); else { setOpacity(0); rafId = null; }
     }
     rafId = requestAnimationFrame(step);
   }
@@ -184,7 +207,7 @@
   const startPlayback = () => {
     video.play().then(() => { fadingOutRef = false; fadeIn(); }).catch(() => {
       video.muted = true;
-      video.play().then(() => { fadingOutRef = false; fadeIn(); }).catch(()=>{});
+      video.play().then(() => { fadingOutRef = false; fadeIn(); }).catch(() => {});
     });
   };
 
@@ -193,49 +216,213 @@
 
   video.addEventListener('timeupdate', () => {
     if (!video.duration) return;
-    if ((video.duration - video.currentTime) <= FADE_OUT_TRIGGER && !fadingOutRef) {
-      fadingOutRef = true; fadeOut();
+    const remaining = video.duration - video.currentTime;
+    if (remaining <= FADE_OUT_TRIGGER && !fadingOutRef) {
+      fadingOutRef = true;
+      fadeOut();
     }
   });
 
   video.addEventListener('ended', () => {
-    cancelFade(); setOpacity(0);
+    cancelFade();
+    setOpacity(0);
     setTimeout(() => {
-      try { video.currentTime = 0; } catch(e){}
+      try { video.currentTime = 0; } catch (e) {}
       fadingOutRef = false;
-      video.play().then(fadeIn).catch(()=>{});
+      video.play().then(() => { fadeIn(); }).catch(() => {});
     }, 100);
   });
 })();
 
+
 /* ============================================================
-   2. Redirect Logic (New)
-   ============================================================ */
-document.getElementById('chat-form').addEventListener('submit', function(e) {
-  e.preventDefault(); // Prevent page reload
+   CLIENT-SIDE ROUTER (Handles Landing vs Chat UI)
+============================================================ */
+const landingView = document.getElementById('landing-view');
+const chatView = document.getElementById('chat-view');
+
+function handleRoute() {
+  const path = window.location.pathname;
   
-  const input = document.getElementById('user-input');
-  const query = input.value.trim();
+  // Match /c/[chatid] route
+  const chatMatch = path.match(/^\/c\/([a-zA-Z0-9-]+)/);
   
-  if (!query) return;
+  if (chatMatch) {
+    const chatId = chatMatch[1];
+    openChatView(chatId);
+  } else {
+    openLandingView();
+  }
+}
 
-  // Generate a simple unique ID for the chat session
-  // In production, this ID would be created by your backend database
-  const chatId = 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+function navigateToChat(prompt) {
+  const chatId = crypto.randomUUID();
+  history.pushState({ chatId, prompt }, '', `/c/${chatId}`);
+  openChatView(chatId, prompt);
+}
 
-  // Optional: Store the initial message in localStorage so the next page can pick it up
-  localStorage.setItem(`initial_msg_${chatId}`, query);
+function navigateHome() {
+  history.pushState({}, '', '/');
+  openLandingView();
+  // Reset landing form
+  document.getElementById('landing-input').value = '';
+  document.getElementById('char-count').textContent = '0/3,000';
+  // Clear chat state
+  messages = [];
+  document.getElementById('chat-messages').innerHTML = '';
+}
 
-  // Redirect to the Chat UI
-  window.location.href = `/c/${chatId}`;
-});
+window.addEventListener('popstate', handleRoute);
 
-// Character counter update
-const userInput = document.getElementById('user-input');
+function openLandingView() {
+  landingView.classList.remove('hidden');
+  chatView.classList.add('hidden');
+}
+
+function openChatView(chatId, initialPrompt) {
+  landingView.classList.add('hidden');
+  chatView.classList.remove('hidden');
+  
+  // If we have an initial prompt and the chat is empty, send it
+  if (initialPrompt && messages.length === 0) {
+    sendChatMessage(initialPrompt);
+  }
+}
+
+
+/* ============================================================
+   LANDING PAGE LOGIC
+============================================================ */
+const landingForm = document.getElementById('landing-form');
+const landingInput = document.getElementById('landing-input');
 const charCount = document.getElementById('char-count');
-userInput.addEventListener('input', () => {
-  charCount.textContent = userInput.value.length;
+
+landingInput.addEventListener('input', (e) => {
+  charCount.textContent = `${e.target.value.length}/3,000`;
 });
+
+landingForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const prompt = landingInput.value.trim();
+  if (!prompt) return;
+  navigateToChat(prompt);
+});
+
+
+/* ============================================================
+   CHAT PAGE LOGIC & OPENROUTER STREAMING
+============================================================ */
+const chatForm = document.getElementById('chat-form');
+const chatInput = document.getElementById('chat-input');
+const chatMessages = document.getElementById('chat-messages');
+const chatSubmitBtn = chatForm.querySelector('button[type="submit"]');
+
+chatInput.addEventListener('input', () => {
+  chatSubmitBtn.disabled = chatInput.value.trim() === '';
+});
+
+chatForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const text = chatInput.value.trim();
+  if (!text) return;
+  chatInput.value = '';
+  chatSubmitBtn.disabled = true;
+  sendChatMessage(text);
+});
+
+function addMessageToDOM(role, content) {
+  const wrapper = document.createElement('div');
+  wrapper.className = `flex gap-4 ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+  
+  if (role === 'assistant') {
+    wrapper.innerHTML = `
+      <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs flex-shrink-0">AI</div>
+      <div class="bg-[#2f2f2f] text-white p-4 rounded-2xl max-w-[80%] whitespace-pre-wrap break-words">${content}</div>
+    `;
+  } else {
+    wrapper.innerHTML = `
+      <div class="bg-blue-600 text-white p-4 rounded-2xl max-w-[80%] whitespace-pre-wrap break-words">${content}</div>
+    `;
+  }
+  
+  chatMessages.appendChild(wrapper);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  return wrapper.querySelector('.bg-\\[\\#2f2f2f\\], .bg-blue-600'); // Return bubble for updating
+}
+
+async function sendChatMessage(text) {
+  // 1. Add user message to state and DOM
+  messages.push({ role: 'user', content: text });
+  addMessageToDOM('user', text);
+
+  // 2. Create an empty assistant bubble to stream text into
+  const assistantBubble = addMessageToDOM('assistant', '');
+  assistantBubble.innerHTML = '<span class="opacity-50">Thinking...</span>';
+
+  try {
+    // 3. Call OpenRouter API
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": window.location.href, 
+        "X-Title": "HTML AI App"
+      },
+      body: JSON.stringify({
+        model: "openai/gpt-4o", // You can change this to 'anthropic/claude-3.5-sonnet' etc.
+        messages: messages,
+        stream: true
+      })
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+    // 4. Parse the streaming response
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let fullResponse = '';
+
+    assistantBubble.innerHTML = ''; // Clear "Thinking..."
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // Keep last incomplete line
+      
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6).trim();
+          if (data === '[DONE]') break;
+          
+          try {
+            const json = JSON.parse(data);
+            const chunk = json.choices[0]?.delta?.content || '';
+            if (chunk) {
+              fullResponse += chunk;
+              assistantBubble.textContent = fullResponse; // Update UI live
+              chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+          } catch (e) { /* Ignore JSON parse errors for keep-alive comments */ }
+        }
+      }
+    }
+
+    // 5. Save final response to state
+    messages.push({ role: 'assistant', content: fullResponse });
+
+  } catch (error) {
+    console.error("OpenRouter Error:", error);
+    assistantBubble.innerHTML = `<span class="text-red-400">Error fetching response. Check your API key and network.</span>`;
+  }
+}
+
+// Initialize app state on load
+handleRoute();
 </script>
 </body>
 </html>
