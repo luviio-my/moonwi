@@ -114,8 +114,6 @@
   @keyframes stopPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(0.88); } }
   .stop-icon-pulse { animation: stopPulse 1.2s ease-in-out infinite; }
   @keyframes toastIn { from { opacity: 0; transform: translateY(-8px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
-  @keyframes searchSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-  .search-spinning { animation: searchSpin 0.8s linear infinite; }
 
   .prose-content { line-height: 1.7; font-size: 15px; word-wrap: break-word; overflow-wrap: break-word; }
   .prose-content p { margin: 0.6em 0; }
@@ -432,7 +430,7 @@
         </div>
         <div class="flex items-center gap-1.5">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M12 2l1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5z"/></svg>
-          <span class="font-schibsted font-medium text-white text-[12px]">Powered by Gemini Flash</span>
+          <span class="font-schibsted font-medium text-white text-[12px]">Powered by Gemini Pro & Flash</span>
         </div>
       </div>
       <div class="flex-1 mx-3 mb-3 rounded-[12px] flex flex-col bg-white" style="box-shadow: 0 4px 20px rgba(0,0,0,0.25);">
@@ -523,7 +521,7 @@
 
       <div class="relative" id="model-selector-wrap">
         <button onclick="toggleModelDropdown()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors text-sm font-medium">
-          <span id="selected-model-label" class="top-bar-model-label">Gemini Flash</span>
+          <span id="selected-model-label" class="top-bar-model-label">Gemini 3.5 Flash</span>
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="transition-transform duration-200" id="model-chevron"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div id="model-dropdown" class="model-dropdown"></div>
@@ -589,14 +587,14 @@
 /* ============================================================
    GLOBAL STATE & API CONFIG
 ============================================================ */
-// API Keys removed from frontend. Now securely routed via Cloudflare Worker.
 const BACKEND_URL = "https://my-ai-backend.luviio.workers.dev";
 
+// Added the requested clever models! 
+// NOTE: If Google API rejects these names, you may need to change them to real ones like "gemini-1.5-pro-latest"
 const MODELS = [
-  { id: "gemini-flash-latest", name: "Gemini Flash", desc: "Google · Fast · Advanced", provider: "google" },
-  { id: "openai/gpt-oss-120b:free", name: "GPT-OSS 120B", desc: "Fast · Free · OpenAI", provider: "openrouter" },
-  { id: "google/gemma-4-31b-it:free", name: "Gemma 4 31B", desc: "Google · Free", provider: "openrouter" },
-  { id: "meta-llama/llama-3.3-70b-instruct:free", name: "Llama 3.3 70B", desc: "Meta · Free", provider: "openrouter" }
+  { id: "gemini-3.5-flash", name: "Gemini 3.5 Flash", desc: "Google · Fast · Advanced", provider: "google" },
+  { id: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro", desc: "Google · Pro · Clever", provider: "google" },
+  { id: "gemini-3.1-flash-lite", name: "Gemini 3.1 Flash Lite", desc: "Google · Lite · Efficient", provider: "google" }
 ];
 
 let currentChatId = null;
@@ -604,26 +602,24 @@ let selectedModel = MODELS[0].id;
 let chatStore = {};
 let isGenerating = false;
 let abortController = null;
-let renderThrottle = null;
 
 function getChat(chatId) {
   if (!chatStore[chatId]) chatStore[chatId] = { messages: [], title: "New Chat" };
   return chatStore[chatId];
 }
 
-function getSystemPrompt(searchContext) {
+function getSystemPrompt() {
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   const now = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-  let prompt = `You are MoonWi AI, an advanced, helpful, and friendly assistant. Today is ${today}, current time is ${now}.
+  return `You are MoonWi AI, an advanced, helpful, and friendly assistant. Today is ${today}, current time is ${now}.
 
-You have access to real-time web search results when provided. When web search results are included in the conversation, use them to provide accurate, current answers. Always cite sources when using search results.
+You have access to real-time web search results via Google Search Grounding. Use this capability automatically whenever the user asks about current events, recent information, news, or facts that require up-to-date data.
 
 Key rules:
-- For current/recent information: use the provided web search results to give accurate, up-to-date answers.
+- For current/recent information: use your search capabilities to give accurate, up-to-date answers.
 - Always provide accurate, current, and well-structured answers.
-- When you use web search results, mention what you found and cite the source URLs.
+- Cite sources naturally when using search results.
 - Be concise but complete. Answer directly without unnecessary filler.
-- If no web search results are provided and the question requires current data, state that you don't have real-time access and provide the best answer you can.
 
 When sharing code:
 - ALWAYS use proper markdown code blocks with language identifiers like \`\`\`html, \`\`\`python, \`\`\`javascript, \`\`\`css, etc.
@@ -631,101 +627,6 @@ When sharing code:
 - For Python code, make sure it is syntactically correct and includes necessary imports.
 
 Format responses with markdown: use **bold**, *italic*, lists, tables, blockquotes, and code blocks where appropriate.`;
-
-  if (searchContext) {
-    prompt += `\n\n--- WEB SEARCH RESULTS ---\n${searchContext}\n--- END WEB SEARCH RESULTS ---\n\nUse the above search results to answer the user's question with current, accurate information. Cite the source URLs in your answer.`;
-  }
-
-  return prompt;
-}
-
-/* ============================================================
-   FREE WEB SEARCH — Uses Wikipedia API (CORS-friendly, no key)
-============================================================ */
-async function performWebSearch(query) {
-  const results = [];
-
-  // 1. Try Wikipedia
-  try {
-    const wikiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
-    const wikiResp = await fetch(wikiUrl, { signal: AbortSignal.timeout(4000) });
-    if (wikiResp.ok) {
-      const data = await wikiResp.json();
-      if (data.extract) {
-        results.push({
-          title: data.title || 'Wikipedia',
-          url: data.content_urls?.desktop?.page || `https://en.wikipedia.org/wiki/${encodeURIComponent(query)}`,
-          snippet: data.extract
-        });
-      }
-    }
-  } catch (e) { /* skip */ }
-
-  // 2. Try Wikipedia search API for related topics
-  try {
-    const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&srlimit=3&format=json&origin=*`;
-    const searchResp = await fetch(searchUrl, { signal: AbortSignal.timeout(4000) });
-    if (searchResp.ok) {
-      const data = await searchResp.json();
-      if (data.query?.search) {
-        for (const item of data.query.search) {
-          if (!results.find(r => r.title === item.title)) {
-            results.push({
-              title: item.title,
-              url: `https://en.wikipedia.org/wiki/${encodeURIComponent(item.title.replace(/ /g, '_'))}`,
-              snippet: item.snippet.replace(/<[^>]+>/g, '')
-            });
-          }
-        }
-      }
-    }
-  } catch (e) { /* skip */ }
-
-  // 3. Try DuckDuckGo Instant Answer API (CORS-friendly)
-  try {
-    const ddgUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`;
-    const ddgResp = await fetch(ddgUrl, { signal: AbortSignal.timeout(4000) });
-    if (ddgResp.ok) {
-      const data = await ddgResp.json();
-      if (data.Abstract) {
-        results.unshift({
-          title: data.Heading || 'DuckDuckGo',
-          url: data.AbstractURL || `https://duckduckgo.com/?q=${encodeURIComponent(query)}`,
-          snippet: data.Abstract
-        });
-      }
-      if (data.RelatedTopics) {
-        for (const topic of data.RelatedTopics.slice(0, 2)) {
-          if (topic.Text && topic.FirstURL) {
-            results.push({
-              title: topic.Text.substring(0, 60),
-              url: topic.FirstURL,
-              snippet: topic.Text
-            });
-          }
-        }
-      }
-    }
-  } catch (e) { /* skip */ }
-
-  if (results.length === 0) return null;
-
-  return results.map((r, i) => `[${i + 1}] ${r.title}\nURL: ${r.url}\n${r.snippet}`).join('\n\n');
-}
-
-/* ============================================================
-   Detect if query needs web search
-============================================================ */
-function needsWebSearch(text) {
-  const lower = text.toLowerCase();
-  const currentKeywords = [
-    'latest', 'recent', 'current', 'today', 'yesterday', 'this week', 'this month', 'this year',
-    'news', 'update', 'updated', 'happened', 'happening', 'ongoing', 'now', '2024', '2025',
-    'stock', 'price', 'weather', 'score', 'result', 'who won', 'when did', 'how much is',
-    'what is the latest', 'what happened', 'is it true', 'did ', 'has ', 'announce',
-    'release', 'launch', 'breaking', 'live', 'trending', 'viral', 'new '
-  ];
-  return currentKeywords.some(kw => lower.includes(kw));
 }
 
 /* ============================================================
@@ -895,11 +796,11 @@ async function generateChatTitle(firstMessage) {
   try {
     const response = await fetch(BACKEND_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        message: `Create a very short title (3-6 words max) for a chat that starts with this user message. Reply with ONLY the title, no quotes, no punctuation at the end. Use Title Case. Message: ${firstMessage.substring(0, 500)}`
+        messages: [{ role: 'user', content: `Create a very short title (3-6 words max) for a chat that starts with this user message. Reply with ONLY the title, no quotes, no punctuation at the end. Use Title Case. Message: ${firstMessage.substring(0, 500)}` }],
+        model: selectedModel,
+        systemPrompt: "You are a title generator. Output only the title text."
       })
     });
 
@@ -1508,7 +1409,6 @@ async function sendChatMessage(text, isRegenerate = false) {
     addMessageToDOM('user', text);
   }
 
-  // Remove old regenerate buttons
   document.querySelectorAll('.msg-actions.always-show').forEach(el => el.classList.remove('always-show'));
   document.querySelectorAll('.msg-actions .msg-action-btn[title="Regenerate response"]').forEach(btn => btn.remove());
 
@@ -1521,56 +1421,18 @@ async function sendChatMessage(text, isRegenerate = false) {
   setGeneratingState(true);
   abortController = new AbortController();
 
-  // Perform free web search if needed
-  let searchContext = null;
-  let didSearch = false;
-  const userText = isRegenerate
-    ? [...chatData.messages].reverse().find(m => m.role === 'user')?.content || ''
-    : text;
-
-  if (needsWebSearch(userText)) {
-    // Show searching indicator
-    assistantBubble.innerHTML = '<div class="flex items-center gap-2 py-1.5"><svg class="search-spinning" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><span style="color: var(--text-secondary); font-size: 14px;">Searching the web...</span></div>';
-
-    try {
-      searchContext = await performWebSearch(userText);
-      didSearch = !!searchContext;
-    } catch (e) { /* skip search */ }
-
-    // Show typing indicator after search
-    if (avatarEl) avatarEl.classList.remove('thinking-avatar');
-    assistantBubble.innerHTML = '';
-    showTypingIndicator(assistantBubble);
-    if (avatarEl) avatarEl.classList.add('thinking-avatar');
-
-    // Add search badge if search was performed
-    if (didSearch) {
-      const badge = document.createElement('div');
-      badge.className = 'search-badge';
-      badge.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg> Searched the web';
-      assistantBubble.parentElement.insertBefore(badge, assistantBubble);
-    }
-  }
-
-  const systemPrompt = getSystemPrompt(searchContext);
+  const systemPrompt = getSystemPrompt();
   
-  // Format conversation history as a plain string for the backend
-  let promptString = `System Instructions:\n${systemPrompt}\n\nConversation History:\n`;
-  chatData.messages.forEach(m => {
-    promptString += `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}\n`;
-  });
-  promptString += `Assistant:`;
-
   let fullResponse = '';
 
   try {
     const response = await fetch(BACKEND_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        message: promptString // Sending a single string as expected by index.js
+        messages: chatData.messages, // Send proper array of messages!
+        model: selectedModel,        // Send the selected model!
+        systemPrompt: systemPrompt   // Send the system prompt separately!
       }),
       signal: abortController.signal
     });
@@ -1583,7 +1445,6 @@ async function sendChatMessage(text, isRegenerate = false) {
     const data = await response.json();
     fullResponse = data.reply || "No response";
 
-    // Render the response
     assistantBubble.innerHTML = renderMarkdown(fullResponse);
     enhanceCodeBlocks(assistantBubble);
     if (window.Prism) Prism.highlightAllUnder(assistantBubble);
