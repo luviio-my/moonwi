@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hero — Transform Data Quickly</title>
+<title>MoonWi AI — Transform Data Quickly</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600;700&family=Fustat:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -19,13 +19,15 @@
   .gradient-overlay {
     background: radial-gradient(ellipse 90% 80% at 50% 20%, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.05) 80%);
   }
-  /* Custom Scrollbar for Chat */
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
   
-  /* Sidebar Transitions */
-  .sidebar-collapsed { width: 0 !important; padding: 0 !important; border: none !important; overflow: hidden !important; }
+  /* Sidebar transition */
+  #sidebar { transition: width 0.3s ease, transform 0.3s ease; overflow: hidden; white-space: nowrap; }
+  #sidebar.closed { width: 0px !important; padding: 0 !important; border: none !important; }
+  #sidebar-content { opacity: 1; transition: opacity 0.2s ease; }
+  #sidebar.closed #sidebar-content { opacity: 0; pointer-events: none; }
 </style>
 </head>
 <body class="overflow-x-hidden bg-black">
@@ -45,7 +47,7 @@
 
   <!-- Navigation Bar -->
   <nav class="relative z-20 flex items-center justify-between w-full" style="padding: 16px 120px;">
-    <div class="font-schibsted font-semibold text-white text-[24px] select-none cursor-pointer" onclick="navigateHome()" style="letter-spacing: -1.44px;">Logoipsum</div>
+    <div class="font-schibsted font-semibold text-white text-[24px] select-none cursor-pointer" onclick="navigateHome()" style="letter-spacing: -1.44px;">MoonWi AI</div>
     <ul class="flex items-center gap-10">
       <li><a href="#" class="font-schibsted font-medium text-white text-[16px] hover:opacity-70 transition-opacity" style="letter-spacing: -0.2px;">Platform</a></li>
       <li class="flex items-center gap-1.5 cursor-pointer">
@@ -57,8 +59,8 @@
       <li><a href="#" class="font-schibsted font-medium text-white text-[16px] hover:opacity-70 transition-opacity" style="letter-spacing: -0.2px;">Contact</a></li>
     </ul>
     <div class="flex items-center gap-3">
-      <button class="font-schibsted font-medium text-white text-[14px] rounded-lg hover:bg-white/10 transition-colors" style="width: 82px; height: 40px;">Sign Up</button>
-      <button class="font-schibsted font-medium text-white text-[14px] rounded-lg bg-black hover:opacity-90 transition-opacity" style="width: 101px; height: 40px; border: 1px solid rgba(255,255,255,0.12);">Log In</button>
+      <button onclick="simulateLogin()" class="font-schibsted font-medium text-white text-[14px] rounded-lg hover:bg-white/10 transition-colors" style="width: 82px; height: 40px;">Sign Up</button>
+      <button onclick="simulateLogin()" class="font-schibsted font-medium text-white text-[14px] rounded-lg bg-black hover:opacity-90 transition-opacity" style="width: 101px; height: 40px; border: 1px solid rgba(255,255,255,0.12);">Log In</button>
     </div>
   </nav>
 
@@ -122,109 +124,77 @@
 <div id="chat-view" class="hidden h-screen flex bg-[#212121] text-gray-100 font-schibsted">
   
   <!-- Sidebar -->
-  <aside id="chat-sidebar" class="w-64 bg-[#171717] flex flex-col border-r border-white/5 transition-all duration-300 ease-in-out">
-    
-    <!-- Sidebar Top: Close Toggle & Logo -->
-    <div class="p-3 flex items-center justify-between border-b border-white/5">
-      <div class="font-schibsted font-semibold text-white text-[18px] select-none cursor-pointer flex items-center gap-2" onclick="navigateHome()">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-white">
-           <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-        </svg>
-        MoonWi AI
-      </div>
-      <button onclick="toggleSidebar()" class="p-1.5 rounded-md hover:bg-white/10 transition-colors">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="size-4.5 text-white rotate-180">
-          <path d="M6 2V14M5.2 2H10.8C11.9201 2 12.4802 2 12.908 2.21799C13.2843 2.40973 13.5903 2.71569 13.782 3.09202C14 3.51984 14 4.0799 14 5.2V10.8C14 11.9201 14 12.4802 13.782 12.908C13.5903 13.2843 13.2843 13.5903 12.908 13.782C12.4802 14 11.9201 14 10.8 14H5.2C4.07989 14 3.51984 14 3.09202 13.782C2.71569 13.5903 2.40973 13.2843 2.21799 12.908C2 12.4802 2 11.9201 2 10.8V5.2C2 4.07989 2 3.51984 2.21799 3.09202C2.40973 2.71569 2.71569 2.40973 3.09202 2.21799C3.51984 2 4.0799 2 5.2 2Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.33"></path>
-        </svg>
-      </button>
-    </div>
-
-    <!-- New Chat Button -->
-    <div class="p-2">
-      <button onclick="navigateHome()" class="flex items-center gap-3 w-full p-3 text-sm rounded hover:bg-white/5 transition-colors text-left">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-        New chat
-      </button>
-    </div>
-
-    <!-- History List -->
-    <div class="flex-1 mt-2 overflow-y-auto px-2">
-      <p class="text-xs text-gray-500 px-3 mb-2 uppercase tracking-wider">History</p>
-      <div id="history-list" class="space-y-1">
-        <div class="px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded cursor-pointer truncate">Current Chat</div>
-        <div class="px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded cursor-pointer truncate">Data Analysis Techniques</div>
-        <div class="px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded cursor-pointer truncate">Web Scraping Strategies</div>
-        <div class="px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded cursor-pointer truncate">Machine Learning Basics</div>
-      </div>
-    </div>
-
-    <!-- Sidebar Bottom: User & Settings -->
-    <div class="p-2 border-t border-white/5 mt-auto">
-      <button class="flex items-center gap-3 w-full p-3 text-sm rounded hover:bg-white/5 transition-colors text-left">
-        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center text-xs font-bold text-white">U</div>
-        <div class="flex-1 truncate">
-          <div class="text-white font-medium text-sm">User Account</div>
-          <div class="text-gray-500 text-xs">Free Plan</div>
-        </div>
-      </button>
-      <button class="flex items-center gap-3 w-full p-3 text-sm rounded hover:bg-white/5 transition-colors text-left">
-        <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400">
-            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  <aside id="sidebar" class="w-64 bg-[#171717] p-2 flex flex-col border-r border-white/5 flex-shrink-0">
+    <div id="sidebar-content" class="flex flex-col h-full">
+      <!-- Top Section: Toggle & New Chat -->
+      <div class="flex items-center justify-between p-2 gap-2">
+        <button onclick="toggleSidebar()" class="p-1.5 text-white hover:bg-white/10 rounded transition-colors">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-white rotate-180">
+            <path d="M6 2V14M5.2 2H10.8C11.9201 2 12.4802 2 12.908 2.21799C13.2843 2.40973 13.5903 2.71569 13.782 3.09202C14 3.51984 14 4.0799 14 5.2V10.8C14 11.9201 14 12.4802 13.782 12.908C13.5903 13.2843 13.2843 13.5903 12.908 13.782C12.4802 14 11.9201 14 10.8 14H5.2C4.07989 14 3.51984 14 3.09202 13.782C2.71569 13.5903 2.40973 13.2843 2.21799 12.908C2 12.4802 2 11.9201 2 10.8V5.2C2 4.07989 2 3.51984 2.21799 3.09202C2.40973 2.71569 2.71569 2.40973 3.09202 2.21799C3.51984 2 4.0799 2 5.2 2Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.33"></path>
           </svg>
+        </button>
+        <button onclick="startNewChat()" class="flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-white/5 transition-colors flex-1 text-white">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          New chat
+        </button>
+      </div>
+      
+      <!-- History List -->
+      <div class="flex-1 mt-4 overflow-y-auto">
+        <p class="text-xs text-gray-500 px-3 mb-2 uppercase tracking-wider">History</p>
+        <div id="history-list">
+          <div class="px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded cursor-pointer truncate">Current Chat</div>
         </div>
-        <div class="flex-1 text-gray-300">Settings</div>
-      </button>
+      </div>
+
+      <!-- Bottom Section: Account & Settings -->
+      <div class="mt-auto p-2 border-t border-white/5 space-y-1">
+        <button class="w-full flex items-center gap-3 p-2 text-sm rounded hover:bg-white/5 transition-colors text-gray-300">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Account
+        </button>
+        <button class="w-full flex items-center gap-3 p-2 text-sm rounded hover:bg-white/5 transition-colors text-gray-300">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Settings
+        </button>
+      </div>
     </div>
   </aside>
 
   <!-- Main Chat Area -->
-  <main class="flex-1 flex flex-col items-center relative">
+  <main class="flex-1 flex flex-col items-center relative h-screen">
     
-    <!-- Header Area for Mobile/Open Sidebar Toggle & Model Select -->
-    <div class="w-full max-w-3xl flex items-center justify-between p-4">
-      <button id="open-sidebar-btn" onclick="toggleSidebar()" class="p-2 rounded-md hover:bg-white/5 transition-colors hidden">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-      </button>
-      
-      <!-- Model Selection Dropdown -->
-      <div class="relative ml-auto">
-        <button id="model-dropdown-btn" class="flex items-center gap-2 bg-[#2f2f2f] hover:bg-[#3a3a3a] text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-          <span id="selected-model-name">GPT-4o</span>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    <!-- Top Bar (When Sidebar is closed) -->
+    <div id="top-bar" class="hidden absolute top-0 left-0 w-full flex items-center justify-between p-4 z-20 bg-[#212121]">
+      <div class="flex items-center gap-4">
+        <button onclick="toggleSidebar()" class="p-1.5 text-white hover:bg-white/10 rounded transition-colors">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-white rotate-180">
+            <path d="M6 2V14M5.2 2H10.8C11.9201 2 12.4802 2 12.908 2.21799C13.2843 2.40973 13.5903 2.71569 13.782 3.09202C14 3.51984 14 4.0799 14 5.2V10.8C14 11.9201 14 12.4802 13.782 12.908C13.5903 13.2843 13.2843 13.5903 12.908 13.782C12.4802 14 11.9201 14 10.8 14H5.2C4.07989 14 3.51984 14 3.09202 13.782C2.71569 13.5903 2.40973 13.2843 2.21799 12.908C2 12.4802 2 11.9201 2 10.8V5.2C2 4.07989 2 3.51984 2.21799 3.09202C2.40973 2.71569 2.71569 2.40973 3.09202 2.21799C3.51984 2 4.0799 2 5.2 2Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.33"></path>
+          </svg>
         </button>
-        <div id="model-dropdown-menu" class="hidden absolute right-0 mt-2 w-56 bg-[#2f2f2f] border border-white/10 rounded-xl shadow-xl z-50 overflow-hidden">
-          <div class="p-1">
-            <button onclick="selectModel('openai/gpt-4o', 'GPT-4o')" class="model-item flex items-center w-full text-left px-3 py-2.5 text-sm rounded-lg hover:bg-white/5 text-gray-200">
-              <span class="flex-1">GPT-4o</span>
-              <span class="text-xs text-gray-500">OpenAI</span>
-            </button>
-            <button onclick="selectModel('anthropic/claude-3.5-sonnet', 'Claude 3.5 Sonnet')" class="model-item flex items-center w-full text-left px-3 py-2.5 text-sm rounded-lg hover:bg-white/5 text-gray-200">
-              <span class="flex-1">Claude 3.5 Sonnet</span>
-              <span class="text-xs text-gray-500">Anthropic</span>
-            </button>
-            <button onclick="selectModel('google/gemini-flash-1.5', 'Gemini 1.5 Flash')" class="model-item flex items-center w-full text-left px-3 py-2.5 text-sm rounded-lg hover:bg-white/5 text-gray-200">
-              <span class="flex-1">Gemini 1.5 Flash</span>
-              <span class="text-xs text-gray-500">Google</span>
-            </button>
-            <button onclick="selectModel('meta-llama/llama-3.1-70b-instruct', 'Llama 3.1 70B')" class="model-item flex items-center w-full text-left px-3 py-2.5 text-sm rounded-lg hover:bg-white/5 text-gray-200">
-              <span class="flex-1">Llama 3.1 70B</span>
-              <span class="text-xs text-gray-500">Meta</span>
-            </button>
-          </div>
-        </div>
+        <span class="font-semibold text-white text-lg">MoonWi AI</span>
+      </div>
+      
+      <!-- Model Selection -->
+      <div class="relative">
+        <select id="model-select-top" class="appearance-none bg-[#2f2f2f] text-white text-sm border border-white/10 rounded-lg py-2 pl-4 pr-10 outline-none cursor-pointer focus:border-white/20">
+          <option value="openai/gpt-4o">GPT-4o</option>
+          <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+          <option value="google/gemini-flash-1.5">Gemini 1.5 Flash</option>
+          <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70b</option>
+        </select>
+        <svg class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/70" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
       </div>
     </div>
 
     <div id="chat-messages" class="w-full max-w-3xl flex-1 overflow-y-auto p-6 space-y-6 pb-32">
-      <!-- Messages will be injected here -->
+      <!-- Messages injected here -->
     </div>
 
     <!-- Input Area -->
     <div class="w-full max-w-3xl p-4 absolute bottom-0 bg-gradient-to-t from-[#212121] to-transparent">
       <form id="chat-form" class="relative">
-        <input id="chat-input" type="text" placeholder="Message MoonWi AI..." class="w-full bg-[#2f2f2f] text-white border border-white/10 rounded-2xl py-4 pl-4 pr-14 outline-none focus:border-white/20 transition-colors" autocomplete="off">
+        <input id="chat-input" type="text" placeholder="Message AI..." class="w-full bg-[#2f2f2f] text-white border border-white/10 rounded-2xl py-4 pl-4 pr-14 outline-none focus:border-white/20 transition-colors" autocomplete="off">
         <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-white text-black rounded-full hover:opacity-80 transition disabled:opacity-30" disabled>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
         </button>
@@ -240,11 +210,283 @@
 ============================================================ */
 const OPENROUTER_API_KEY = "sk-or-v1-YOUR_OPENROUTER_API_KEY_HERE"; // <--- PASTE YOUR API KEY HERE
 
-let messages = []; // Holds the conversation history
-let selectedModel = "openai/gpt-4o"; // Default model
+let messages = []; 
+let selectedModel = "openai/gpt-4o";
 
 /* ============================================================
-   CUSTOM JS VIDEO FADE SYSTEM (From Original Code)
+   AUTH MOCKUP & ROUTER LOGIC
+============================================================ */
+function isUserLoggedIn() {
+  return localStorage.getItem('moonwi_logged_in') === 'true';
+}
+
+function simulateLogin() {
+  localStorage.setItem('moonwi_logged_in', 'true');
+  startNewChat();
+}
+
+function simulateLogout() {
+  localStorage.removeItem('moonwi_logged_in');
+  navigateHome();
+}
+
+const landingView = document.getElementById('landing-view');
+const chatView = document.getElementById('chat-view');
+
+function handleRoute() {
+  const path = window.location.pathname;
+  const chatMatch = path.match(/^\/c\/([a-zA-Z0-9-]+)/);
+  
+  // 1. Handle explicit /home route (always show landing)
+  if (path === '/home') {
+    openLandingView();
+    return;
+  }
+  
+  // 2. Handle Chat Routes
+  if (chatMatch) {
+    const chatId = chatMatch[1];
+    openChatView(chatId);
+    return;
+  }
+  
+  // 3. Handle Root Route (/)
+  if (path === '/') {
+    if (isUserLoggedIn()) {
+      // Logged in users go straight to a new chat
+      startNewChat();
+    } else {
+      // Logged out users see the landing page
+      openLandingView();
+    }
+    return;
+  }
+  
+  // Fallback
+  openLandingView();
+}
+
+function navigateToChat(prompt) {
+  const chatId = crypto.randomUUID();
+  history.pushState({ chatId, prompt }, '', `/c/${chatId}`);
+  openChatView(chatId, prompt);
+}
+
+function navigateHome() {
+  history.pushState({}, '', '/home');
+  openLandingView();
+  // Reset forms
+  document.getElementById('landing-input').value = '';
+  document.getElementById('char-count').textContent = '0/3,000';
+  messages = [];
+  document.getElementById('chat-messages').innerHTML = '';
+}
+
+function startNewChat() {
+  history.pushState({}, '', `/c/${crypto.randomUUID()}`);
+  messages = [];
+  const chatMessages = document.getElementById('chat-messages');
+  chatMessages.innerHTML = `
+    <div class="h-full flex flex-col items-center justify-center text-center">
+      <h2 class="text-white text-3xl font-semibold mb-4">How can I help you?</h2>
+      <p class="text-gray-400 text-sm">Ask anything, or try uploading a document to get started.</p>
+    </div>
+  `;
+  chatView.classList.remove('hidden');
+  landingView.classList.add('hidden');
+  resetSidebarState();
+}
+
+window.addEventListener('popstate', handleRoute);
+
+function openLandingView() {
+  landingView.classList.remove('hidden');
+  chatView.classList.add('hidden');
+}
+
+function openChatView(chatId, initialPrompt) {
+  landingView.classList.add('hidden');
+  chatView.classList.remove('hidden');
+  
+  if (messages.length === 0 && !initialPrompt) {
+    startNewChat(); // Show the "How can I help you?" screen
+  } else if (initialPrompt && messages.length === 0) {
+    document.getElementById('chat-messages').innerHTML = ''; // Clear empty state
+    sendChatMessage(initialPrompt);
+  }
+  resetSidebarState();
+}
+
+
+/* ============================================================
+   SIDEBAR TOGGLE & MODEL SELECT LOGIC
+============================================================ */
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const topBar = document.getElementById('top-bar');
+  sidebar.classList.toggle('closed');
+  
+  if (sidebar.classList.contains('closed')) {
+    topBar.classList.remove('hidden');
+    topBar.classList.add('flex');
+  } else {
+    topBar.classList.add('hidden');
+    topBar.classList.remove('flex');
+  }
+}
+
+function resetSidebarState() {
+  const sidebar = document.getElementById('sidebar');
+  const topBar = document.getElementById('top-bar');
+  sidebar.classList.remove('closed');
+  topBar.classList.add('hidden');
+  topBar.classList.remove('flex');
+}
+
+// Keep model selection in sync if multiple exist
+document.addEventListener('change', (e) => {
+  if (e.target.id.startsWith('model-select')) {
+    selectedModel = e.target.value;
+  }
+});
+
+
+/* ============================================================
+   LANDING PAGE LOGIC
+============================================================ */
+const landingForm = document.getElementById('landing-form');
+const landingInput = document.getElementById('landing-input');
+const charCount = document.getElementById('char-count');
+
+landingInput.addEventListener('input', (e) => {
+  charCount.textContent = `${e.target.value.length}/3,000`;
+});
+
+landingForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const prompt = landingInput.value.trim();
+  if (!prompt) return;
+  // Simulate login on first prompt submit so they stay in chat view
+  localStorage.setItem('moonwi_logged_in', 'true');
+  navigateToChat(prompt);
+});
+
+
+/* ============================================================
+   CHAT PAGE LOGIC & OPENROUTER STREAMING
+============================================================ */
+const chatForm = document.getElementById('chat-form');
+const chatInput = document.getElementById('chat-input');
+const chatMessages = document.getElementById('chat-messages');
+const chatSubmitBtn = chatForm.querySelector('button[type="submit"]');
+
+chatInput.addEventListener('input', () => {
+  chatSubmitBtn.disabled = chatInput.value.trim() === '';
+});
+
+chatForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const text = chatInput.value.trim();
+  if (!text) return;
+  chatInput.value = '';
+  chatSubmitBtn.disabled = true;
+  
+  // Clear the "How can I help you?" screen if it's the first message
+  if (messages.length === 0) {
+    chatMessages.innerHTML = '';
+  }
+  
+  sendChatMessage(text);
+});
+
+function addMessageToDOM(role, content) {
+  const wrapper = document.createElement('div');
+  wrapper.className = `flex gap-4 ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+  
+  if (role === 'assistant') {
+    wrapper.innerHTML = `
+      <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs flex-shrink-0">AI</div>
+      <div class="bg-[#2f2f2f] text-white p-4 rounded-2xl max-w-[80%] whitespace-pre-wrap break-words">${content}</div>
+    `;
+  } else {
+    wrapper.innerHTML = `
+      <div class="bg-blue-600 text-white p-4 rounded-2xl max-w-[80%] whitespace-pre-wrap break-words">${content}</div>
+    `;
+  }
+  
+  chatMessages.appendChild(wrapper);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  return wrapper.querySelector('.bg-\\[\\#2f2f2f\\], .bg-blue-600');
+}
+
+async function sendChatMessage(text) {
+  messages.push({ role: 'user', content: text });
+  addMessageToDOM('user', text);
+
+  const assistantBubble = addMessageToDOM('assistant', '');
+  assistantBubble.innerHTML = '<span class="opacity-50">Thinking...</span>';
+
+  try {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": window.location.href, 
+        "X-Title": "MoonWi AI"
+      },
+      body: JSON.stringify({
+        model: selectedModel,
+        messages: messages,
+        stream: true
+      })
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let fullResponse = '';
+
+    assistantBubble.innerHTML = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+      
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6).trim();
+          if (data === '[DONE]') break;
+          
+          try {
+            const json = JSON.parse(data);
+            const chunk = json.choices[0]?.delta?.content || '';
+            if (chunk) {
+              fullResponse += chunk;
+              assistantBubble.textContent = fullResponse;
+              chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+          } catch (e) { /* Ignore keep-alive errors */ }
+        }
+      }
+    }
+
+    messages.push({ role: 'assistant', content: fullResponse });
+
+  } catch (error) {
+    console.error("OpenRouter Error:", error);
+    assistantBubble.innerHTML = `<span class="text-red-400">Error fetching response. Check your API key and network.</span>`;
+  }
+}
+
+/* ============================================================
+   CUSTOM JS VIDEO FADE SYSTEM
 ============================================================ */
 (function() {
   const video = document.getElementById('hero-video');
@@ -316,234 +558,6 @@ let selectedModel = "openai/gpt-4o"; // Default model
     }, 100);
   });
 })();
-
-
-/* ============================================================
-   CLIENT-SIDE ROUTER (Handles Landing vs Chat UI)
-============================================================ */
-const landingView = document.getElementById('landing-view');
-const chatView = document.getElementById('chat-view');
-
-function handleRoute() {
-  const path = window.location.pathname;
-  
-  // Match /c/[chatid] route
-  const chatMatch = path.match(/^\/c\/([a-zA-Z0-9-]+)/);
-  
-  if (chatMatch) {
-    const chatId = chatMatch[1];
-    openChatView(chatId);
-  } else {
-    openLandingView();
-  }
-}
-
-function navigateToChat(prompt) {
-  const chatId = crypto.randomUUID();
-  history.pushState({ chatId, prompt }, '', `/c/${chatId}`);
-  openChatView(chatId, prompt);
-}
-
-function navigateHome() {
-  history.pushState({}, '', '/');
-  openLandingView();
-  // Reset landing form
-  document.getElementById('landing-input').value = '';
-  document.getElementById('char-count').textContent = '0/3,000';
-  // Clear chat state
-  messages = [];
-  document.getElementById('chat-messages').innerHTML = '';
-}
-
-window.addEventListener('popstate', handleRoute);
-
-function openLandingView() {
-  landingView.classList.remove('hidden');
-  chatView.classList.add('hidden');
-}
-
-function openChatView(chatId, initialPrompt) {
-  landingView.classList.add('hidden');
-  chatView.classList.remove('hidden');
-  
-  // Ensure sidebar is visible by default on open
-  document.getElementById('chat-sidebar').classList.remove('sidebar-collapsed');
-  document.getElementById('open-sidebar-btn').classList.add('hidden');
-  
-  // If we have an initial prompt and the chat is empty, send it
-  if (initialPrompt && messages.length === 0) {
-    sendChatMessage(initialPrompt);
-  }
-}
-
-/* ============================================================
-   CHAT UI INTERACTIONS (Sidebar & Models)
-============================================================ */
-function toggleSidebar() {
-  const sidebar = document.getElementById('chat-sidebar');
-  const openBtn = document.getElementById('open-sidebar-btn');
-  
-  if (sidebar.classList.contains('sidebar-collapsed')) {
-    sidebar.classList.remove('sidebar-collapsed');
-    openBtn.classList.add('hidden');
-  } else {
-    sidebar.classList.add('sidebar-collapsed');
-    openBtn.classList.remove('hidden');
-  }
-}
-
-// Model Dropdown Logic
-const modelBtn = document.getElementById('model-dropdown-btn');
-const modelMenu = document.getElementById('model-dropdown-menu');
-
-modelBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  modelMenu.classList.toggle('hidden');
-});
-
-document.addEventListener('click', (e) => {
-  if (!modelMenu.contains(e.target) && !modelBtn.contains(e.target)) {
-    modelMenu.classList.add('hidden');
-  }
-});
-
-function selectModel(apiName, displayName) {
-  selectedModel = apiName;
-  document.getElementById('selected-model-name').textContent = displayName;
-  modelMenu.classList.add('hidden');
-}
-
-
-/* ============================================================
-   LANDING PAGE LOGIC
-============================================================ */
-const landingForm = document.getElementById('landing-form');
-const landingInput = document.getElementById('landing-input');
-const charCount = document.getElementById('char-count');
-
-landingInput.addEventListener('input', (e) => {
-  charCount.textContent = `${e.target.value.length}/3,000`;
-});
-
-landingForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const prompt = landingInput.value.trim();
-  if (!prompt) return;
-  navigateToChat(prompt);
-});
-
-
-/* ============================================================
-   CHAT PAGE LOGIC & OPENROUTER STREAMING
-============================================================ */
-const chatForm = document.getElementById('chat-form');
-const chatInput = document.getElementById('chat-input');
-const chatMessages = document.getElementById('chat-messages');
-const chatSubmitBtn = chatForm.querySelector('button[type="submit"]');
-
-chatInput.addEventListener('input', () => {
-  chatSubmitBtn.disabled = chatInput.value.trim() === '';
-});
-
-chatForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const text = chatInput.value.trim();
-  if (!text) return;
-  chatInput.value = '';
-  chatSubmitBtn.disabled = true;
-  sendChatMessage(text);
-});
-
-function addMessageToDOM(role, content) {
-  const wrapper = document.createElement('div');
-  wrapper.className = `flex gap-4 ${role === 'user' ? 'justify-end' : 'justify-start'}`;
-  
-  if (role === 'assistant') {
-    wrapper.innerHTML = `
-      <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs flex-shrink-0">AI</div>
-      <div class="bg-[#2f2f2f] text-white p-4 rounded-2xl max-w-[80%] whitespace-pre-wrap break-words">${content}</div>
-    `;
-  } else {
-    wrapper.innerHTML = `
-      <div class="bg-blue-600 text-white p-4 rounded-2xl max-w-[80%] whitespace-pre-wrap break-words">${content}</div>
-    `;
-  }
-  
-  chatMessages.appendChild(wrapper);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-  return wrapper.querySelector('div:nth-child(2)'); // Return bubble for updating
-}
-
-async function sendChatMessage(text) {
-  // 1. Add user message to state and DOM
-  messages.push({ role: 'user', content: text });
-  addMessageToDOM('user', text);
-
-  // 2. Create an empty assistant bubble to stream text into
-  const assistantBubble = addMessageToDOM('assistant', '');
-  assistantBubble.innerHTML = '<span class="opacity-50">Thinking...</span>';
-
-  try {
-    // 3. Call OpenRouter API
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": window.location.href, 
-        "X-Title": "MoonWi AI"
-      },
-      body: JSON.stringify({
-        model: selectedModel, // Uses the globally selected model
-        messages: messages,
-        stream: true
-      })
-    });
-
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-    // 4. Parse the streaming response
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    let fullResponse = '';
-
-    assistantBubble.innerHTML = ''; // Clear "Thinking..."
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop(); // Keep last incomplete line
-      
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const data = line.slice(6).trim();
-          if (data === '[DONE]') break;
-          
-          try {
-            const json = JSON.parse(data);
-            const chunk = json.choices[0]?.delta?.content || '';
-            if (chunk) {
-              fullResponse += chunk;
-              assistantBubble.textContent = fullResponse; // Update UI live
-              chatMessages.scrollTop = chatMessages.scrollHeight;
-            }
-          } catch (e) { /* Ignore JSON parse errors for keep-alive comments */ }
-        }
-      }
-    }
-
-    // 5. Save final response to state
-    messages.push({ role: 'assistant', content: fullResponse });
-
-  } catch (error) {
-    console.error("OpenRouter Error:", error);
-    assistantBubble.innerHTML = `<span class="text-red-400">Error fetching response. Check your API key and network.</span>`;
-  }
-}
 
 // Initialize app state on load
 handleRoute();
