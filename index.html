@@ -9,167 +9,271 @@
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600;700&family=Fustat:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-  :root {
-    --bg-primary: #000000;
-    --bg-secondary: #0f0f0f;
-    --bg-tertiary: #1c1c1c;
-    --bg-input: #2f2f2f;
-    --text-primary: #ffffff;
-    --text-secondary: #9a9a9a;
-    --border-color: rgba(255,255,255,0.1);
-  }
-  
-  html.light-mode {
-    --bg-primary: #ffffff;
-    --bg-secondary: #f7f7f7;
-    --bg-tertiary: #ececec;
-    --bg-input: #ffffff;
-    --text-primary: #000000;
-    --text-secondary: #505050;
-    --border-color: rgba(0,0,0,0.1);
-  }
-
-  body { font-family: 'Fustat', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); transition: background-color 0.3s ease, color 0.3s ease; }
+  body { font-family: 'Fustat', sans-serif; }
   .font-display { font-family: 'Fustat', sans-serif; }
   .font-schibsted { font-family: 'Schibsted Grotesk', sans-serif; }
   .font-inter { font-family: 'Inter', sans-serif; }
   .font-noto { font-family: 'Noto Sans', sans-serif; }
-  
   .video-wrap { width: 115%; height: 115%; position: absolute; top: 0; left: 50%; transform: translateX(-50%); pointer-events: none; }
   .video-wrap video { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
-  
-  html:not(.light-mode) .gradient-overlay {
+  .gradient-overlay {
     background: radial-gradient(ellipse 90% 80% at 50% 20%, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.05) 80%);
   }
-  html.light-mode .gradient-overlay {
-    background: radial-gradient(ellipse 90% 80% at 50% 20%, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.15) 40%, rgba(255,255,255,0.05) 80%);
+
+  /* =====================================================
+     THEME SYSTEM — scoped to the Chat App (landing page
+     keeps its own fixed dark/video aesthetic)
+  ===================================================== */
+  :root {
+    --bg-app: #212121;
+    --bg-sidebar: #171717;
+    --bg-surface: #2f2f2f;
+    --bg-surface-elevated: #2b2b2b;
+    --bg-hover: rgba(255,255,255,0.06);
+    --bg-active: rgba(255,255,255,0.10);
+    --border-color: rgba(255,255,255,0.08);
+    --text-primary: #ececec;
+    --text-secondary: #aaaaaa;
+    --text-muted: #777777;
+    --bubble-ai-bg: #2f2f2f;
+    --input-bg: #2f2f2f;
+    --scrollbar-thumb: #4a4a4a;
+    --shadow-color: rgba(0,0,0,0.45);
+    --danger: #f87171;
+    --danger-hover-bg: rgba(248,113,113,0.12);
+    --accent: #5ae14c;
   }
+  html[data-theme="light"] {
+    --bg-app: #ffffff;
+    --bg-sidebar: #f7f7f8;
+    --bg-surface: #ffffff;
+    --bg-surface-elevated: #ffffff;
+    --bg-hover: rgba(0,0,0,0.045);
+    --bg-active: rgba(0,0,0,0.07);
+    --border-color: rgba(0,0,0,0.10);
+    --text-primary: #1f1f1f;
+    --text-secondary: #6b6b6b;
+    --text-muted: #9a9a9a;
+    --bubble-ai-bg: #f3f3f4;
+    --input-bg: #ffffff;
+    --scrollbar-thumb: #d4d4d4;
+    --shadow-color: rgba(0,0,0,0.12);
+    --danger: #dc2626;
+    --danger-hover-bg: rgba(220,38,38,0.08);
+    --accent: #16a34a;
+  }
+
+  .bg-app-c { background: var(--bg-app); }
+  .bg-sidebar-c { background: var(--bg-sidebar); }
+  .bg-surface-c { background: var(--bg-surface); }
+  .bg-surface-elevated-c { background: var(--bg-surface-elevated); }
+  .border-base { border-color: var(--border-color) !important; }
+  .text-primary-c { color: var(--text-primary); }
+  .text-secondary-c { color: var(--text-secondary); }
+  .text-muted-c { color: var(--text-muted); }
+  .hover-surface { transition: background-color .15s ease; }
+  .hover-surface:hover { background: var(--bg-hover); }
+  .placeholder-muted::placeholder { color: var(--text-muted); }
 
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(128, 128, 128, 0.4); border-radius: 10px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(128, 128, 128, 0.6); }
-  
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+
   /* Sidebar transition */
   #sidebar { transition: width 0.3s ease, transform 0.3s ease; overflow: hidden; white-space: nowrap; }
   #sidebar.closed { width: 0px !important; padding: 0 !important; border: none !important; }
   #sidebar-content { opacity: 1; transition: opacity 0.2s ease; }
   #sidebar.closed #sidebar-content { opacity: 0; pointer-events: none; }
-  
+
   /* Modal transitions */
   .modal-overlay { transition: opacity 0.2s ease; }
   .modal-panel { transition: opacity 0.2s ease, transform 0.2s ease; }
-  
-  /* Active Chat in Sidebar */
-  .chat-item { position: relative; display: flex; align-items: center; justify-content: space-between; }
-  .chat-item-active { background: rgba(255,255,255,0.1); color: var(--text-primary); }
-  html.light-mode .chat-item-active { background: rgba(0,0,0,0.05); }
-  .chat-item-inactive:hover { background: rgba(255,255,255,0.05); }
-  html.light-mode .chat-item-inactive:hover { background: rgba(0,0,0,0.03); }
-  
-  .chat-item-actions { opacity: 0; transition: opacity 0.2s ease; }
-  .chat-item:hover .chat-item-actions { opacity: 1; }
-  
-  /* Smooth message animations */
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .msg-animate { animation: slideIn 0.3s ease-out forwards; }
 
-  /* Theme specific shadow adjustments */
-  html.light-mode .landing-form-shadow { box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
-  html:not(.light-mode) .landing-form-shadow { box-shadow: 0 10px 40px rgba(0,0,0,0.4); }
+  /* Active Chat in Sidebar */
+  .chat-item-active { background: var(--bg-active); color: var(--text-primary); }
+  .chat-item-inactive:hover { background: var(--bg-hover); }
+
+  /* Chat row reveal-on-hover action button */
+  .chat-row-action { opacity: 0; transition: opacity .15s ease; }
+  .chat-row:hover .chat-row-action,
+  .chat-row.menu-open .chat-row-action { opacity: 1; }
+  .chat-row.menu-open { background: var(--bg-hover); }
+
+  /* Floating context menu */
+  #chat-context-menu {
+    position: fixed; z-index: 60; min-width: 192px;
+    background: var(--bg-surface-elevated); border: 1px solid var(--border-color);
+    border-radius: 12px; box-shadow: 0 12px 32px var(--shadow-color);
+    padding: 6px; opacity: 0; transform: scale(0.96) translateY(-4px);
+    pointer-events: none; transition: opacity .12s ease, transform .12s ease;
+  }
+  #chat-context-menu.show { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
+  #chat-context-menu button {
+    width: 100%; display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; border-radius: 8px; font-size: 13px;
+    color: var(--text-primary); transition: background .12s ease; text-align: left;
+  }
+  #chat-context-menu button:hover { background: var(--bg-hover); }
+  #chat-context-menu button.danger { color: var(--danger); }
+  #chat-context-menu button.danger:hover { background: var(--danger-hover-bg); }
+  #chat-context-menu hr { border: none; border-top: 1px solid var(--border-color); margin: 4px 2px; }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(12px);
+    background: var(--bg-surface-elevated); color: var(--text-primary); border: 1px solid var(--border-color);
+    padding: 10px 18px; border-radius: 10px; font-size: 13px; box-shadow: 0 12px 32px var(--shadow-color);
+    opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease; z-index: 100;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Theme toggle switch */
+  .theme-toggle { width: 46px; height: 26px; border-radius: 9999px; position: relative; cursor: pointer; background: var(--bg-active); transition: background .25s ease; flex-shrink: 0; }
+  .theme-toggle .knob {
+    width: 20px; height: 20px; border-radius: 50%; background: #fff; position: absolute; top: 3px; left: 3px;
+    transition: transform .25s cubic-bezier(.4,0,.2,1); box-shadow: 0 1px 3px rgba(0,0,0,.35);
+  }
+  .theme-toggle.on { background: var(--accent); }
+  .theme-toggle.on .knob { transform: translateX(20px); }
+
+  /* Message animation */
+  @keyframes messageIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .msg-animate { animation: messageIn .28s cubic-bezier(.2,.7,.3,1) both; }
+
+  /* Typing indicator */
+  .typing-dots { display: inline-flex; gap: 4px; align-items: center; padding: 4px 2px; }
+  .typing-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--text-secondary); animation: typingBounce 1.2s infinite ease-in-out; }
+  .typing-dots span:nth-child(2) { animation-delay: .15s; }
+  .typing-dots span:nth-child(3) { animation-delay: .3s; }
+  @keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0); opacity: .4; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+  /* Composer */
+  #chat-input { resize: none; max-height: 200px; }
+  #chat-input:focus { border-color: var(--accent); }
+  #chat-form button[type="submit"]:not(:disabled):hover { transform: scale(1.06); }
+
+  /* Inline rename input */
+  .chat-rename-input { background: var(--bg-app); border: 1px solid var(--accent); border-radius: 6px; outline: none; }
 </style>
 </head>
-<body class="overflow-x-hidden">
+<body class="overflow-x-hidden bg-black">
+
+<!-- Toast notification -->
+<div id="toast"></div>
+
+<!-- Floating context menu (chat row actions) -->
+<div id="chat-context-menu"></div>
 
 <!-- =========================================
-     MODALS (Settings, Account & Confirm Delete)
+     MODALS (Settings, Account, Delete confirm, Archived)
 ========================================= -->
 <div id="settings-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
-  <div class="modal-overlay absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0" onclick="closeModal('settings-modal')"></div>
-  <div class="modal-panel relative bg-[#2f2f2f] rounded-2xl p-8 w-full max-w-md shadow-2xl border border-white/10 text-white opacity-0 scale-95">
+  <div class="modal-overlay absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal('settings-modal')"></div>
+  <div class="modal-panel relative bg-surface-elevated-c text-primary-c rounded-2xl p-8 w-full max-w-md shadow-2xl border border-base">
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-2xl font-bold">Settings</h2>
-      <button onclick="closeModal('settings-modal')" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
+      <button onclick="closeModal('settings-modal')" class="p-2 hover-surface rounded-lg transition-colors">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
     </div>
-    <div class="space-y-4">
-      <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl cursor-pointer" onclick="toggleTheme()">
-        <span class="flex items-center gap-2">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-          Toggle Theme
-        </span>
-        <span id="theme-status" class="text-sm text-gray-400">Dark Mode</span>
+    <div class="space-y-3">
+      <div class="flex items-center justify-between p-3 rounded-xl" style="background: var(--bg-hover);">
+        <div>
+          <div>Theme</div>
+          <div class="text-xs text-muted-c mt-0.5" id="theme-label">Dark</div>
+        </div>
+        <div id="theme-toggle" class="theme-toggle on" onclick="toggleTheme()">
+          <div class="knob"></div>
+        </div>
       </div>
-      <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+      <div class="flex items-center justify-between p-3 rounded-xl" style="background: var(--bg-hover);">
         <span>Notifications</span>
         <div class="w-12 h-7 bg-gray-600 rounded-full relative cursor-pointer"><div class="absolute left-1 top-1 w-5 h-5 bg-white rounded-full shadow"></div></div>
       </div>
-      <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
-        <span>Memory Management</span>
-        <span class="text-sm text-blue-400 cursor-pointer hover:underline">View Memories</span>
+      <div class="flex items-center justify-between p-3 rounded-xl" style="background: var(--bg-hover);">
+        <span>Language</span>
+        <span class="text-secondary-c text-sm">English</span>
+      </div>
+      <button onclick="openArchivedModal()" class="w-full flex items-center justify-between p-3 rounded-xl hover-surface transition-colors" style="background: var(--bg-hover);">
+        <span>Archived chats</span>
+        <span class="flex items-center gap-1.5 text-secondary-c text-sm">
+          <span id="archived-count">0</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </span>
+      </button>
+      <div class="flex items-center justify-between p-3 rounded-xl" style="background: var(--bg-hover);">
+        <div>
+          <div>Saved memories</div>
+          <div class="text-xs text-muted-c mt-0.5">Clear what MoonWi remembers</div>
+        </div>
+        <button onclick="clearMemories()" class="text-sm font-medium px-3 py-1.5 rounded-lg hover-surface border border-base text-secondary-c hover:text-primary-c transition-colors">Clear</button>
       </div>
     </div>
   </div>
 </div>
 
 <div id="account-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
-  <div class="modal-overlay absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0" onclick="closeModal('account-modal')"></div>
-  <div class="modal-panel relative bg-[#2f2f2f] rounded-2xl p-8 w-full max-w-md shadow-2xl border border-white/10 text-white opacity-0 scale-95">
+  <div class="modal-overlay absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal('account-modal')"></div>
+  <div class="modal-panel relative bg-surface-elevated-c text-primary-c rounded-2xl p-8 w-full max-w-md shadow-2xl border border-base">
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-2xl font-bold">Account</h2>
-      <button onclick="closeModal('account-modal')" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
+      <button onclick="closeModal('account-modal')" class="p-2 hover-surface rounded-lg transition-colors">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
     </div>
-    <div class="flex items-center gap-4 mb-6 p-4 bg-white/5 rounded-xl">
-      <div class="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-2xl font-bold">M</div>
+    <div class="flex items-center gap-4 mb-6 p-4 rounded-xl" style="background: var(--bg-hover);">
+      <div class="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-2xl font-bold text-white">M</div>
       <div>
         <div class="font-semibold text-lg">MoonWi User</div>
-        <div class="text-gray-400 text-sm">user@moonwi.ai</div>
+        <div class="text-secondary-c text-sm">user@moonwi.ai</div>
       </div>
     </div>
     <div class="space-y-3">
-      <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+      <div class="flex items-center justify-between p-3 rounded-xl" style="background: var(--bg-hover);">
         <span>Plan</span>
-        <span class="text-sm text-green-400 font-medium">Free Tier</span>
+        <span class="text-sm text-green-500 font-medium">Free Tier</span>
       </div>
-      <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+      <div class="flex items-center justify-between p-3 rounded-xl" style="background: var(--bg-hover);">
         <span>Credits Used</span>
-        <span class="text-sm text-gray-400">60 / 450</span>
+        <span class="text-sm text-secondary-c">60 / 450</span>
       </div>
       <button onclick="closeModal('account-modal'); simulateLogout();" class="w-full mt-4 p-3 bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500/20 transition-colors font-medium">Log Out</button>
     </div>
   </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
-<div id="delete-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
-  <div class="modal-overlay absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0" onclick="closeModal('delete-modal')"></div>
-  <div class="modal-panel relative bg-[#2f2f2f] rounded-2xl p-8 w-full max-w-md shadow-2xl border border-white/10 text-white opacity-0 scale-95">
-    <h2 class="text-2xl font-bold mb-4">Delete chat?</h2>
-    <p class="text-gray-400 mb-6">This will delete <span id="delete-chat-title" class="font-semibold text-white"></span>.</p>
-    <p class="text-sm text-gray-500 mb-6">
-      Visit settings to delete any memories saved during this chat.
-    </p>
-    <div class="flex gap-3 justify-end">
-      <button onclick="closeModal('delete-modal')" class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition">Cancel</button>
-      <button id="confirm-delete-btn" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 transition font-medium">Delete</button>
+<!-- Delete-chat confirmation (double confirm before destructive action) -->
+<div id="delete-chat-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center">
+  <div class="modal-overlay absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal('delete-chat-modal')"></div>
+  <div class="modal-panel relative bg-surface-elevated-c text-primary-c rounded-2xl p-7 w-full max-w-sm shadow-2xl border border-base">
+    <div class="flex items-start gap-3 mb-2">
+      <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background: var(--danger-hover-bg);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/><path d="M10 11v6M14 11v6"/></svg>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold">Delete chat?</h3>
+        <p class="text-sm text-secondary-c mt-1.5 leading-relaxed">This will delete <span id="delete-chat-title" class="font-medium text-primary-c">"Chat"</span>. Visit settings to delete any memories saved during this chat.</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3 mt-6">
+      <button onclick="closeModal('delete-chat-modal')" class="flex-1 p-2.5 rounded-xl hover-surface border border-base font-medium transition-colors">Cancel</button>
+      <button onclick="executeDeleteChat()" class="flex-1 p-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-medium transition-colors">Delete</button>
     </div>
   </div>
 </div>
 
-<!-- Context Menu for Chat Tabs -->
-<div id="context-menu" class="hidden fixed z-50 w-48 bg-[#2f2f2f] border border-white/10 rounded-xl shadow-2xl py-2 text-sm text-white">
-  <button data-action="share" class="w-full text-left px-4 py-2 hover:bg-white/10 flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share</button>
-  <button data-action="rename" class="w-full text-left px-4 py-2 hover:bg-white/10 flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Rename</button>
-  <button data-action="pin" class="w-full text-left px-4 py-2 hover:bg-white/10 flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17z"/></svg> Pin chat</button>
-  <button data-action="archive" class="w-full text-left px-4 py-2 hover:bg-white/10 flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg> Archive</button>
-  <hr class="border-white/10 my-2">
-  <button data-action="delete" class="w-full text-left px-4 py-2 hover:bg-red-500/10 text-red-400 flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Delete</button>
+<!-- Archived chats manager -->
+<div id="archived-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+  <div class="modal-overlay absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal('archived-modal')"></div>
+  <div class="modal-panel relative bg-surface-elevated-c text-primary-c rounded-2xl p-7 w-full max-w-md shadow-2xl border border-base max-h-[70vh] flex flex-col">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-xl font-bold">Archived chats</h2>
+      <button onclick="closeModal('archived-modal')" class="p-2 hover-surface rounded-lg transition-colors">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div id="archived-list" class="space-y-1.5 overflow-y-auto flex-1"></div>
+  </div>
 </div>
 
 
@@ -177,7 +281,7 @@
      1. LANDING VIEW (Home)
 ========================================= -->
 <div id="landing-view" class="relative w-full min-h-screen overflow-hidden">
-  <!-- Video Background -->
+  <!-- Video Background (Simplified Loop) -->
   <div class="absolute inset-0 z-0">
     <div class="video-wrap">
       <video id="hero-video" muted playsinline loop preload="auto"
@@ -200,9 +304,6 @@
       <li><a href="#" class="font-schibsted font-medium text-white text-[16px] hover:opacity-70 transition-opacity" style="letter-spacing: -0.2px;">Contact</a></li>
     </ul>
     <div class="flex items-center gap-3">
-      <button onclick="toggleTheme()" class="font-schibsted font-medium text-white text-[14px] rounded-lg hover:bg-white/10 transition-colors p-2">
-        <svg id="theme-icon-nav" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-      </button>
       <button onclick="simulateLogin()" class="font-schibsted font-medium text-white text-[14px] rounded-lg hover:bg-white/10 transition-colors" style="width: 82px; height: 40px;">Sign Up</button>
       <button onclick="simulateLogin()" class="font-schibsted font-medium text-white text-[14px] rounded-lg bg-black hover:opacity-90 transition-opacity" style="width: 101px; height: 40px; border: 1px solid rgba(255,255,255,0.12);">Log In</button>
     </div>
@@ -225,7 +326,7 @@
     <div style="height: 44px;"></div>
 
     <!-- Search Input Box -->
-    <form id="landing-form" class="w-full rounded-[18px] flex flex-col overflow-hidden landing-form-shadow" style="max-width: 728px; height: 200px; background: rgba(0,0,0,0.24); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+    <form id="landing-form" class="w-full rounded-[18px] flex flex-col overflow-hidden shadow-2xl" style="max-width: 728px; height: 200px; background: rgba(0,0,0,0.24); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
       <div class="flex items-center justify-between px-4" style="height: 40px;">
         <div class="flex items-center gap-2.5">
           <span class="font-schibsted font-medium text-white text-[12px]" style="letter-spacing: -0.1px; opacity: 0.9;">60/450 credits</span>
@@ -236,9 +337,9 @@
           <span class="font-schibsted font-medium text-white text-[12px]" style="letter-spacing: -0.1px; opacity: 0.9;">Powered by GPT-4o</span>
         </div>
       </div>
-      <div class="flex-1 mx-3 mb-3 rounded-[12px] flex flex-col bg-white" style="box-shadow: 0 4px 20px rgba(0,0,0,0.25);">
+      <div class="flex-1 mx-3 mb-3 rounded-[12px] flex flex-col" style="background: #ffffff; box-shadow: 0 4px 20px rgba(0,0,0,0.25);">
         <div class="flex-1 px-4 pt-3 relative">
-          <input id="landing-input" type="text" placeholder="Type question..." class="w-full bg-transparent border-none outline-none text-[16px] placeholder:font-normal text-black" style="font-family: 'Fustat', sans-serif; letter-spacing: -0.2px;" required>
+          <input id="landing-input" type="text" placeholder="Type question..." class="w-full bg-transparent border-none outline-none text-[16px] placeholder:font-normal" style="color: #000; font-family: 'Fustat', sans-serif; letter-spacing: -0.2px;" required>
           <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full hover:scale-105 transition-transform" style="width: 36px; height: 36px; background: #000000;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
@@ -258,6 +359,7 @@
           <span id="char-count" class="font-schibsted font-medium text-[12px]" style="color: #9a9a9a; letter-spacing: -0.1px;">0/3,000</span>
         </div>
       </div>
+      <!-- Disclaimer added below the form box -->
       <div class="text-center pb-2 pt-1">
         <span class="font-inter text-[11px] text-white/50" style="letter-spacing: -0.1px;">MoonWi AI can make mistakes. Check important info.</span>
       </div>
@@ -268,53 +370,51 @@
 <!-- =========================================
      2. CHAT VIEW (/c/[chatid])
 ========================================= -->
-<div id="chat-view" class="hidden h-screen flex font-schibsted" style="background-color: var(--bg-secondary); color: var(--text-primary);">
-  
+<div id="chat-view" class="hidden h-screen flex bg-app-c text-primary-c font-schibsted">
+
   <!-- Sidebar -->
-  <aside id="sidebar" class="w-64 p-2 flex flex-col border-r flex-shrink-0" style="background-color: var(--bg-primary); border-color: var(--border-color);">
+  <aside id="sidebar" class="w-64 bg-sidebar-c p-2 flex flex-col border-r border-base flex-shrink-0">
     <div id="sidebar-content" class="flex flex-col h-full">
       <!-- Top Section: Toggle & New Chat -->
       <div class="flex items-center justify-between p-2 gap-2">
-        <button onclick="toggleSidebar()" class="p-1.5 hover:bg-white/10 rounded transition-colors">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="rotate-180" style="color: var(--text-primary);">
+        <button onclick="toggleSidebar()" class="p-1.5 hover-surface rounded-lg transition-colors">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="rotate-180">
             <path d="M6 2V14M5.2 2H10.8C11.9201 2 12.4802 2 12.908 2.21799C13.2843 2.40973 13.5903 2.71569 13.782 3.09202C14 3.51984 14 4.0799 14 5.2V10.8C14 11.9201 14 12.4802 13.782 12.908C13.5903 13.2843 13.2843 13.5903 12.908 13.782C12.4802 14 11.9201 14 10.8 14H5.2C4.07989 14 3.51984 14 3.09202 13.782C2.71569 13.5903 2.40973 2.71569 2.21799 12.908C2 12.4802 2 11.9201 2 10.8V5.2C2 4.07989 2 3.51984 2.21799 3.09202C2.40973 2.71569 2.71569 2.40973 3.09202 2.21799C3.51984 2 4.0799 2 5.2 2Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.33"></path>
           </svg>
         </button>
-        <button onclick="startNewChat()" class="flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-white/5 transition-colors flex-1">
+        <button onclick="startNewChat()" class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover-surface transition-colors flex-1">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
           New chat
         </button>
       </div>
-      
-      <!-- Model Selection -->
+
+      <!-- Model Selection (Visible when sidebar is open) -->
       <div class="px-2 mb-2 mt-1">
         <div class="relative">
-          <select id="model-select-sidebar" class="w-full appearance-none text-xs border rounded-lg py-2 pl-3 pr-8 outline-none cursor-pointer focus:border-white/20" style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color);">
-            <option value="openai/gpt-oss-120b:free">OpenAI: gpt-oss-120b (free)</option>
+          <select id="model-select-sidebar" class="w-full appearance-none bg-surface-c text-primary-c text-xs border border-base rounded-lg py-2 pl-3 pr-8 outline-none cursor-pointer">
+            <option value="openai/gpt-4o">GPT-4o</option>
+            <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+            <option value="google/gemini-flash-1.5">Gemini 1.5 Flash</option>
+            <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70b</option>
           </select>
-          <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-70" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-primary);"><path d="M6 9l6 6 6-6"/></svg>
+          <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-secondary-c" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </div>
       </div>
 
       <!-- History List -->
-      <div class="flex-1 mt-2 overflow-y-auto pr-1">
-        <p class="text-xs px-3 mb-2 uppercase tracking-wider" style="color: var(--text-secondary);">History</p>
-        <div id="history-list" class="space-y-1">
+      <div class="flex-1 mt-2 overflow-y-auto overflow-x-hidden">
+        <div id="history-list" class="space-y-3">
           <!-- Dynamically populated -->
         </div>
       </div>
 
-      <!-- Bottom Section: Theme, Account & Settings -->
-      <div class="mt-auto p-2 border-t space-y-1" style="border-color: var(--border-color);">
-        <button onclick="toggleTheme()" class="w-full flex items-center gap-3 p-2 text-sm rounded hover:bg-white/5 transition-colors" style="color: var(--text-primary);">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-          Toggle Theme
-        </button>
-        <button onclick="openModal('account-modal')" class="w-full flex items-center gap-3 p-2 text-sm rounded hover:bg-white/5 transition-colors" style="color: var(--text-primary);">
+      <!-- Bottom Section: Account & Settings -->
+      <div class="mt-auto p-2 border-t border-base space-y-1">
+        <button onclick="openModal('account-modal')" class="w-full flex items-center gap-3 p-2 text-sm rounded-lg hover-surface transition-colors text-secondary-c">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           Account
         </button>
-        <button onclick="openModal('settings-modal')" class="w-full flex items-center gap-3 p-2 text-sm rounded hover:bg-white/5 transition-colors" style="color: var(--text-primary);">
+        <button onclick="openModal('settings-modal')" class="w-full flex items-center gap-3 p-2 text-sm rounded-lg hover-surface transition-colors text-secondary-c">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           Settings
         </button>
@@ -323,42 +423,49 @@
   </aside>
 
   <!-- Main Chat Area -->
-  <main class="flex-1 flex flex-col items-center relative h-screen">
-    
+  <main class="flex-1 flex flex-col items-center relative h-screen bg-app-c">
+
     <!-- Top Bar (When Sidebar is closed) -->
-    <div id="top-bar" class="hidden absolute top-0 left-0 w-full flex items-center justify-between p-4 z-20" style="background-color: var(--bg-secondary);">
+    <div id="top-bar" class="hidden absolute top-0 left-0 w-full flex items-center justify-between p-4 z-20 bg-app-c border-b border-base">
       <div class="flex items-center gap-4">
-        <button onclick="toggleSidebar()" class="p-1.5 hover:bg-white/10 rounded transition-colors">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="rotate-180" style="color: var(--text-primary);">
+        <button onclick="toggleSidebar()" class="p-1.5 hover-surface rounded-lg transition-colors">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="rotate-180">
             <path d="M6 2V14M5.2 2H10.8C11.9201 2 12.4802 2 12.908 2.21799C13.2843 2.40973 13.5903 2.71569 13.782 3.09202C14 3.51984 14 4.0799 14 5.2V10.8C14 11.9201 14 12.4802 13.782 12.908C13.5903 13.2843 13.2843 13.5903 12.908 13.782C12.4802 14 11.9201 14 10.8 14H5.2C4.07989 14 3.51984 14 3.09202 13.782C2.71569 13.5903 2.40973 2.71569 2.21799 12.908C2 12.4802 2 11.9201 2 10.8V5.2C2 4.07989 2 3.51984 2.21799 3.09202C2.40973 2.71569 2.71569 2.40973 3.09202 2.21799C3.51984 2 4.0799 2 5.2 2Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.33"></path>
           </svg>
         </button>
         <span class="font-semibold text-lg">MoonWi AI</span>
       </div>
-      
+
       <!-- Model Selection Top Bar -->
       <div class="relative">
-        <select id="model-select-top" class="appearance-none text-sm border rounded-lg py-2 pl-4 pr-10 outline-none cursor-pointer focus:border-white/20" style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color);">
-          <option value="openai/gpt-oss-120b:free">OpenAI: gpt-oss-120b (free)</option>
+        <select id="model-select-top" class="appearance-none bg-surface-c text-primary-c text-sm border border-base rounded-lg py-2 pl-4 pr-10 outline-none cursor-pointer">
+          <option value="openai/gpt-4o">GPT-4o</option>
+          <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+          <option value="google/gemini-flash-1.5">Gemini 1.5 Flash</option>
+          <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70b</option>
         </select>
-        <svg class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-70" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-primary);"><path d="M6 9l6 6 6-6"/></svg>
+        <svg class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-secondary-c" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
       </div>
     </div>
 
-    <div id="chat-messages" class="w-full max-w-3xl flex-1 overflow-y-auto p-6 space-y-8 pb-32 scroll-smooth">
+    <div id="chat-messages" class="w-full max-w-3xl flex-1 overflow-y-auto p-6 space-y-6 pb-32">
       <!-- Messages injected here -->
     </div>
 
     <!-- Input Area -->
-    <div class="w-full max-w-3xl p-4 absolute bottom-0 bg-gradient-to-t from-black via-black to-transparent" style="background: linear-gradient(to top, var(--bg-secondary), transparent);">
-      <form id="chat-form" class="relative">
-        <input id="chat-input" type="text" placeholder="Message MoonWi AI..." class="w-full border rounded-2xl py-4 pl-4 pr-14 outline-none focus:border-white/20 transition-colors" style="background-color: var(--bg-input); color: var(--text-primary); border-color: var(--border-color);" autocomplete="off">
-        <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-white text-black rounded-full hover:opacity-80 transition disabled:opacity-30" disabled>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-        </button>
-      </form>
-      <div class="text-center mt-2">
-        <span class="font-inter text-[11px]" style="color: var(--text-secondary); letter-spacing: -0.1px;">MoonWi AI can make mistakes. Check important info.</span>
+    <div class="w-full max-w-3xl p-4 absolute bottom-0">
+      <div class="absolute inset-x-0 bottom-0 h-36 pointer-events-none z-0" style="background: linear-gradient(to top, var(--bg-app), var(--bg-app) 35%, transparent);"></div>
+      <div class="relative z-10">
+        <form id="chat-form" class="relative">
+          <textarea id="chat-input" rows="1" placeholder="Message MoonWi AI..." class="w-full bg-surface-c text-primary-c placeholder-muted border border-base rounded-2xl py-4 pl-4 pr-14 outline-none transition-colors" style="box-shadow: 0 8px 24px var(--shadow-color);" autocomplete="off"></textarea>
+          <button type="submit" class="absolute right-3 bottom-3 p-2 bg-white text-black rounded-full hover:opacity-80 transition disabled:opacity-30" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </form>
+        <!-- Disclaimer added below chat text box -->
+        <div class="text-center mt-2">
+          <span class="font-inter text-[11px] text-muted-c" style="letter-spacing: -0.1px;">MoonWi AI can make mistakes. Check important info.</span>
+        </div>
       </div>
     </div>
 
@@ -369,21 +476,51 @@
 /* ============================================================
    GLOBAL STATE & API CONFIG
 ============================================================ */
-const OPENROUTER_API_KEY = "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"; // <--- PASTE YOUR API KEY HERE
+const OPENROUTER_API_KEY = "sk-or-v1-YOUR_OPENROUTER_API_KEY_HERE"; // <--- PASTE YOUR API KEY HERE
 
 let currentChatId = null;
-let selectedModel = "openai/gpt-oss-120b:free"; // Default model
-let chatStore = {}; 
+let selectedModel = "openai/gpt-4o";
+let deleteTargetChatId = null;
+
+// Chat state management for switching between chats
+let chatStore = {};
 
 function getChat(chatId) {
   if (!chatStore[chatId]) {
     chatStore[chatId] = {
       messages: [],
-      title: "New Chat"
+      title: "New Chat",
+      pinned: false,
+      archived: false
     };
   }
   return chatStore[chatId];
 }
+
+function escapeHTML(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+/* ============================================================
+   THEME (Dark #000000 / Light #FFFFFF)
+============================================================ */
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const toggle = document.getElementById('theme-toggle');
+  const label = document.getElementById('theme-label');
+  if (toggle) toggle.classList.toggle('on', theme === 'dark');
+  if (label) label.textContent = theme === 'dark' ? 'Dark' : 'Light';
+  localStorage.setItem('moonwi_theme', theme);
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+
+applyTheme(localStorage.getItem('moonwi_theme') || 'dark');
 
 /* ============================================================
    AUTH MOCKUP & ROUTER LOGIC
@@ -408,21 +545,35 @@ const chatView = document.getElementById('chat-view');
 function handleRoute() {
   const path = window.location.pathname;
   const chatMatch = path.match(/^\/c\/([a-zA-Z0-9-]+)/);
-  
-  if (path === '/home') { openLandingView(); return; }
-  if (chatMatch) { switchToChat(chatMatch[1]); return; }
-  
-  if (path === '/') {
-    if (isUserLoggedIn()) startNewChat();
-    else openLandingView();
+
+  if (path === '/home') {
+    openLandingView();
     return;
   }
+
+  if (chatMatch) {
+    const chatId = chatMatch[1];
+    switchToChat(chatId);
+    return;
+  }
+
+  if (path === '/') {
+    if (isUserLoggedIn()) {
+      startNewChat();
+    } else {
+      openLandingView();
+    }
+    return;
+  }
+
   openLandingView();
 }
 
 function navigateToChat(prompt) {
   const chatId = crypto.randomUUID();
   history.pushState({ chatId, prompt }, '', `/c/${chatId}`);
+
+  // Initialize chat data
   getChat(chatId).title = prompt.substring(0, 30) + (prompt.length > 30 ? '...' : '');
   switchToChat(chatId, prompt);
 }
@@ -454,7 +605,7 @@ function openChatView() {
 function startNewChat() {
   const chatId = crypto.randomUUID();
   history.pushState({}, '', `/c/${chatId}`);
-  getChat(chatId);
+  getChat(chatId); // Initialize empty
   switchToChat(chatId);
 }
 
@@ -462,7 +613,8 @@ function switchToChat(chatId, initialPrompt) {
   currentChatId = chatId;
   openChatView();
   renderChatMessages();
-  
+
+  // If there's an initial prompt and the chat is empty, send it
   const chatData = getChat(chatId);
   if (initialPrompt && chatData.messages.length === 0) {
     sendChatMessage(initialPrompt);
@@ -470,123 +622,285 @@ function switchToChat(chatId, initialPrompt) {
 }
 
 function renderChatMessages() {
-  const chatMessages = document.getElementById('chat-messages');
+  const chatMessagesEl = document.getElementById('chat-messages');
   const chatData = getChat(currentChatId);
-  
+
   if (chatData.messages.length === 0) {
-    chatMessages.innerHTML = `
-      <div class="h-full flex flex-col items-center justify-center text-center pt-24">
-        <h2 class="text-3xl font-semibold mb-4" style="color: var(--text-primary);">How can I help you?</h2>
-        <p class="text-sm" style="color: var(--text-secondary);">Ask anything, or try uploading a document to get started.</p>
+    chatMessagesEl.innerHTML = `
+      <div class="h-full flex flex-col items-center justify-center text-center px-4">
+        <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5" style="background: var(--bg-hover);">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        </div>
+        <h2 class="text-2xl font-semibold mb-2">How can I help you?</h2>
+        <p class="text-secondary-c text-sm max-w-sm">Ask anything, or try uploading a document to get started.</p>
       </div>
     `;
   } else {
-    chatMessages.innerHTML = '';
+    chatMessagesEl.innerHTML = '';
     chatData.messages.forEach(msg => {
       addMessageToDOM(msg.role, msg.content, false);
     });
-    setTimeout(() => { chatMessages.scrollTop = chatMessages.scrollHeight; }, 100);
+    chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
   }
-}
-
-function renderHistoryList() {
-  const historyList = document.getElementById('history-list');
-  const chatIds = Object.keys(chatStore);
-  
-  if (chatIds.length === 0) {
-    historyList.innerHTML = '<div class="px-3 py-2 text-sm italic" style="color: var(--text-secondary);">No chats yet</div>';
-    return;
-  }
-  
-  historyList.innerHTML = '';
-  
-  [...chatIds].reverse().forEach(id => {
-    const chat = chatStore[id];
-    const isActive = id === currentChatId;
-    
-    const div = document.createElement('div');
-    div.className = `chat-item px-3 py-2 text-sm rounded cursor-pointer truncate transition-colors ${isActive ? 'chat-item-active' : 'chat-item-inactive'}`;
-    div.style.color = isActive ? 'var(--text-primary)' : 'var(--text-secondary)';
-    
-    // Title Span
-    const titleSpan = document.createElement('span');
-    titleSpan.className = 'truncate flex-1';
-    titleSpan.textContent = chat.title;
-    titleSpan.onclick = () => {
-      history.pushState({}, '', `/c/${id}`);
-      switchToChat(id);
-    };
-    
-    // Action Menu (Three dots)
-    const actionsDiv = document.createElement('div');
-    actionsDiv.className = 'chat-item-actions absolute right-2 top-1/2 -translate-y-1/2';
-    actionsDiv.innerHTML = `
-      <button class="p-1 hover:bg-white/20 rounded" onclick="showChatMenu(event, '${id}')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
-      </button>
-    `;
-    
-    div.appendChild(titleSpan);
-    div.appendChild(actionsDiv);
-    historyList.appendChild(div);
-  });
 }
 
 /* ============================================================
-   CHAT CONTEXT MENU & DELETION
+   HISTORY LIST RENDERING (Pinned / Chats + hover action menu)
 ============================================================ */
-function showChatMenu(e, chatId) {
-  e.stopPropagation();
-  const menu = document.getElementById('context-menu');
-  menu.classList.remove('hidden');
-  menu.style.left = `${e.clientX}px`;
-  menu.style.top = `${e.clientY}px`;
-  
-  menu.dataset.chatid = chatId;
+function renderHistoryList() {
+  const historyList = document.getElementById('history-list');
+  const archivedCountEl = document.getElementById('archived-count');
+  const allIds = Object.keys(chatStore);
+  const visibleIds = allIds.filter(id => !chatStore[id].archived);
+
+  if (archivedCountEl) {
+    archivedCountEl.textContent = allIds.filter(id => chatStore[id].archived).length;
+  }
+
+  if (visibleIds.length === 0) {
+    historyList.innerHTML = '<div class="px-3 py-2 text-sm text-muted-c italic">No chats yet</div>';
+    return;
+  }
+
+  const pinned = visibleIds.filter(id => chatStore[id].pinned).reverse();
+  const recents = visibleIds.filter(id => !chatStore[id].pinned).reverse();
+
+  let html = '';
+  if (pinned.length) {
+    html += `<div>
+      <p class="text-xs text-muted-c px-3 mb-1.5 uppercase tracking-wider font-medium">Pinned</p>
+      <div class="space-y-0.5">${pinned.map(renderChatRow).join('')}</div>
+    </div>`;
+  }
+  if (recents.length) {
+    html += `<div>
+      <p class="text-xs text-muted-c px-3 mb-1.5 mt-1 uppercase tracking-wider font-medium">Chats</p>
+      <div class="space-y-0.5">${recents.map(renderChatRow).join('')}</div>
+    </div>`;
+  }
+  historyList.innerHTML = html;
+}
+
+function renderChatRow(id) {
+  const chat = chatStore[id];
+  const isActive = id === currentChatId;
+  return `
+    <div class="chat-row relative flex items-center rounded-lg pr-1 ${isActive ? 'chat-item-active' : 'chat-item-inactive'} transition-colors" data-chat-id="${id}">
+      <div class="flex-1 px-3 py-2 text-sm truncate cursor-pointer" onclick="navigateToExistingChat('${id}')">${escapeHTML(chat.title)}</div>
+      <button class="chat-row-action p-1.5 rounded-md hover-surface flex-shrink-0" onclick="event.stopPropagation(); openChatMenu(event, '${id}')" aria-label="Chat options">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+      </button>
+    </div>
+  `;
+}
+
+function navigateToExistingChat(id) {
+  history.pushState({}, '', `/c/${id}`);
+  switchToChat(id);
+}
+
+/* ============================================================
+   CHAT ROW CONTEXT MENU — Share / Rename / Pin / Archive / Delete
+============================================================ */
+function openChatMenu(evt, chatId) {
+  evt.stopPropagation();
+  const chat = chatStore[chatId];
+  const menu = document.getElementById('chat-context-menu');
+
+  menu.innerHTML = `
+    <button onclick="shareChat('${chatId}')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+      Share
+    </button>
+    <button onclick="startRenameChat('${chatId}')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5z"/></svg>
+      Rename
+    </button>
+    <button onclick="togglePinChat('${chatId}')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5M9 3h6l-.5 6.5L18 12v2H6v-2l3.5-2.5z"/></svg>
+      ${chat.pinned ? 'Unpin chat' : 'Pin chat'}
+    </button>
+    <button onclick="archiveChat('${chatId}')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8M10 13h4"/></svg>
+      Archive
+    </button>
+    <hr>
+    <button class="danger" onclick="confirmDeleteChat('${chatId}')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/></svg>
+      Delete
+    </button>
+  `;
+
+  const btnRect = evt.currentTarget.getBoundingClientRect();
+  const menuWidth = 200;
+  const menuHeight = 220;
+  let left = btnRect.right - menuWidth;
+  let top = btnRect.bottom + 6;
+  if (left < 8) left = 8;
+  if (top + menuHeight > window.innerHeight) top = btnRect.top - 6 - menuHeight;
+
+  menu.style.left = `${left}px`;
+  menu.style.top = `${top}px`;
+
+  document.querySelectorAll('.chat-row.menu-open').forEach(r => r.classList.remove('menu-open'));
+  evt.currentTarget.closest('.chat-row').classList.add('menu-open');
+
+  requestAnimationFrame(() => menu.classList.add('show'));
+}
+
+function closeChatMenu() {
+  const menu = document.getElementById('chat-context-menu');
+  menu.classList.remove('show');
+  document.querySelectorAll('.chat-row.menu-open').forEach(r => r.classList.remove('menu-open'));
 }
 
 document.addEventListener('click', (e) => {
-  const menu = document.getElementById('context-menu');
-  if (!menu.contains(e.target) && !e.target.closest('button')?.getAttribute('onclick')?.includes('showChatMenu')) {
-    menu.classList.add('hidden');
+  const menu = document.getElementById('chat-context-menu');
+  if (menu.classList.contains('show') && !menu.contains(e.target)) {
+    closeChatMenu();
   }
 });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeChatMenu();
+});
 
-document.getElementById('context-menu').addEventListener('click', (e) => {
-  const action = e.target.closest('button')?.dataset.action;
-  const menu = document.getElementById('context-menu');
-  const chatId = menu.dataset.chatid;
-  
-  if (!action) return;
-  
-  if (action === 'delete') {
-    const chatData = getChat(chatId);
-    document.getElementById('delete-chat-title').textContent = `"${chatData.title}"`;
-    openModal('delete-modal');
-    
-    document.getElementById('confirm-delete-btn').onclick = () => {
-      deleteChat(chatId);
-      closeModal('delete-modal');
-    };
+/* ---- Share ---- */
+function shareChat(chatId) {
+  closeChatMenu();
+  const url = `${window.location.origin}/c/${chatId}`;
+  const fallbackCopy = () => {
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) { /* no-op */ }
+    document.body.removeChild(ta);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).catch(fallbackCopy);
   } else {
-    alert(`${action.charAt(0).toUpperCase() + action.slice(1)} functionality triggered for chat: ${getChat(chatId).title}`);
+    fallbackCopy();
   }
-  
-  menu.classList.add('hidden');
-});
+  showToast('Link copied to clipboard');
+}
 
-function deleteChat(chatId) {
-  delete chatStore[chatId];
-  if (currentChatId === chatId) {
-    const remainingChats = Object.keys(chatStore);
-    if (remainingChats.length > 0) {
-      switchToChat(remainingChats[0]);
-    } else {
-      startNewChat();
-    }
+/* ---- Rename ---- */
+function startRenameChat(chatId) {
+  closeChatMenu();
+  const row = document.querySelector(`.chat-row[data-chat-id="${chatId}"] .flex-1`);
+  if (!row) return;
+  const chat = chatStore[chatId];
+  row.outerHTML = `<input type="text" value="${escapeHTML(chat.title)}" class="flex-1 px-3 py-1.5 text-sm chat-rename-input mx-1" id="rename-input-${chatId}" onclick="event.stopPropagation()">`;
+  const input = document.getElementById(`rename-input-${chatId}`);
+  input.focus();
+  input.select();
+  input.addEventListener('blur', () => commitRename(chatId, input.value));
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+    if (e.key === 'Escape') { e.preventDefault(); renderHistoryList(); }
+  });
+}
+
+function commitRename(chatId, newTitle) {
+  if (!chatStore[chatId]) return;
+  const trimmed = newTitle.trim();
+  if (trimmed) chatStore[chatId].title = trimmed.substring(0, 60);
+  renderHistoryList();
+}
+
+/* ---- Pin ---- */
+function togglePinChat(chatId) {
+  closeChatMenu();
+  chatStore[chatId].pinned = !chatStore[chatId].pinned;
+  renderHistoryList();
+  showToast(chatStore[chatId].pinned ? 'Chat pinned' : 'Chat unpinned');
+}
+
+/* ---- Archive ---- */
+function archiveChat(chatId) {
+  closeChatMenu();
+  chatStore[chatId].archived = true;
+  if (chatId === currentChatId) {
+    startNewChat();
   } else {
     renderHistoryList();
   }
+  showToast('Chat archived');
+}
+
+function unarchiveChat(chatId) {
+  chatStore[chatId].archived = false;
+  renderArchivedList();
+  renderHistoryList();
+  showToast('Chat restored');
+}
+
+/* ---- Delete (with confirmation) ---- */
+function confirmDeleteChat(chatId) {
+  closeChatMenu();
+  deleteTargetChatId = chatId;
+  const chat = chatStore[chatId];
+  document.getElementById('delete-chat-title').textContent = `"${chat.title}"`;
+  openModal('delete-chat-modal');
+}
+
+function executeDeleteChat() {
+  if (!deleteTargetChatId) return;
+  const wasCurrent = deleteTargetChatId === currentChatId;
+  delete chatStore[deleteTargetChatId];
+  closeModal('delete-chat-modal');
+  showToast('Chat deleted');
+  if (wasCurrent) {
+    startNewChat();
+  } else {
+    renderHistoryList();
+  }
+  deleteTargetChatId = null;
+}
+
+/* ---- Archived chats manager ---- */
+function openArchivedModal() {
+  closeModal('settings-modal');
+  renderArchivedList();
+  openModal('archived-modal');
+}
+
+function renderArchivedList() {
+  const list = document.getElementById('archived-list');
+  const ids = Object.keys(chatStore).filter(id => chatStore[id].archived).reverse();
+  const archivedCountEl = document.getElementById('archived-count');
+  if (archivedCountEl) archivedCountEl.textContent = ids.length;
+
+  if (ids.length === 0) {
+    list.innerHTML = '<div class="text-sm text-muted-c italic px-2 py-6 text-center">No archived chats</div>';
+    return;
+  }
+  list.innerHTML = ids.map(id => `
+    <div class="flex items-center justify-between px-3 py-2.5 rounded-xl hover-surface">
+      <span class="text-sm truncate flex-1 pr-2">${escapeHTML(chatStore[id].title)}</span>
+      <div class="flex items-center gap-1.5 flex-shrink-0">
+        <button onclick="unarchiveChat('${id}')" class="text-xs font-medium px-2.5 py-1.5 rounded-lg hover-surface border border-base">Restore</button>
+        <button onclick="confirmDeleteChat('${id}'); closeModal('archived-modal');" class="text-xs font-medium px-2.5 py-1.5 rounded-lg text-red-400 hover:bg-red-500/10">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ---- Memories ---- */
+function clearMemories() {
+  showToast('Memories cleared');
+}
+
+/* ---- Toast ---- */
+let toastTimer = null;
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
 }
 
 
@@ -597,7 +911,7 @@ function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   const topBar = document.getElementById('top-bar');
   sidebar.classList.toggle('closed');
-  
+
   if (sidebar.classList.contains('closed')) {
     topBar.classList.remove('hidden');
     topBar.classList.add('flex');
@@ -615,6 +929,7 @@ function resetSidebarState() {
   topBar.classList.remove('flex');
 }
 
+// Keep model selection in sync across sidebar and top bar
 document.addEventListener('change', (e) => {
   if (e.target.id === 'model-select-sidebar' || e.target.id === 'model-select-top') {
     selectedModel = e.target.value;
@@ -630,6 +945,7 @@ document.addEventListener('change', (e) => {
 function openModal(id) {
   const modal = document.getElementById(id);
   modal.classList.remove('hidden');
+  // Force reflow for transition
   requestAnimationFrame(() => {
     modal.querySelector('.modal-overlay').style.opacity = '1';
     modal.querySelector('.modal-panel').style.opacity = '1';
@@ -643,30 +959,6 @@ function closeModal(id) {
   modal.querySelector('.modal-panel').style.opacity = '0';
   modal.querySelector('.modal-panel').style.transform = 'scale(0.95)';
   setTimeout(() => modal.classList.add('hidden'), 200);
-}
-
-
-/* ============================================================
-   THEME TOGGLE LOGIC
-============================================================ */
-function toggleTheme() {
-  const html = document.documentElement;
-  html.classList.toggle('light-mode');
-  const isLight = html.classList.contains('light-mode');
-  localStorage.setItem('moonwi_theme', isLight ? 'light' : 'dark');
-  
-  // Update settings modal text
-  const themeStatus = document.getElementById('theme-status');
-  if (themeStatus) themeStatus.textContent = isLight ? 'Light Mode' : 'Dark Mode';
-}
-
-function loadTheme() {
-  const savedTheme = localStorage.getItem('moonwi_theme');
-  if (savedTheme === 'light') {
-    document.documentElement.classList.add('light-mode');
-    const themeStatus = document.getElementById('theme-status');
-    if (themeStatus) themeStatus.textContent = 'Light Mode';
-  }
 }
 
 
@@ -696,11 +988,23 @@ landingForm.addEventListener('submit', (e) => {
 const chatForm = document.getElementById('chat-form');
 const chatInput = document.getElementById('chat-input');
 const chatMessages = document.getElementById('chat-messages');
-
 const chatSubmitBtn = chatForm.querySelector('button[type="submit"]');
+
+function autoResizeChatInput() {
+  chatInput.style.height = 'auto';
+  chatInput.style.height = Math.min(chatInput.scrollHeight, 200) + 'px';
+}
 
 chatInput.addEventListener('input', () => {
   chatSubmitBtn.disabled = chatInput.value.trim() === '';
+  autoResizeChatInput();
+});
+
+chatInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    if (!chatSubmitBtn.disabled) chatForm.requestSubmit();
+  }
 });
 
 chatForm.addEventListener('submit', (e) => {
@@ -708,48 +1012,51 @@ chatForm.addEventListener('submit', (e) => {
   const text = chatInput.value.trim();
   if (!text) return;
   chatInput.value = '';
+  autoResizeChatInput();
   chatSubmitBtn.disabled = true;
   sendChatMessage(text);
 });
 
 function addMessageToDOM(role, content, animate = true) {
-  const chatMessages = document.getElementById('chat-messages');
-  
-  const emptyState = chatMessages.querySelector('.h-full.flex');
+  const chatMessagesEl = document.getElementById('chat-messages');
+
+  // Clear the "How can I help you?" screen if present
+  const emptyState = chatMessagesEl.querySelector('.h-full.flex');
   if (emptyState) emptyState.remove();
-  
+
   const wrapper = document.createElement('div');
-  wrapper.className = `flex gap-4 msg-animate ${role === 'user' ? 'justify-end' : 'justify-start'}`;
-  
+  wrapper.className = `flex gap-3 ${role === 'user' ? 'justify-end' : 'justify-start'} ${animate ? 'msg-animate' : ''}`;
+
   if (role === 'assistant') {
     wrapper.innerHTML = `
-      <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs flex-shrink-0">AI</div>
-      <div class="assistant-msg p-4 rounded-2xl max-w-[80%] whitespace-pre-wrap break-words" style="background-color: var(--bg-tertiary); color: var(--text-primary);">${content}</div>
+      <div class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-semibold flex-shrink-0 text-white" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">AI</div>
+      <div class="assistant-msg p-4 rounded-2xl rounded-tl-sm max-w-[80%] whitespace-pre-wrap break-words leading-relaxed" style="background: var(--bubble-ai-bg); color: var(--text-primary);">${content}</div>
     `;
   } else {
     wrapper.innerHTML = `
-      <div class="bg-blue-600 text-white p-4 rounded-2xl max-w-[80%] whitespace-pre-wrap break-words">${content}</div>
+      <div class="bg-blue-600 text-white p-4 rounded-2xl rounded-tr-sm max-w-[80%] whitespace-pre-wrap break-words leading-relaxed">${content}</div>
     `;
   }
-  
-  chatMessages.appendChild(wrapper);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+
+  chatMessagesEl.appendChild(wrapper);
+  chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
   return wrapper.querySelector('.assistant-msg');
 }
 
 async function sendChatMessage(text) {
   const chatData = getChat(currentChatId);
-  
+
+  // Update title if it's the first message
   if (chatData.messages.length === 0) {
     chatData.title = text.substring(0, 30) + (text.length > 30 ? '...' : '');
     renderHistoryList();
   }
-  
+
   chatData.messages.push({ role: 'user', content: text });
   addMessageToDOM('user', text);
 
   const assistantBubble = addMessageToDOM('assistant', '');
-  assistantBubble.innerHTML = '<span class="opacity-50">Thinking...</span>';
+  assistantBubble.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
 
   try {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -757,7 +1064,7 @@ async function sendChatMessage(text) {
       headers: {
         "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": window.location.href, 
+        "HTTP-Referer": window.location.href,
         "X-Title": "MoonWi AI"
       },
       body: JSON.stringify({
@@ -779,16 +1086,16 @@ async function sendChatMessage(text) {
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-      
+
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
       buffer = lines.pop();
-      
+
       for (const line of lines) {
         if (line.startsWith('data: ')) {
           const data = line.slice(6).trim();
           if (data === '[DONE]') break;
-          
+
           try {
             const json = JSON.parse(data);
             const chunk = json.choices[0]?.delta?.content || '';
@@ -797,7 +1104,7 @@ async function sendChatMessage(text) {
               assistantBubble.textContent = fullResponse;
               chatMessages.scrollTop = chatMessages.scrollHeight;
             }
-          } catch (e) { /* Ignore */ }
+          } catch (e) { /* Ignore keep-alive errors */ }
         }
       }
     }
@@ -811,12 +1118,12 @@ async function sendChatMessage(text) {
 }
 
 /* ============================================================
-   CUSTOM JS VIDEO FADE SYSTEM
+   CUSTOM JS VIDEO FADE SYSTEM (Simplified Loop)
 ============================================================ */
 (function() {
   const video = document.getElementById('hero-video');
   if (!video) return;
-  
+
   const FADE_DURATION = 400;
   let rafId = null;
 
@@ -839,7 +1146,7 @@ async function sendChatMessage(text) {
   }
 
   video.style.opacity = '0';
-  
+
   const startPlayback = () => {
     video.play().then(() => { fadeIn(); }).catch(() => {
       video.muted = true;
@@ -849,10 +1156,11 @@ async function sendChatMessage(text) {
 
   if (video.readyState >= 2) startPlayback();
   else video.addEventListener('loadeddata', startPlayback, { once: true });
+
+  // Simple native loop handling - no custom fade out logic needed since loop attribute is set
 })();
 
-// Initialize
-loadTheme();
+// Initialize app state on load
 handleRoute();
 </script>
 </body>
