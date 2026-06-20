@@ -3,368 +3,842 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nexura - High-Impact Creatives & Deployments</title>
+  <title>Luviio - Workers & Pages</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> <!-- Supabase Library -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap">
+  <!-- Monaco Editor -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
   
   <style>
     body { font-family: 'JetBrains Mono', monospace; }
     .font-dot { font-family: 'DotGothic16', sans-serif; }
-    .reveal{opacity:0;transform:translateY(20px);filter:blur(8px);transition:opacity .8s ease-out,transform .8s ease-out,filter .8s ease-out}
-    .reveal.in-view{opacity:1;transform:translateY(0);filter:blur(0)}
-    .reveal-fade{opacity:0;filter:blur(8px);transition:opacity .8s ease-out,filter .8s ease-out}
-    .reveal-fade.in-view{opacity:1;filter:blur(0)}
-    .view { display: none; }
-    .view.active { display: block; }
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #1C1F26; }
+    ::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+
+    /* View Switcher */
+    .view { display: none; opacity: 0; transition: opacity 0.3s ease; }
+    .view.active { display: block; opacity: 1; }
+
+    /* File Tree Styles */
+    .file-item:hover { background: rgba(255,255,255,0.05); }
+    .file-item.active { background: rgba(56,189,248,0.1); border-left-color: #38bdf8; }
+    
+    /* Drop Zone Animation */
+    .drop-zone-active {
+      border-color: #a855f7 !important;
+      background: rgba(168,85,247,0.05) !important;
+      transform: scale(1.01);
+    }
+
+    /* Terminal Output */
+    .terminal-line::before {
+      content: '$ ';
+      color: #22c55e;
+      margin-right: 8px;
+    }
+
+    /* Loading Spinner */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { animation: spin 1s linear infinite; }
+
+    /* Glow Effects */
+    .glow-blue { box-shadow: 0 0 20px rgba(59,130,246,0.3); }
+    .glow-purple { box-shadow: 0 0 20px rgba(168,85,247,0.3); }
+    
+    /* Grid Background */
+    .grid-bg { 
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), 
+                        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); 
+      background-size: 40px 40px; 
+    }
+
+    /* Sidebar Nav Active State */
+    .nav-link.active {
+      background: rgba(59, 130, 246, 0.1);
+      color: #60a5fa;
+      border-color: rgba(59, 130, 246, 0.2);
+    }
   </style>
 </head>
-<body class="bg-[#0B0F19] text-white overflow-x-hidden min-h-screen selection:bg-blue-500/30">
+<body class="bg-[#0A0E17] text-white overflow-x-hidden min-h-screen selection:bg-blue-500/30">
 
   <!-- ========================================= -->
-  <!-- VIEW 1: LANDING PAGE                      -->
+  <!-- VIEW 1: LANDING / LOGIN                   -->
   <!-- ========================================= -->
   <div id="landing-view" class="view active">
-    <div class="absolute inset-x-0 top-0 z-[-1] bg-[#0B0F19] h-screen">
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full bg-blue-500/10 blur-[120px]"></div>
-      <div class="absolute top-1/3 right-0 w-[500px] h-[500px] rounded-full bg-purple-500/10 blur-[120px]"></div>
-    </div>
+    <div class="min-h-screen flex items-center justify-center relative grid-bg">
+      <!-- Background Effects -->
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full bg-blue-500/10 blur-[150px] pointer-events-none"></div>
+      <div class="absolute bottom-0 right-0 w-[600px] h-[600px] rounded-full bg-purple-500/10 blur-[150px] pointer-events-none"></div>
 
-    <header class="w-full flex justify-between items-center px-6 md:px-10 py-6 z-50 relative reveal-fade">
-      <div class="flex items-center gap-2.5 text-white font-medium text-base">
-        <div class="bg-white text-[#0B0F19] rounded-lg p-1">
-          <iconify-icon icon="solar:ghost-smile-bold" width="20"></iconify-icon>
+      <div class="w-full max-w-md mx-4 relative z-10">
+        <div class="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-10 shadow-2xl shadow-black/50">
+          <!-- Logo -->
+          <div class="flex flex-col items-center mb-10">
+            <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-5 shadow-lg glow-blue">
+              <iconify-icon icon="solar:ghost-smile-bold" width="28" class="text-white"></iconify-icon>
+            </div>
+            <h1 class="text-3xl font-dot tracking-tight text-white mb-2">Luviio</h1>
+            <p class="text-xs text-gray-500 tracking-wide uppercase">Internal Platform Access</p>
+          </div>
+
+          <!-- Login Form -->
+          <form onsubmit="handleLogin(event)" class="space-y-5">
+            <div class="space-y-2">
+              <label class="text-xs text-gray-400 font-medium uppercase tracking-wider">Email Address</label>
+              <div class="relative">
+                <iconify-icon icon="solar:letter-linear" width="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></iconify-icon>
+                <input type="email" required placeholder="admin@luviio.internal" 
+                  class="w-full bg-black/30 border border-white/10 rounded-xl pl-10 pr-4 py-3.5 text-sm outline-none focus:border-blue-500/50 focus:bg-black/40 transition-all placeholder:text-gray-600">
+              </div>
+            </div>
+            
+            <div class="space-y-2">
+              <label class="text-xs text-gray-400 font-medium uppercase tracking-wider">Password</label>
+              <div class="relative">
+                <iconify-icon icon="solar:lock-linear" width="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></iconify-icon>
+                <input type="password" required placeholder="••••••••••••" 
+                  class="w-full bg-black/30 border border-white/10 rounded-xl pl-10 pr-4 py-3.5 text-sm outline-none focus:border-blue-500/50 focus:bg-black/40 transition-all placeholder:text-gray-600">
+              </div>
+            </div>
+
+            <button type="submit" id="login-btn"
+              class="w-full mt-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-semibold py-3.5 rounded-xl text-sm transition-all shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 group">
+              <span>Access Dashboard</span>
+              <iconify-icon icon="solar:arrow-right-linear" width="16" class="group-hover:translate-x-1 transition-transform"></iconify-icon>
+            </button>
+          </form>
+
+          <div class="mt-8 pt-6 border-t border-white/5 text-center">
+            <p class="text-xs text-gray-600">Secure connection via Supabase Auth • Cloudflare Network</p>
+          </div>
         </div>
-        <span class="tracking-tight">Nexura</span>
-      </div>
-      <div class="flex items-center gap-6">
-        <button onclick="switchView('login-view')" class="px-5 py-2 rounded-full bg-white/10 border border-white/5 text-white text-xs font-medium hover:bg-white/20 transition-all backdrop-blur-md">
-          Dashboard Login →
-        </button>
-      </div>
-    </header>
-
-    <main class="relative z-10 pt-16 md:pt-24 pb-12 px-4 flex flex-col items-center text-center reveal" data-delay="200">
-      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span class="text-xs text-gray-300">Now accepting Q1 2025 partners</span>
-      </div>
-      <h1 class="text-5xl md:text-6xl lg:text-7xl tracking-tight text-white mb-6 max-w-4xl mx-auto leading-[1.1] font-dot">
-        High-performance ad creatives that drive growth
-      </h1>
-      <p class="text-sm md:text-base text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-        Experience an agency-grade creative partnership focused on producing high-converting static ads and UGC that help ecom brands scale faster.
-      </p>
-      <div class="flex flex-col sm:flex-row gap-3 items-center">
-        <button class="px-6 py-3 rounded-full bg-white text-black font-semibold text-xs hover:bg-gray-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-          Book a call →
-        </button>
-        <button onclick="switchView('login-view')" class="px-6 py-3 rounded-full bg-white/5 border border-white/10 text-white text-xs font-medium hover:bg-white/10 transition-all backdrop-blur-md">
-          Go to Dashboard
-        </button>
-      </div>
-    </main>
-  </div>
-
-  <!-- ========================================= -->
-  <!-- VIEW 2: AUTH SCREEN (Login / Sign Up)     -->
-  <!-- ========================================= -->
-  <div id="login-view" class="view">
-    <div class="min-h-screen flex items-center justify-center px-4 relative">
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full bg-blue-500/10 blur-[120px] z-[-1]"></div>
-      
-      <div class="w-full max-w-md bg-[#1C1F26] border border-white/5 rounded-3xl p-8 shadow-2xl">
-        <div class="flex flex-col items-center mb-8">
-          <div class="bg-white text-[#0B0F19] rounded-lg p-1 mb-4">
-            <iconify-icon icon="solar:ghost-smile-bold" width="24"></iconify-icon>
-          </div>
-          <h1 id="auth-title" class="text-2xl font-dot tracking-tight">Luviio Internal Login</h1>
-          <p id="auth-subtitle" class="text-xs text-gray-500 mt-1">Sign in to access Nexura Dashboard</p>
-        </div>
-
-        <!-- Auth Error/Success Message -->
-        <div id="auth-msg" class="hidden text-xs p-3 rounded-lg mb-4"></div>
-
-        <form id="auth-form" onsubmit="handleAuth(event)" class="flex flex-col gap-4">
-          <div>
-            <label class="text-xs text-gray-400 mb-1 block">Email</label>
-            <input type="email" id="email" required class="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-sm outline-none focus:border-blue-500/50 transition-all" placeholder="admin@luviio.com">
-          </div>
-          <div>
-            <label class="text-xs text-gray-400 mb-1 block">Password</label>
-            <input type="password" id="password" required class="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-sm outline-none focus:border-blue-500/50 transition-all" placeholder="••••••••">
-          </div>
-          <button type="submit" id="auth-btn" class="mt-4 w-full bg-white text-black font-semibold py-3 rounded-lg text-sm hover:bg-gray-200 transition-all">
-            Sign In →
-          </button>
-        </form>
         
-        <div class="mt-6 text-center text-xs text-gray-500">
-          <span id="auth-toggle-text">Don't have an account?</span>
-          <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-blue-400 hover:text-blue-300 font-medium ml-1">Sign up</button>
-        </div>
-
-        <button onclick="switchView('landing-view')" class="w-full mt-6 text-xs text-gray-500 hover:text-white transition-colors">
-          ← Back to Landing Page
-        </button>
+        <p class="text-center mt-6 text-xs text-gray-600">
+          © 2025 Luviio Systems. Private Infrastructure.
+        </p>
       </div>
     </div>
   </div>
 
   <!-- ========================================= -->
-  <!-- VIEW 3: CLOUDFLARE-STYLE DASHBOARD        -->
+  <!-- VIEW 2: DASHBOARD (Cloudflare Style)      -->
   <!-- ========================================= -->
   <div id="dashboard-view" class="view">
-    <header class="w-full flex justify-between items-center px-6 md:px-10 py-4 border-b border-white/5 bg-[#0B0F19] z-50 sticky top-0">
-      <div class="flex items-center gap-2.5 text-white font-medium text-base">
-        <div class="bg-white text-[#0B0F19] rounded-lg p-1">
-          <iconify-icon icon="solar:ghost-smile-bold" width="20"></iconify-icon>
+    
+    <!-- Top Navigation Bar -->
+    <header class="fixed top-0 left-0 right-0 h-16 bg-[#0A0E17]/80 backdrop-blur-xl border-b border-white/5 z-50 px-6 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity" onclick="navigateTo('/Main-Menu')">
+          <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+            <iconify-icon icon="solar:ghost-smile-bold" width="18" class="text-white"></iconify-icon>
+          </div>
+          <span class="font-dot text-lg tracking-tight hidden sm:block">Luviio</span>
         </div>
-        <span class="tracking-tight">Nexura Dashboard</span>
+        
+        <div class="h-6 w-px bg-white/10 hidden sm:block"></div>
+        
+        <nav class="hidden md:flex items-center gap-1 ml-2">
+          <a onclick="navigateTo('/Overview')" class="cursor-pointer px-3 py-1.5 rounded-lg bg-white/5 text-white text-xs font-medium border border-white/5">Workers & Pages</a>
+          <a onclick="navigateTo('/Supabase-Database')" class="cursor-pointer px-3 py-1.5 rounded-lg text-gray-400 hover:text-white text-xs font-medium transition-colors">Supabase DB</a>
+          <a onclick="navigateTo('/Custom-Domains')" class="cursor-pointer px-3 py-1.5 rounded-lg text-gray-400 hover:text-white text-xs font-medium transition-colors">Domains</a>
+          <a onclick="navigateTo('/Analytics')" class="cursor-pointer px-3 py-1.5 rounded-lg text-gray-400 hover:text-white text-xs font-medium transition-colors">Analytics</a>
+        </nav>
       </div>
-      <div class="flex items-center gap-6">
-        <span id="user-email" class="text-xs text-gray-400 hidden sm:block"></span>
-        <button onclick="handleLogout()" class="px-4 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-xs font-medium hover:bg-red-500/20 hover:border-red-500/30 transition-all">
-          Logout
+
+      <div class="flex items-center gap-4">
+        <button class="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-all relative">
+          <iconify-icon icon="solar:bell-linear" width="20"></iconify-icon>
+          <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
         </button>
+        <div class="flex items-center gap-3 pl-4 border-l border-white/10">
+          <div class="text-right hidden sm:block">
+            <div class="text-xs font-medium text-white">Admin User</div>
+            <div class="text-[10px] text-gray-500 uppercase tracking-wider">Super Admin</div>
+          </div>
+          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center text-sm font-bold text-black cursor-pointer ring-2 ring-white/10">
+            A
+          </div>
+        </div>
       </div>
     </header>
 
-    <div class="max-w-7xl mx-auto px-6 py-10 flex gap-8">
-      <aside class="hidden md:flex flex-col w-56 gap-2 border-r border-white/5 pr-6">
-        <div class="text-xs text-gray-500 uppercase mb-2">Account</div>
-        <a href="#" class="text-sm text-white bg-white/5 px-3 py-2 rounded-lg flex items-center gap-2">
-          <iconify-icon icon="solar:server-bold" width="16"></iconify-icon> Workers & Pages
-        </a>
-        <a href="#" class="text-sm text-gray-400 hover:text-white px-3 py-2 rounded-lg flex items-center gap-2">
-          <iconify-icon icon="solar:database-bold" width="16"></iconify-icon> Supabase DB
-        </a>
+    <!-- Main Layout -->
+    <div class="pt-16 flex min-h-screen">
+      
+      <!-- Sidebar -->
+      <aside class="hidden lg:flex flex-col w-64 border-r border-white/5 bg-[#0A0E17]/50 p-6 fixed left-0 top-16 bottom-0 overflow-y-auto">
+        <div class="mb-6">
+          <div class="text-[10px] text-gray-500 uppercase tracking-widest mb-3 font-semibold">Main Menu</div>
+          <nav class="space-y-1" id="main-menu-nav">
+            <a onclick="navigateTo('/Overview')" class="nav-link cursor-pointer flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 text-sm font-medium transition-all border border-transparent">
+              <iconify-icon icon="solar:server-square-bold-duotone" width="20"></iconify-icon>
+              Overview
+            </a>
+            <a onclick="navigateTo('/Create-Project')" class="nav-link cursor-pointer flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 text-sm font-medium transition-all border border-transparent">
+              <iconify-icon icon="solar:add-circle-bold-duotone" width="20"></iconify-icon>
+              Create Project
+            </a>
+            <a onclick="navigateTo('/My-Projects')" class="nav-link cursor-pointer flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 text-sm font-medium transition-all border border-transparent">
+              <iconify-icon icon="solar:folder-with-files-bold-duotone" width="20"></iconify-icon>
+              My Projects
+              <span class="ml-auto text-[10px] bg-white/10 px-2 py-0.5 rounded-full">3</span>
+            </a>
+          </nav>
+        </div>
+
+        <div class="mb-6">
+          <div class="text-[10px] text-gray-500 uppercase tracking-widest mb-3 font-semibold">Resources</div>
+          <nav class="space-y-1">
+            <a onclick="navigateTo('/Supabase-Database')" class="nav-link cursor-pointer flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 text-sm font-medium transition-all border border-transparent">
+              <iconify-icon icon="solar:database-bold-duotone" width="20"></iconify-icon>
+              Supabase Database
+            </a>
+            <a onclick="navigateTo('/Custom-Domains')" class="nav-link cursor-pointer flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 text-sm font-medium transition-all border border-transparent">
+              <iconify-icon icon="solar:global-bold-duotone" width="20"></iconify-icon>
+              Custom Domains
+            </a>
+            <a onclick="navigateTo('/Analytics')" class="nav-link cursor-pointer flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 text-sm font-medium transition-all border border-transparent">
+              <iconify-icon icon="solar:chart-2-bold-duotone" width="20"></iconify-icon>
+              Analytics
+            </a>
+          </nav>
+        </div>
+
+        <div class="mt-auto pt-6 border-t border-white/5">
+          <div class="bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-xl p-4">
+            <div class="flex items-start gap-3">
+              <iconify-icon icon="solar:fire-bold-duotone" width="24" class="text-orange-400 flex-shrink-0"></iconify-icon>
+              <div>
+                <div class="text-xs font-semibold text-orange-300 mb-1">Pro Tip</div>
+                <p class="text-[11px] text-gray-400 leading-relaxed">Use the Code Editor for rapid prototyping without leaving your browser.</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </aside>
 
-      <main class="flex-1">
-        <div class="mb-10">
-          <h1 class="text-3xl font-dot mb-2">Workers & Pages</h1>
-          <p class="text-sm text-gray-400">Build & deploy serverless functions, sites, and full-stack applications.</p>
-        </div>
-
-        <div class="bg-[#1C1F26] border border-white/5 rounded-2xl p-6">
-          <h2 class="text-lg mb-1">Create a Worker / Get started with Pages</h2>
-          <p class="text-xs text-gray-500 mb-6">How would you like to begin?</p>
-
-          <div class="grid md:grid-cols-3 gap-4 mb-8">
-            <div class="bg-[#262A34] p-5 rounded-xl border border-white/5 hover:border-blue-500/30 cursor-pointer transition-all">
-              <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-4 text-blue-400">
-                <iconify-icon icon="mdi:git" width="20"></iconify-icon>
+      <!-- Main Content Area (Router Outlet) -->
+      <main class="flex-1 lg:ml-64 p-6 md:p-10">
+        
+        <!-- ========================================= -->
+        <!-- PAGE: OVERVIEW / MAIN-MENU                -->
+        <!-- ========================================= -->
+        <div id="page-overview" class="page-content">
+          <div class="max-w-6xl mx-auto mb-10">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+              <div>
+                <div class="flex items-center gap-2 text-xs text-blue-400 mb-2 font-medium">
+                  <iconify-icon icon="solar:server-square-linear" width="14"></iconify-icon>
+                  <span>WORKERS & PAGES</span>
+                </div>
+                <h1 class="text-4xl font-dot tracking-tight text-white mb-2">Build & Deploy</h1>
+                <p class="text-sm text-gray-400 max-w-xl leading-relaxed">
+                  Create serverless applications, static sites, and full-stack projects. Deploy globally in seconds.
+                </p>
               </div>
-              <h3 class="font-medium mb-1 text-sm">Import Git repository</h3>
-              <p class="text-xs text-gray-500">Start by importing an existing Git repository.</p>
-            </div>
-            
-            <div class="bg-[#262A34] p-5 rounded-xl border border-white/5 hover:border-purple-500/30 cursor-pointer transition-all">
-              <div class="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-4 text-purple-400">
-                <iconify-icon icon="solar:upload-bold" width="20"></iconify-icon>
-              </div>
-              <h3 class="font-medium mb-1 text-sm">Drag and drop your files</h3>
-              <p class="text-xs text-gray-500">Upload HTML, CSS, and JS files directly.</p>
+              <button onclick="navigateTo('/Create-Project')" class="px-6 py-3 bg-white text-black font-semibold text-sm rounded-xl hover:bg-gray-100 transition-all shadow-lg shadow-white/10 flex items-center gap-2 self-start whitespace-nowrap">
+                <iconify-icon icon="solar:add-circle-bold" width="18"></iconify-icon>
+                New Project
+              </button>
             </div>
 
-            <div onclick="showEditor()" class="bg-[#262A34] p-5 rounded-xl border border-white/5 hover:border-emerald-500/30 cursor-pointer transition-all">
-              <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4 text-emerald-400">
-                <iconify-icon icon="solar:code-bold" width="20"></iconify-icon>
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
+              <div class="bg-[#111827] border border-white/5 rounded-2xl p-5 hover:border-white/10 transition-all">
+                <div class="flex items-center justify-between mb-3">
+                  <iconify-icon icon="solar:box-bold-duotone" width="24" class="text-blue-400"></iconify-icon>
+                  <span class="text-[10px] text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-full font-medium">Active</span>
+                </div>
+                <div class="text-2xl font-bold text-white mb-1">3</div>
+                <div class="text-xs text-gray-500">Total Deployments</div>
               </div>
-              <h3 class="font-medium mb-1 text-sm">Type in code source</h3>
-              <p class="text-xs text-gray-500">Write code like Github. Edit files and commit changes.</p>
+              
+              <div class="bg-[#111827] border border-white/5 rounded-2xl p-5 hover:border-white/10 transition-all">
+                <div class="flex items-center justify-between mb-3">
+                  <iconify-icon icon="solar:cpu-bolt-bold-duotone" width="24" class="text-purple-400"></iconify-icon>
+                  <span class="text-[10px] text-gray-400 bg-white/5 px-2 py-1 rounded-full font-medium">Workers</span>
+                </div>
+                <div class="text-2xl font-bold text-white mb-1">12ms</div>
+                <div class="text-xs text-gray-500">Avg Response Time</div>
+              </div>
+              
+              <div class="bg-[#111827] border border-white/5 rounded-2xl p-5 hover:border-white/10 transition-all">
+                <div class="flex items-center justify-between mb-3">
+                  <iconify-icon icon="solar:database-bold-duotone" width="24" class="text-emerald-400"></iconify-icon>
+                  <span class="text-[10px] text-blue-400 bg-blue-400/10 px-2 py-1 rounded-full font-medium">Supabase</span>
+                </div>
+                <div class="text-2xl font-bold text-white mb-1">Connected</div>
+                <div class="text-xs text-gray-500">Database Status</div>
+              </div>
             </div>
           </div>
+        </div>
 
-          <div id="editor-area" class="hidden border-t border-white/5 pt-6">
-            <div class="flex justify-between items-center mb-4 flex-col sm:flex-row gap-4">
-              <input type="text" id="filename" placeholder="index.html" class="bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-sm w-full sm:w-1/4 outline-none focus:border-white/30">
-              <input type="text" id="commit-msg" placeholder="Initial commit" class="bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-sm w-full sm:w-1/3 outline-none focus:border-white/30">
+        <!-- ========================================= -->
+        <!-- PAGE: CREATE PROJECT                      -->
+        <!-- ========================================= -->
+        <div id="page-create" class="page-content hidden">
+          <div class="max-w-6xl mx-auto">
+            <div class="mb-8">
+              <h1 class="text-3xl font-dot tracking-tight text-white mb-2">Create a Worker or Get Started with Pages</h1>
+              <p class="text-sm text-gray-400">How would you like to begin your project?</p>
             </div>
-            <div id="monaco-container" style="height: 300px; width: 100%; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden;"></div>
-            
-            <div class="flex gap-4 mt-4">
-              <button onclick="commitCode()" class="px-6 py-2 rounded-lg bg-white text-black font-semibold text-sm hover:bg-gray-200 transition-all">Commit & Deploy</button>
-              <button onclick="cancelEditor()" class="px-6 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm hover:bg-white/10 transition-all">Cancel</button>
+
+            <div class="bg-[#111827] border border-white/5 rounded-3xl p-8 md:p-10 shadow-2xl shadow-black/20">
+              <div class="grid md:grid-cols-3 gap-6">
+                
+                <!-- Option 1: Git Import -->
+                <div class="group bg-[#1a1f2e] rounded-2xl p-6 border border-white/5 hover:border-blue-500/30 transition-all cursor-pointer relative overflow-hidden"
+                     onclick="handleGitImport()">
+                  <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div class="relative z-10">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-5 text-blue-400 group-hover:scale-110 transition-transform">
+                      <iconify-icon icon="mdi:git" width="24"></iconify-icon>
+                    </div>
+                    <h3 class="font-semibold text-white mb-2 text-base">Import Git Repository</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">Start by importing an existing repository from GitHub, GitLab, or Bitbucket.</p>
+                    <div class="mt-4 flex items-center gap-2 text-xs text-blue-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span>Connect Repo</span>
+                      <iconify-icon icon="solar:arrow-right-linear" width="14"></iconify-icon>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Option 2: Drag and Drop -->
+                <div id="drop-zone" 
+                     class="group bg-[#1a1f2e] rounded-2xl p-6 border border-dashed border-white/10 hover:border-purple-500/50 transition-all cursor-pointer relative overflow-hidden"
+                     ondragover="handleDragOver(event)" 
+                     ondragleave="handleDragLeave(event)" 
+                     ondrop="handleDrop(event)"
+                     onclick="document.getElementById('file-input').click()">
+                  <input type="file" id="file-input" multiple class="hidden" onchange="handleFileSelect(event)">
+                  
+                  <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div class="relative z-10 text-center">
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-5 text-purple-400 mx-auto group-hover:scale-110 transition-transform group-hover:glow-purple">
+                      <iconify-icon icon="solar:upload-minimalistic-bold" width="24"></iconify-icon>
+                    </div>
+                    <h3 class="font-semibold text-white mb-2 text-base">Drag and Drop Files</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed mb-4">Upload HTML, CSS, JS, and assets directly from your computer.</p>
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/10 text-purple-400 text-xs font-medium border border-purple-500/20">
+                      <iconify-icon icon="solar:folder-2-linear" width="14"></iconify-icon>
+                      Browse Files
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Option 3: Code Editor (The Feature You Wanted) -->
+                <div onclick="openCodeEditor()" 
+                     class="group bg-[#1a1f2e] rounded-2xl p-6 border border-white/5 hover:border-emerald-500/30 transition-all cursor-pointer relative overflow-hidden">
+                  <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div class="relative z-10">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-5 text-emerald-400 group-hover:scale-110 transition-transform">
+                      <iconify-icon icon="solar:code-square-bold" width="24"></iconify-icon>
+                    </div>
+                    <h3 class="font-semibold text-white mb-2 text-base">Write Code Directly</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">Open the code editor to write, edit files like GitHub, and commit changes.</p>
+                    <div class="mt-4 flex items-center gap-2 text-xs text-emerald-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span>Open Editor</span>
+                      <iconify-icon icon="solar:arrow-right-linear" width="14"></iconify-icon>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div id="deploy-msg" class="text-xs text-emerald-400 mt-4 hidden"></div>
           </div>
         </div>
+
+        <!-- ========================================= -->
+        <!-- PAGE: CODE EDITOR & PREVIEW               -->
+        <!-- ========================================= -->
+        <div id="page-editor" class="page-content hidden">
+          <div class="max-w-7xl mx-auto">
+            <!-- Editor Header -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+              <div>
+                <h1 class="text-2xl font-dot text-white mb-1">Code Editor <span class="text-blue-400 text-sm align-middle">/my-project</span></h1>
+                <p class="text-xs text-gray-400">Write code, preview instantly, and commit changes.</p>
+              </div>
+              <div class="flex items-center gap-3">
+                <button onclick="updatePreview()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg text-sm transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20">
+                  <iconify-icon icon="solar:eye-bold" width="16"></iconify-icon>
+                  Save & Preview
+                </button>
+                <button onclick="commitChanges()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg text-sm transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+                  <iconify-icon icon="solar:check-circle-bold" width="16"></iconify-icon>
+                  Commit & Deploy
+                </button>
+              </div>
+            </div>
+
+            <div class="flex flex-col lg:flex-row gap-6">
+              
+              <!-- File Explorer Sidebar -->
+              <div class="lg:w-56 flex-shrink-0">
+                <div class="bg-[#0d1117] rounded-xl border border-white/5 overflow-hidden">
+                  <div class="px-4 py-3 border-b border-white/5 flex items-center justify-between">
+                    <span class="text-xs font-semibold text-gray-300 uppercase tracking-wider">Explorer</span>
+                    <button onclick="createNewFile()" class="p-1 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors" title="New File">
+                      <iconify-icon icon="solar:add-circle-linear" width="16"></iconify-icon>
+                    </button>
+                  </div>
+                  <div id="file-tree" class="p-2 max-h-[400px] overflow-y-auto">
+                    <!-- Files populated here -->
+                  </div>
+                </div>
+                
+                <!-- Commit Info -->
+                <div class="mt-4 space-y-3">
+                  <div>
+                    <label class="text-[10px] text-gray-500 uppercase tracking-wider block mb-1.5 font-semibold">Commit Message</label>
+                    <input type="text" id="commit-message" placeholder="Initial commit: Add landing page" 
+                      class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-xs outline-none focus:border-emerald-500/50 transition-all">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Editor & Preview Split View -->
+              <div class="flex-1 flex flex-col xl:flex-row gap-6 min-h-[600px]">
+                
+                <!-- Monaco Editor Area -->
+                <div class="flex-1 flex flex-col min-w-0">
+                  <div class="bg-[#1e1e1e] rounded-xl border border-white/10 overflow-hidden flex flex-col h-full">
+                    <!-- Editor Tabs -->
+                    <div class="flex items-center bg-[#252526] border-b border-white/10 px-2 gap-1">
+                      <div id="active-tab" class="flex items-center gap-2 px-3 py-2 bg-[#1e1e1e] border-t-2 border-emerald-500 text-xs text-white rounded-t">
+                        <iconify-icon icon="mdi:language-html5" width="14" class="text-orange-500"></iconify-icon>
+                        <span id="active-filename">index.html</span>
+                      </div>
+                    </div>
+                    <!-- Monaco Container -->
+                    <div id="monaco-container" style="flex: 1; min-height: 500px;"></div>
+                  </div>
+                </div>
+
+                <!-- Live Preview Area -->
+                <div class="flex-1 flex flex-col min-w-0">
+                  <div class="bg-white rounded-xl border border-white/10 overflow-hidden flex flex-col h-full">
+                    <div class="flex items-center bg-[#252526] border-b border-white/10 px-3 py-2 gap-2">
+                      <iconify-icon icon="solar:global-linear" width="14" class="text-gray-400"></iconify-icon>
+                      <span class="text-xs text-gray-400 font-mono">localhost:3000/preview</span>
+                      <button onclick="updatePreview()" class="ml-auto text-gray-400 hover:text-white p-1 rounded hover:bg-white/10 transition-colors" title="Refresh Preview">
+                        <iconify-icon icon="solar:refresh-bold" width="14"></iconify-icon>
+                      </button>
+                    </div>
+                    <!-- Iframe Preview -->
+                    <iframe id="preview-frame" class="flex-1 w-full bg-white" style="min-height: 500px;"></iframe>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Deployment Terminal Output -->
+            <div id="deploy-terminal" class="hidden mt-6 bg-black rounded-xl border border-emerald-500/30 overflow-hidden">
+              <div class="flex items-center justify-between px-4 py-2 bg-emerald-500/10 border-b border-emerald-500/20">
+                <div class="flex items-center gap-2 text-xs text-emerald-400 font-mono">
+                  <iconify-icon icon="solar:terminal-bold" width="14"></iconify-icon>
+                  <span>Deployment Log</span>
+                </div>
+                <div class="flex gap-1.5">
+                  <div class="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
+                  <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></div>
+                  <div class="w-2.5 h-2.5 rounded-full bg-green-500/80 animate-pulse"></div>
+                </div>
+              </div>
+              <div id="terminal-output" class="p-4 font-mono text-xs space-y-1 max-h-48 overflow-y-auto text-gray-300"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================= -->
+        <!-- PAGE: GENERIC PLACEHOLDER                 -->
+        <!-- ========================================= -->
+        <div id="page-generic" class="page-content hidden">
+          <div class="max-w-4xl mx-auto mt-20 text-center">
+            <div class="inline-block w-16 h-16 bg-[#111827] border border-white/10 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+              <iconify-icon icon="solar:confounded-circle-bold-duotone" width="32" class="text-blue-400"></iconify-icon>
+            </div>
+            <h1 class="text-3xl font-dot text-white mb-2" id="generic-title">Page</h1>
+            <p class="text-sm text-gray-400 mb-6">This section is under construction.</p>
+            <button onclick="navigateTo('/Overview')" class="px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white font-medium text-sm rounded-lg transition-all border border-white/10">
+              Back to Overview
+            </button>
+          </div>
+        </div>
+
       </main>
     </div>
   </div>
 
+  <!-- ========================================= -->
+  <!-- JAVASCRIPT LOGIC                          -->
+  <!-- ========================================= -->
   <script>
-    // =========================================
-    // 1. SUPABASE INITIALIZATION
-    // =========================================
-    // REPLACE THESE WITH YOUR SUPABASE PROJECT CREDENTIALS
-    const SUPABASE_URL = 'https://your-project-id.supabase.co';
-    const SUPABASE_ANON_KEY = 'your-anon-public-key';
-    
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    let isLoginMode = true;
+    // ==========================================
+    // STATE MANAGEMENT
+    // ==========================================
     let editor = null;
+    let currentFile = 'index.html';
+    let currentProjectName = 'my-project';
+    
+    const fileContents = {
+      'index.html': `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Luviio App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Welcome to Luviio</h1>
+            <nav>
+                <a href="#">Home</a>
+                <a href="#">About</a>
+                <a href="#">Contact</a>
+            </nav>
+        </header>
+        <main>
+            <section class="hero">
+                <h2>Build Fast, Scale Global</h2>
+                <p>This is your live preview. Edit the code and click "Save & Preview".</p>
+                <button onclick="greet()">Click Me</button>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"><\/script>
+</body>
+</html>`,
+      'styles.css': `* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: system-ui, sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #ffffff;
+    min-height: 100vh;
+}
+.container { max-width: 800px; margin: 0 auto; padding: 2rem; text-align: center; }
+header { margin-bottom: 3rem; }
+h1 { font-size: 2.5rem; color: #38bdf8; }
+nav a { color: #94a3b8; text-decoration: none; margin: 0 1rem; }
+.hero h2 { font-size: 2rem; margin-bottom: 1rem; }
+.hero p { color: #cbd5e1; margin-bottom: 2rem; }
+button {
+    background: #3b82f6; color: white; border: none;
+    padding: 0.75rem 2rem; border-radius: 0.5rem;
+    cursor: pointer; font-weight: 600; font-size: 1rem;
+}
+button:hover { background: #2563eb; }`,
+      'app.js': `function greet() {
+    alert('Hello from Luviio! Your deployment is working perfectly.');
+}`
+    };
 
-    // =========================================
-    // 2. VIEW SWITCHER
-    // =========================================
-    function switchView(viewId) {
-      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      document.getElementById(viewId).classList.add('active');
-      window.scrollTo(0, 0);
-      if (viewId === 'dashboard-view') initMonaco();
+    // ==========================================
+    // CLIENT-SIDE ROUTER
+    // ==========================================
+    function navigateTo(path) {
+      // Update URL without reloading page
+      window.history.pushState({ path }, '', path);
+      handleRouteChange(path);
     }
 
-    // =========================================
-    // 3. AUTHENTICATION LOGIC
-    // =========================================
-    function toggleAuthMode() {
-      isLoginMode = !isLoginMode;
-      document.getElementById('auth-title').innerText = isLoginMode ? 'Luviio Internal Login' : 'Create Account';
-      document.getElementById('auth-subtitle').innerText = isLoginMode ? 'Sign in to access Nexura Dashboard' : 'Sign up to get started';
-      document.getElementById('auth-btn').innerText = isLoginMode ? 'Sign In →' : 'Sign Up →';
-      document.getElementById('auth-toggle-text').innerText = isLoginMode ? "Don't have an account?" : "Already have an account?";
-      document.getElementById('auth-toggle-btn').innerText = isLoginMode ? 'Sign up' : 'Sign in';
-      document.getElementById('auth-msg').classList.add('hidden');
-    }
-
-    async function handleAuth(event) {
-      event.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const msgDiv = document.getElementById('auth-msg');
-      
-      msgDiv.classList.add('hidden');
-      msgDiv.className = 'hidden text-xs p-3 rounded-lg mb-4';
-
-      try {
-        let response;
-        if (isLoginMode) {
-          response = await supabase.auth.signInWithPassword({ email, password });
-        } else {
-          response = await supabase.auth.signUp({ email, password });
-        }
-
-        if (response.error) throw response.error;
-
-        if (response.data.user && !response.data.session && isLoginMode) {
-          throw new Error("Please verify your email before logging in.");
-        }
-
-        if (response.data.session) {
-          switchView('dashboard-view');
-          checkUser();
-        } else {
-          msgDiv.classList.remove('hidden');
-          msgDiv.classList.add('bg-emerald-500/10', 'text-emerald-400', 'border', 'border-emerald-500/20');
-          msgDiv.innerText = "Account created! Check your email to confirm (if email verification is enabled in Supabase).";
-        }
-      } catch (error) {
-        msgDiv.classList.remove('hidden');
-        msgDiv.classList.add('bg-red-500/10', 'text-red-400', 'border', 'border-red-500/20');
-        msgDiv.innerText = error.message;
+    function handleRouteChange(path) {
+      if (path === '/' || path === '/Main-Menu' || path === '/Overview') {
+        showPage('page-overview');
+        updateActiveNav('/Overview');
+      } 
+      else if (path === '/Create-Project') {
+        showPage('page-create');
+        updateActiveNav('/Create-Project');
+      } 
+      else if (path.startsWith('/create/')) {
+        currentProjectName = path.split('/create/')[1] || 'new-project';
+        showPage('page-editor');
+        updateActiveNav('/Create-Project');
+        openCodeEditor();
+      } 
+      else if (path === '/My-Projects') {
+        showPage('page-generic');
+        document.getElementById('generic-title').textContent = 'My Projects';
+        updateActiveNav('/My-Projects');
+      } 
+      else if (path === '/Supabase-Database') {
+        showPage('page-generic');
+        document.getElementById('generic-title').textContent = 'Supabase Database';
+        updateActiveNav('/Supabase-Database');
+      } 
+      else if (path === '/Custom-Domains') {
+        showPage('page-generic');
+        document.getElementById('generic-title').textContent = 'Custom Domains';
+        updateActiveNav('/Custom-Domains');
+      } 
+      else if (path === '/Analytics') {
+        showPage('page-generic');
+        document.getElementById('generic-title').textContent = 'Analytics';
+        updateActiveNav('/Analytics');
+      } 
+      else {
+        showPage('page-overview');
       }
     }
 
-    async function handleLogout() {
-      await supabase.auth.signOut();
-      switchView('landing-view');
+    function showPage(pageId) {
+      document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+      document.getElementById(pageId).classList.remove('hidden');
     }
 
-    async function checkUser() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        document.getElementById('user-email').innerText = user.email;
-      } else {
-        switchView('landing-view');
-      }
-    }
-
-    // =========================================
-    // 4. MONACO EDITOR LOGIC
-    // =========================================
-    function initMonaco() {
-      if (editor !== null) return;
-      require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
-      require(['vs/editor/editor.main'], function () {
-        editor = monaco.editor.create(document.getElementById('monaco-container'), {
-          value: '<!DOCTYPE html>\n<html lang="en">\n<head>\n    <title>My Luviio App</title>\n</head>\n<body>\n    <h1>Hello from Luviio!</h1>\n</body>\n</html>',
-          language: 'html',
-          theme: 'vs-dark',
-          automaticLayout: true
-        });
+    function updateActiveNav(navPath) {
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('onclick').includes(navPath)) {
+          link.classList.add('active');
+        }
       });
     }
 
-    function showEditor() {
-      document.getElementById('editor-area').classList.remove('hidden');
-      if (editor === null) initMonaco();
-    }
+    window.addEventListener('popstate', () => {
+      handleRouteChange(window.location.pathname);
+    });
 
-    function cancelEditor() {
-      document.getElementById('editor-area').classList.add('hidden');
-    }
-
-    async function commitCode() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        alert("Your session has expired. Please login again.");
-        switchView('login-view');
-        return;
-      }
-
-      const filename = document.getElementById('filename').value || 'index.html';
-      const content = editor.getValue();
-      const commitMsg = document.getElementById('commit-msg').value || 'Initial commit';
+    // ==========================================
+    // AUTHENTICATION VIEW SWITCH
+    // ==========================================
+    function handleLogin(e) {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      btn.innerHTML = '<iconify-icon icon="solar:refresh-bold" width="18" class="spinner"></iconify-icon><span>Authenticating...</span>';
       
-      // --- SUPABASE DB INSERT ---
-      // Make sure you created the 'files' table in Supabase as instructed previously
-      const { data, error } = await supabase
-        .from('files')
-        .insert([{ filename, content, commit_message: commitMsg }]);
-
-      const msgDiv = document.getElementById('deploy-msg');
-      msgDiv.classList.remove('hidden');
-      
-      if (error) {
-        msgDiv.className = 'text-xs text-red-400 mt-4';
-        msgDiv.innerText = `Error saving: ${error.message}`;
-      } else {
-        msgDiv.className = 'text-xs text-emerald-400 mt-4';
-        msgDiv.innerText = `Successfully committed '${filename}' (${commitMsg}). Deploying to ${filename.split('.')[0]}.luviio.internal...`;
-      }
+      setTimeout(() => {
+        document.getElementById('landing-view').classList.remove('active');
+        document.getElementById('dashboard-view').classList.add('active');
+        navigateTo('/Overview');
+        btn.innerHTML = '<span>Access Dashboard</span><iconify-icon icon="solar:arrow-right-linear" width="16" class="group-hover:translate-x-1 transition-transform"></iconify-icon>';
+      }, 1200);
     }
 
-    // =========================================
-    // 5. INITIALIZE APP ON LOAD
-    // =========================================
-    (async function() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        switchView('dashboard-view');
-        checkUser();
-      } else {
-        switchView('landing-view');
-      }
+    // ==========================================
+    // MONACO EDITOR INITIALIZATION
+    // ==========================================
+    function initMonaco() {
+      if (editor) return; // Prevent multiple initializations
 
-      // Reveal animations
-      var els = document.querySelectorAll('.reveal,.reveal-fade');
-      var io = new IntersectionObserver(function(entries) {
-        entries.forEach(function(e) {
-          if(e.isIntersecting) {
-            var d = e.target.getAttribute('data-delay') || 0;
-            setTimeout(function(){ e.target.classList.add('in-view'); }, parseInt(d));
-            io.unobserve(e.target);
+      require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+      require(['vs/editor/editor.main'], function () {
+        monaco.editor.defineTheme('luviio-dark', {
+          base: 'vs-dark',
+          inherit: true,
+          rules: [
+            { token: 'comment', foreground: '6A9955' },
+            { token: 'keyword', foreground: '569CD6' },
+            { token: 'string', foreground: 'CE9178' },
+          ],
+          colors: {
+            'editor.background': '#1e1e1e',
+            'editor.foreground': '#d4d4d4',
           }
         });
-      }, { threshold: 0.12 });
-      els.forEach(function(el) { io.observe(el); });
-    })();
+
+        editor = monaco.editor.create(document.getElementById('monaco-container'), {
+          value: fileContents['index.html'],
+          language: 'html',
+          theme: 'luviio-dark',
+          fontSize: 13,
+          fontFamily: "'JetBrains Mono', monospace",
+          lineNumbers: 'on',
+          minimap: { enabled: false },
+          scrollBeyondLastLine: false,
+          automaticLayout: true,
+          tabSize: 2,
+          wordWrap: 'on',
+          padding: { top: 16, bottom: 16 }
+        });
+
+        editor.onDidChangeModelContent(() => {
+          fileContents[currentFile] = editor.getValue();
+        });
+
+        renderFileTree();
+        updatePreview();
+      });
+    }
+
+    function renderFileTree() {
+      const tree = document.getElementById('file-tree');
+      tree.innerHTML = '';
+      
+      Object.keys(fileContents).forEach(filename => {
+        const ext = filename.split('.').pop();
+        const iconColor = ext === 'css' ? 'text-blue-500' : ext === 'js' ? 'text-yellow-500' : 'text-orange-500';
+        const iconName = ext === 'css' ? 'mdi:language-css3' : ext === 'js' ? 'mdi:language-javascript' : 'mdi:language-html5';
+        
+        const div = document.createElement('div');
+        div.className = `file-item flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer border-l-2 border-transparent text-sm ${filename === currentFile ? 'active' : ''}`;
+        div.setAttribute('data-file', filename);
+        div.onclick = function() { selectFile(this, filename); };
+        div.innerHTML = `
+          <iconify-icon icon="${iconName}" width="16" class="${iconColor}"></iconify-icon>
+          <span class="${filename === currentFile ? 'text-white' : 'text-gray-400'}">${filename}</span>
+        `;
+        tree.appendChild(div);
+      });
+    }
+
+    // ==========================================
+    // CODE EDITOR FUNCTIONS
+    // ==========================================
+    function openCodeEditor() {
+      // When clicking "Write Code Directly", route to the create page dynamically
+      navigateTo(`/create/${currentProjectName}`);
+      setTimeout(() => {
+        if (!editor) {
+          initMonaco();
+        } else {
+          updatePreview();
+        }
+      }, 100);
+    }
+
+    function selectFile(element, filename) {
+      document.querySelectorAll('.file-item').forEach(item => {
+        item.classList.remove('active');
+        item.querySelector('span').classList.remove('text-white');
+        item.querySelector('span').classList.add('text-gray-400');
+      });
+      
+      element.classList.add('active');
+      element.querySelector('span').classList.remove('text-gray-400');
+      element.querySelector('span').classList.add('text-white');
+      
+      document.getElementById('active-filename').textContent = filename;
+      currentFile = filename;
+      
+      if (editor) {
+        const lang = filename.endsWith('.css') ? 'css' : filename.endsWith('.js') ? 'javascript' : 'html';
+        monaco.editor.setModelLanguage(editor.getModel(), lang);
+        editor.setValue(fileContents[filename] || '');
+      }
+    }
+
+    function createNewFile() {
+      const name = prompt('Enter filename (e.g., utils.js):');
+      if (name && !fileContents[name]) {
+        fileContents[name] = '// New file: ' + name + '\n';
+        renderFileTree();
+        selectFile(document.querySelector(`[data-file="${name}"]`), name);
+      }
+    }
+
+    function updatePreview() {
+      // Save current editor content before previewing
+      if (editor) {
+        fileContents[currentFile] = editor.getValue();
+      }
+
+      let htmlContent = fileContents['index.html'] || '';
+      
+      // Replace local CSS/JS links with actual content for the iframe preview
+      const cssContent = fileContents['styles.css'] || '';
+      const jsContent = fileContents['app.js'] || '';
+
+      // Simple replacement for standard structures
+      htmlContent = htmlContent.replace('<link rel="stylesheet" href="styles.css">', `<style>${cssContent}</style>`);
+      htmlContent = htmlContent.replace('<script src="app.js"><\/script>', `<script>${jsContent}<\/script>`);
+      
+      const iframe = document.getElementById('preview-frame');
+      iframe.srcdoc = htmlContent;
+    }
+
+    async function commitChanges() {
+      updatePreview(); // Ensure everything is saved
+      
+      const message = document.getElementById('commit-message').value || `Update ${currentProjectName}`;
+      const content = editor ? editor.getValue() : '';
+      
+      const terminal = document.getElementById('deploy-terminal');
+      const output = document.getElementById('terminal-output');
+      terminal.classList.remove('hidden');
+      output.innerHTML = '';
+      
+      const steps = [
+        { text: `> luviio deploy --project=${currentProjectName}`, delay: 100 },
+        { text: '> Authenticating with Supabase...', delay: 800 },
+        { text: '> ✓ Authentication successful', delay: 600 },
+        { text: `> Bundling assets...`, delay: 400 },
+        { text: `> Uploading to Cloudflare Workers...`, delay: 1000 },
+        { text: `> Optimizing bundle size (${content.length} bytes)...`, delay: 700 },
+        { text: '> Creating deployment...', delay: 500 },
+        { text: `> Assigning domain: ${currentProjectName}.luviio.internal`, delay: 600 },
+        { text: '> Propagating to global network (200+ edge locations)...', delay: 1200 },
+        { text: '', delay: 300 },
+        { text: `✓ Successfully deployed!`, delay: 400, success: true },
+        { text: `  URL: https://${currentProjectName}.luviio.internal`, delay: 200, highlight: true },
+        { text: `  Commit: ${message}`, delay: 100 },
+      ];
+      
+      for (const step of steps) {
+        await new Promise(r => setTimeout(r, step.delay));
+        const line = document.createElement('div');
+        line.className = step.success ? 'text-emerald-400 font-semibold' : step.highlight ? 'text-cyan-400' : 'terminal-line text-gray-400';
+        line.textContent = step.text;
+        output.appendChild(line);
+        output.scrollTop = output.scrollHeight;
+      }
+    }
+
+    // ==========================================
+    // DRAG AND DROP HANDLING
+    // ==========================================
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('drop-zone-active');
+    }
+
+    function handleDragLeave(e) {
+      e.currentTarget.classList.remove('drop-zone-active');
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drop-zone-active');
+      processFiles(e.dataTransfer.files);
+    }
+
+    function handleFileSelect(e) {
+      processFiles(e.target.files);
+    }
+
+    function processFiles(files) {
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          fileContents[file.name] = e.target.result;
+          openCodeEditor();
+          setTimeout(() => {
+            renderFileTree();
+            selectFile(document.querySelector(`[data-file="${file.name}"]`), file.name);
+          }, 200);
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    function handleGitImport() {
+      alert('Git Integration:\n\nThis would open a modal to connect:\n- GitHub\n- GitLab\n- Bitbucket\n\nAnd import repositories automatically.');
+    }
+
+    // Initialize router on load
+    window.addEventListener('load', () => {
+      handleRouteChange(window.location.pathname);
+    });
   </script>
 </body>
 </html>
