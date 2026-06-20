@@ -9,19 +9,46 @@
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600;700&family=Fustat:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-  body { font-family: 'Fustat', sans-serif; }
+  :root {
+    --bg-primary: #000000;
+    --bg-secondary: #0f0f0f;
+    --bg-tertiary: #1c1c1c;
+    --bg-input: #2f2f2f;
+    --text-primary: #ffffff;
+    --text-secondary: #9a9a9a;
+    --border-color: rgba(255,255,255,0.1);
+  }
+  
+  html.light-mode {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f7f7f7;
+    --bg-tertiary: #ececec;
+    --bg-input: #ffffff;
+    --text-primary: #000000;
+    --text-secondary: #505050;
+    --border-color: rgba(0,0,0,0.1);
+  }
+
+  body { font-family: 'Fustat', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); transition: background-color 0.3s ease, color 0.3s ease; }
   .font-display { font-family: 'Fustat', sans-serif; }
   .font-schibsted { font-family: 'Schibsted Grotesk', sans-serif; }
   .font-inter { font-family: 'Inter', sans-serif; }
   .font-noto { font-family: 'Noto Sans', sans-serif; }
+  
   .video-wrap { width: 115%; height: 115%; position: absolute; top: 0; left: 50%; transform: translateX(-50%); pointer-events: none; }
   .video-wrap video { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
-  .gradient-overlay {
+  
+  html:not(.light-mode) .gradient-overlay {
     background: radial-gradient(ellipse 90% 80% at 50% 20%, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.05) 80%);
   }
-  ::-webkit-scrollbar { width: 6px; }
+  html.light-mode .gradient-overlay {
+    background: radial-gradient(ellipse 90% 80% at 50% 20%, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.15) 40%, rgba(255,255,255,0.05) 80%);
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb { background: rgba(128, 128, 128, 0.4); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(128, 128, 128, 0.6); }
   
   /* Sidebar transition */
   #sidebar { transition: width 0.3s ease, transform 0.3s ease; overflow: hidden; white-space: nowrap; }
@@ -34,18 +61,35 @@
   .modal-panel { transition: opacity 0.2s ease, transform 0.2s ease; }
   
   /* Active Chat in Sidebar */
-  .chat-item-active { background: rgba(255,255,255,0.1); color: white; }
+  .chat-item { position: relative; display: flex; align-items: center; justify-content: space-between; }
+  .chat-item-active { background: rgba(255,255,255,0.1); color: var(--text-primary); }
+  html.light-mode .chat-item-active { background: rgba(0,0,0,0.05); }
   .chat-item-inactive:hover { background: rgba(255,255,255,0.05); }
+  html.light-mode .chat-item-inactive:hover { background: rgba(0,0,0,0.03); }
+  
+  .chat-item-actions { opacity: 0; transition: opacity 0.2s ease; }
+  .chat-item:hover .chat-item-actions { opacity: 1; }
+  
+  /* Smooth message animations */
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .msg-animate { animation: slideIn 0.3s ease-out forwards; }
+
+  /* Theme specific shadow adjustments */
+  html.light-mode .landing-form-shadow { box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+  html:not(.light-mode) .landing-form-shadow { box-shadow: 0 10px 40px rgba(0,0,0,0.4); }
 </style>
 </head>
-<body class="overflow-x-hidden bg-black">
+<body class="overflow-x-hidden">
 
 <!-- =========================================
-     MODALS (Settings & Account)
+     MODALS (Settings, Account & Confirm Delete)
 ========================================= -->
 <div id="settings-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
-  <div class="modal-overlay absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal('settings-modal')"></div>
-  <div class="modal-panel relative bg-[#2f2f2f] rounded-2xl p-8 w-full max-w-md shadow-2xl border border-white/10 text-white">
+  <div class="modal-overlay absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0" onclick="closeModal('settings-modal')"></div>
+  <div class="modal-panel relative bg-[#2f2f2f] rounded-2xl p-8 w-full max-w-md shadow-2xl border border-white/10 text-white opacity-0 scale-95">
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-2xl font-bold">Settings</h2>
       <button onclick="closeModal('settings-modal')" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
@@ -53,25 +97,28 @@
       </button>
     </div>
     <div class="space-y-4">
-      <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
-        <span>Dark Mode</span>
-        <div class="w-12 h-7 bg-green-500 rounded-full relative cursor-pointer"><div class="absolute right-1 top-1 w-5 h-5 bg-white rounded-full shadow"></div></div>
+      <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl cursor-pointer" onclick="toggleTheme()">
+        <span class="flex items-center gap-2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          Toggle Theme
+        </span>
+        <span id="theme-status" class="text-sm text-gray-400">Dark Mode</span>
       </div>
       <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
         <span>Notifications</span>
         <div class="w-12 h-7 bg-gray-600 rounded-full relative cursor-pointer"><div class="absolute left-1 top-1 w-5 h-5 bg-white rounded-full shadow"></div></div>
       </div>
       <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
-        <span>Language</span>
-        <span class="text-gray-400 text-sm">English</span>
+        <span>Memory Management</span>
+        <span class="text-sm text-blue-400 cursor-pointer hover:underline">View Memories</span>
       </div>
     </div>
   </div>
 </div>
 
 <div id="account-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
-  <div class="modal-overlay absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal('account-modal')"></div>
-  <div class="modal-panel relative bg-[#2f2f2f] rounded-2xl p-8 w-full max-w-md shadow-2xl border border-white/10 text-white">
+  <div class="modal-overlay absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0" onclick="closeModal('account-modal')"></div>
+  <div class="modal-panel relative bg-[#2f2f2f] rounded-2xl p-8 w-full max-w-md shadow-2xl border border-white/10 text-white opacity-0 scale-95">
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-2xl font-bold">Account</h2>
       <button onclick="closeModal('account-modal')" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
@@ -99,12 +146,38 @@
   </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div id="delete-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+  <div class="modal-overlay absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0" onclick="closeModal('delete-modal')"></div>
+  <div class="modal-panel relative bg-[#2f2f2f] rounded-2xl p-8 w-full max-w-md shadow-2xl border border-white/10 text-white opacity-0 scale-95">
+    <h2 class="text-2xl font-bold mb-4">Delete chat?</h2>
+    <p class="text-gray-400 mb-6">This will delete <span id="delete-chat-title" class="font-semibold text-white"></span>.</p>
+    <p class="text-sm text-gray-500 mb-6">
+      Visit settings to delete any memories saved during this chat.
+    </p>
+    <div class="flex gap-3 justify-end">
+      <button onclick="closeModal('delete-modal')" class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition">Cancel</button>
+      <button id="confirm-delete-btn" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 transition font-medium">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Context Menu for Chat Tabs -->
+<div id="context-menu" class="hidden fixed z-50 w-48 bg-[#2f2f2f] border border-white/10 rounded-xl shadow-2xl py-2 text-sm text-white">
+  <button data-action="share" class="w-full text-left px-4 py-2 hover:bg-white/10 flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share</button>
+  <button data-action="rename" class="w-full text-left px-4 py-2 hover:bg-white/10 flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Rename</button>
+  <button data-action="pin" class="w-full text-left px-4 py-2 hover:bg-white/10 flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17z"/></svg> Pin chat</button>
+  <button data-action="archive" class="w-full text-left px-4 py-2 hover:bg-white/10 flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg> Archive</button>
+  <hr class="border-white/10 my-2">
+  <button data-action="delete" class="w-full text-left px-4 py-2 hover:bg-red-500/10 text-red-400 flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Delete</button>
+</div>
+
 
 <!-- =========================================
      1. LANDING VIEW (Home)
 ========================================= -->
 <div id="landing-view" class="relative w-full min-h-screen overflow-hidden">
-  <!-- Video Background (Simplified Loop) -->
+  <!-- Video Background -->
   <div class="absolute inset-0 z-0">
     <div class="video-wrap">
       <video id="hero-video" muted playsinline loop preload="auto"
@@ -127,6 +200,9 @@
       <li><a href="#" class="font-schibsted font-medium text-white text-[16px] hover:opacity-70 transition-opacity" style="letter-spacing: -0.2px;">Contact</a></li>
     </ul>
     <div class="flex items-center gap-3">
+      <button onclick="toggleTheme()" class="font-schibsted font-medium text-white text-[14px] rounded-lg hover:bg-white/10 transition-colors p-2">
+        <svg id="theme-icon-nav" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
       <button onclick="simulateLogin()" class="font-schibsted font-medium text-white text-[14px] rounded-lg hover:bg-white/10 transition-colors" style="width: 82px; height: 40px;">Sign Up</button>
       <button onclick="simulateLogin()" class="font-schibsted font-medium text-white text-[14px] rounded-lg bg-black hover:opacity-90 transition-opacity" style="width: 101px; height: 40px; border: 1px solid rgba(255,255,255,0.12);">Log In</button>
     </div>
@@ -149,7 +225,7 @@
     <div style="height: 44px;"></div>
 
     <!-- Search Input Box -->
-    <form id="landing-form" class="w-full rounded-[18px] flex flex-col overflow-hidden shadow-2xl" style="max-width: 728px; height: 200px; background: rgba(0,0,0,0.24); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+    <form id="landing-form" class="w-full rounded-[18px] flex flex-col overflow-hidden landing-form-shadow" style="max-width: 728px; height: 200px; background: rgba(0,0,0,0.24); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
       <div class="flex items-center justify-between px-4" style="height: 40px;">
         <div class="flex items-center gap-2.5">
           <span class="font-schibsted font-medium text-white text-[12px]" style="letter-spacing: -0.1px; opacity: 0.9;">60/450 credits</span>
@@ -160,9 +236,9 @@
           <span class="font-schibsted font-medium text-white text-[12px]" style="letter-spacing: -0.1px; opacity: 0.9;">Powered by GPT-4o</span>
         </div>
       </div>
-      <div class="flex-1 mx-3 mb-3 rounded-[12px] flex flex-col" style="background: #ffffff; box-shadow: 0 4px 20px rgba(0,0,0,0.25);">
+      <div class="flex-1 mx-3 mb-3 rounded-[12px] flex flex-col bg-white" style="box-shadow: 0 4px 20px rgba(0,0,0,0.25);">
         <div class="flex-1 px-4 pt-3 relative">
-          <input id="landing-input" type="text" placeholder="Type question..." class="w-full bg-transparent border-none outline-none text-[16px] placeholder:font-normal" style="color: #000; font-family: 'Fustat', sans-serif; letter-spacing: -0.2px;" required>
+          <input id="landing-input" type="text" placeholder="Type question..." class="w-full bg-transparent border-none outline-none text-[16px] placeholder:font-normal text-black" style="font-family: 'Fustat', sans-serif; letter-spacing: -0.2px;" required>
           <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full hover:scale-105 transition-transform" style="width: 36px; height: 36px; background: #000000;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
@@ -182,7 +258,6 @@
           <span id="char-count" class="font-schibsted font-medium text-[12px]" style="color: #9a9a9a; letter-spacing: -0.1px;">0/3,000</span>
         </div>
       </div>
-      <!-- Disclaimer added below the form box -->
       <div class="text-center pb-2 pt-1">
         <span class="font-inter text-[11px] text-white/50" style="letter-spacing: -0.1px;">MoonWi AI can make mistakes. Check important info.</span>
       </div>
@@ -193,52 +268,56 @@
 <!-- =========================================
      2. CHAT VIEW (/c/[chatid])
 ========================================= -->
-<div id="chat-view" class="hidden h-screen flex bg-[#212121] text-gray-100 font-schibsted">
+<div id="chat-view" class="hidden h-screen flex font-schibsted" style="background-color: var(--bg-secondary); color: var(--text-primary);">
   
   <!-- Sidebar -->
-  <aside id="sidebar" class="w-64 bg-[#171717] p-2 flex flex-col border-r border-white/5 flex-shrink-0">
+  <aside id="sidebar" class="w-64 p-2 flex flex-col border-r flex-shrink-0" style="background-color: var(--bg-primary); border-color: var(--border-color);">
     <div id="sidebar-content" class="flex flex-col h-full">
       <!-- Top Section: Toggle & New Chat -->
       <div class="flex items-center justify-between p-2 gap-2">
-        <button onclick="toggleSidebar()" class="p-1.5 text-white hover:bg-white/10 rounded transition-colors">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-white rotate-180">
+        <button onclick="toggleSidebar()" class="p-1.5 hover:bg-white/10 rounded transition-colors">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="rotate-180" style="color: var(--text-primary);">
             <path d="M6 2V14M5.2 2H10.8C11.9201 2 12.4802 2 12.908 2.21799C13.2843 2.40973 13.5903 2.71569 13.782 3.09202C14 3.51984 14 4.0799 14 5.2V10.8C14 11.9201 14 12.4802 13.782 12.908C13.5903 13.2843 13.2843 13.5903 12.908 13.782C12.4802 14 11.9201 14 10.8 14H5.2C4.07989 14 3.51984 14 3.09202 13.782C2.71569 13.5903 2.40973 2.71569 2.21799 12.908C2 12.4802 2 11.9201 2 10.8V5.2C2 4.07989 2 3.51984 2.21799 3.09202C2.40973 2.71569 2.71569 2.40973 3.09202 2.21799C3.51984 2 4.0799 2 5.2 2Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.33"></path>
           </svg>
         </button>
-        <button onclick="startNewChat()" class="flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-white/5 transition-colors flex-1 text-white">
+        <button onclick="startNewChat()" class="flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-white/5 transition-colors flex-1">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
           New chat
         </button>
       </div>
       
-      <!-- Model Selection (Visible when sidebar is open) -->
+      <!-- Model Selection -->
       <div class="px-2 mb-2 mt-1">
         <div class="relative">
-          <select id="model-select-sidebar" class="w-full appearance-none bg-[#2f2f2f] text-white text-xs border border-white/10 rounded-lg py-2 pl-3 pr-8 outline-none cursor-pointer focus:border-white/20">
+          <select id="model-select-sidebar" class="w-full appearance-none text-xs border rounded-lg py-2 pl-3 pr-8 outline-none cursor-pointer focus:border-white/20" style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color);">
             <option value="openai/gpt-4o">GPT-4o</option>
             <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
             <option value="google/gemini-flash-1.5">Gemini 1.5 Flash</option>
             <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70b</option>
           </select>
-          <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-white/70" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-70" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-primary);"><path d="M6 9l6 6 6-6"/></svg>
         </div>
       </div>
 
       <!-- History List -->
-      <div class="flex-1 mt-2 overflow-y-auto">
-        <p class="text-xs text-gray-500 px-3 mb-2 uppercase tracking-wider">History</p>
+      <div class="flex-1 mt-2 overflow-y-auto pr-1">
+        <p class="text-xs px-3 mb-2 uppercase tracking-wider" style="color: var(--text-secondary);">History</p>
         <div id="history-list" class="space-y-1">
           <!-- Dynamically populated -->
         </div>
       </div>
 
-      <!-- Bottom Section: Account & Settings -->
-      <div class="mt-auto p-2 border-t border-white/5 space-y-1">
-        <button onclick="openModal('account-modal')" class="w-full flex items-center gap-3 p-2 text-sm rounded hover:bg-white/5 transition-colors text-gray-300">
+      <!-- Bottom Section: Theme, Account & Settings -->
+      <div class="mt-auto p-2 border-t space-y-1" style="border-color: var(--border-color);">
+        <button onclick="toggleTheme()" class="w-full flex items-center gap-3 p-2 text-sm rounded hover:bg-white/5 transition-colors" style="color: var(--text-primary);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          Toggle Theme
+        </button>
+        <button onclick="openModal('account-modal')" class="w-full flex items-center gap-3 p-2 text-sm rounded hover:bg-white/5 transition-colors" style="color: var(--text-primary);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           Account
         </button>
-        <button onclick="openModal('settings-modal')" class="w-full flex items-center gap-3 p-2 text-sm rounded hover:bg-white/5 transition-colors text-gray-300">
+        <button onclick="openModal('settings-modal')" class="w-full flex items-center gap-3 p-2 text-sm rounded hover:bg-white/5 transition-colors" style="color: var(--text-primary);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           Settings
         </button>
@@ -250,43 +329,42 @@
   <main class="flex-1 flex flex-col items-center relative h-screen">
     
     <!-- Top Bar (When Sidebar is closed) -->
-    <div id="top-bar" class="hidden absolute top-0 left-0 w-full flex items-center justify-between p-4 z-20 bg-[#212121]">
+    <div id="top-bar" class="hidden absolute top-0 left-0 w-full flex items-center justify-between p-4 z-20" style="background-color: var(--bg-secondary);">
       <div class="flex items-center gap-4">
-        <button onclick="toggleSidebar()" class="p-1.5 text-white hover:bg-white/10 rounded transition-colors">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-white rotate-180">
+        <button onclick="toggleSidebar()" class="p-1.5 hover:bg-white/10 rounded transition-colors">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="rotate-180" style="color: var(--text-primary);">
             <path d="M6 2V14M5.2 2H10.8C11.9201 2 12.4802 2 12.908 2.21799C13.2843 2.40973 13.5903 2.71569 13.782 3.09202C14 3.51984 14 4.0799 14 5.2V10.8C14 11.9201 14 12.4802 13.782 12.908C13.5903 13.2843 13.2843 13.5903 12.908 13.782C12.4802 14 11.9201 14 10.8 14H5.2C4.07989 14 3.51984 14 3.09202 13.782C2.71569 13.5903 2.40973 2.71569 2.21799 12.908C2 12.4802 2 11.9201 2 10.8V5.2C2 4.07989 2 3.51984 2.21799 3.09202C2.40973 2.71569 2.71569 2.40973 3.09202 2.21799C3.51984 2 4.0799 2 5.2 2Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.33"></path>
           </svg>
         </button>
-        <span class="font-semibold text-white text-lg">MoonWi AI</span>
+        <span class="font-semibold text-lg">MoonWi AI</span>
       </div>
       
       <!-- Model Selection Top Bar -->
       <div class="relative">
-        <select id="model-select-top" class="appearance-none bg-[#2f2f2f] text-white text-sm border border-white/10 rounded-lg py-2 pl-4 pr-10 outline-none cursor-pointer focus:border-white/20">
+        <select id="model-select-top" class="appearance-none text-sm border rounded-lg py-2 pl-4 pr-10 outline-none cursor-pointer focus:border-white/20" style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color);">
           <option value="openai/gpt-4o">GPT-4o</option>
           <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
           <option value="google/gemini-flash-1.5">Gemini 1.5 Flash</option>
           <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70b</option>
         </select>
-        <svg class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/70" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        <svg class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-70" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-primary);"><path d="M6 9l6 6 6-6"/></svg>
       </div>
     </div>
 
-    <div id="chat-messages" class="w-full max-w-3xl flex-1 overflow-y-auto p-6 space-y-6 pb-32">
+    <div id="chat-messages" class="w-full max-w-3xl flex-1 overflow-y-auto p-6 space-y-8 pb-32 scroll-smooth">
       <!-- Messages injected here -->
     </div>
 
     <!-- Input Area -->
-    <div class="w-full max-w-3xl p-4 absolute bottom-0 bg-gradient-to-t from-[#212121] via-[#212121] to-transparent">
+    <div class="w-full max-w-3xl p-4 absolute bottom-0 bg-gradient-to-t from-black via-black to-transparent" style="background: linear-gradient(to top, var(--bg-secondary), transparent);">
       <form id="chat-form" class="relative">
-        <input id="chat-input" type="text" placeholder="Message AI..." class="w-full bg-[#2f2f2f] text-white border border-white/10 rounded-2xl py-4 pl-4 pr-14 outline-none focus:border-white/20 transition-colors" autocomplete="off">
+        <input id="chat-input" type="text" placeholder="Message MoonWi AI..." class="w-full border rounded-2xl py-4 pl-4 pr-14 outline-none focus:border-white/20 transition-colors" style="background-color: var(--bg-input); color: var(--text-primary); border-color: var(--border-color);" autocomplete="off">
         <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-white text-black rounded-full hover:opacity-80 transition disabled:opacity-30" disabled>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
         </button>
       </form>
-      <!-- Disclaimer added below chat text box -->
       <div class="text-center mt-2">
-        <span class="font-inter text-[11px] text-white/30" style="letter-spacing: -0.1px;">MoonWi AI can make mistakes. Check important info.</span>
+        <span class="font-inter text-[11px]" style="color: var(--text-secondary); letter-spacing: -0.1px;">MoonWi AI can make mistakes. Check important info.</span>
       </div>
     </div>
 
@@ -301,8 +379,6 @@ const OPENROUTER_API_KEY = "sk-or-v1-YOUR_OPENROUTER_API_KEY_HERE"; // <--- PAST
 
 let currentChatId = null;
 let selectedModel = "openai/gpt-4o";
-
-// Chat state management for switching between chats
 let chatStore = {}; 
 
 function getChat(chatId) {
@@ -339,34 +415,20 @@ function handleRoute() {
   const path = window.location.pathname;
   const chatMatch = path.match(/^\/c\/([a-zA-Z0-9-]+)/);
   
-  if (path === '/home') {
-    openLandingView();
-    return;
-  }
-  
-  if (chatMatch) {
-    const chatId = chatMatch[1];
-    switchToChat(chatId);
-    return;
-  }
+  if (path === '/home') { openLandingView(); return; }
+  if (chatMatch) { switchToChat(chatMatch[1]); return; }
   
   if (path === '/') {
-    if (isUserLoggedIn()) {
-      startNewChat();
-    } else {
-      openLandingView();
-    }
+    if (isUserLoggedIn()) startNewChat();
+    else openLandingView();
     return;
   }
-  
   openLandingView();
 }
 
 function navigateToChat(prompt) {
   const chatId = crypto.randomUUID();
   history.pushState({ chatId, prompt }, '', `/c/${chatId}`);
-  
-  // Initialize chat data
   getChat(chatId).title = prompt.substring(0, 30) + (prompt.length > 30 ? '...' : '');
   switchToChat(chatId, prompt);
 }
@@ -398,7 +460,7 @@ function openChatView() {
 function startNewChat() {
   const chatId = crypto.randomUUID();
   history.pushState({}, '', `/c/${chatId}`);
-  getChat(chatId); // Initialize empty
+  getChat(chatId);
   switchToChat(chatId);
 }
 
@@ -407,7 +469,6 @@ function switchToChat(chatId, initialPrompt) {
   openChatView();
   renderChatMessages();
   
-  // If there's an initial prompt and the chat is empty, send it
   const chatData = getChat(chatId);
   if (initialPrompt && chatData.messages.length === 0) {
     sendChatMessage(initialPrompt);
@@ -420,9 +481,9 @@ function renderChatMessages() {
   
   if (chatData.messages.length === 0) {
     chatMessages.innerHTML = `
-      <div class="h-full flex flex-col items-center justify-center text-center">
-        <h2 class="text-white text-3xl font-semibold mb-4">How can I help you?</h2>
-        <p class="text-gray-400 text-sm">Ask anything, or try uploading a document to get started.</p>
+      <div class="h-full flex flex-col items-center justify-center text-center pt-24">
+        <h2 class="text-3xl font-semibold mb-4" style="color: var(--text-primary);">How can I help you?</h2>
+        <p class="text-sm" style="color: var(--text-secondary);">Ask anything, or try uploading a document to get started.</p>
       </div>
     `;
   } else {
@@ -430,7 +491,7 @@ function renderChatMessages() {
     chatData.messages.forEach(msg => {
       addMessageToDOM(msg.role, msg.content, false);
     });
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    setTimeout(() => { chatMessages.scrollTop = chatMessages.scrollHeight; }, 100);
   }
 }
 
@@ -439,25 +500,99 @@ function renderHistoryList() {
   const chatIds = Object.keys(chatStore);
   
   if (chatIds.length === 0) {
-    historyList.innerHTML = '<div class="px-3 py-2 text-sm text-gray-500 italic">No chats yet</div>';
+    historyList.innerHTML = '<div class="px-3 py-2 text-sm italic" style="color: var(--text-secondary);">No chats yet</div>';
     return;
   }
   
   historyList.innerHTML = '';
   
-  // Render in reverse order (newest first)
   [...chatIds].reverse().forEach(id => {
     const chat = chatStore[id];
     const isActive = id === currentChatId;
+    
     const div = document.createElement('div');
-    div.className = `px-3 py-2 text-sm rounded cursor-pointer truncate transition-colors ${isActive ? 'chat-item-active' : 'chat-item-inactive text-gray-400'}`;
-    div.textContent = chat.title;
-    div.onclick = () => {
+    div.className = `chat-item px-3 py-2 text-sm rounded cursor-pointer truncate transition-colors ${isActive ? 'chat-item-active' : 'chat-item-inactive'}`;
+    div.style.color = isActive ? 'var(--text-primary)' : 'var(--text-secondary)';
+    
+    // Title Span
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'truncate flex-1';
+    titleSpan.textContent = chat.title;
+    titleSpan.onclick = () => {
       history.pushState({}, '', `/c/${id}`);
       switchToChat(id);
     };
+    
+    // Action Menu (Three dots)
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'chat-item-actions absolute right-2 top-1/2 -translate-y-1/2';
+    actionsDiv.innerHTML = `
+      <button class="p-1 hover:bg-white/20 rounded" onclick="showChatMenu(event, '${id}')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+      </button>
+    `;
+    
+    div.appendChild(titleSpan);
+    div.appendChild(actionsDiv);
     historyList.appendChild(div);
   });
+}
+
+/* ============================================================
+   CHAT CONTEXT MENU & DELETION
+============================================================ */
+function showChatMenu(e, chatId) {
+  e.stopPropagation();
+  const menu = document.getElementById('context-menu');
+  menu.classList.remove('hidden');
+  menu.style.left = `${e.clientX}px`;
+  menu.style.top = `${e.clientY}px`;
+  
+  menu.dataset.chatid = chatId;
+}
+
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('context-menu');
+  if (!menu.contains(e.target) && !e.target.closest('button')?.getAttribute('onclick')?.includes('showChatMenu')) {
+    menu.classList.add('hidden');
+  }
+});
+
+document.getElementById('context-menu').addEventListener('click', (e) => {
+  const action = e.target.closest('button')?.dataset.action;
+  const menu = document.getElementById('context-menu');
+  const chatId = menu.dataset.chatid;
+  
+  if (!action) return;
+  
+  if (action === 'delete') {
+    const chatData = getChat(chatId);
+    document.getElementById('delete-chat-title').textContent = `"${chatData.title}"`;
+    openModal('delete-modal');
+    
+    document.getElementById('confirm-delete-btn').onclick = () => {
+      deleteChat(chatId);
+      closeModal('delete-modal');
+    };
+  } else {
+    alert(`${action.charAt(0).toUpperCase() + action.slice(1)} functionality triggered for chat: ${getChat(chatId).title}`);
+  }
+  
+  menu.classList.add('hidden');
+});
+
+function deleteChat(chatId) {
+  delete chatStore[chatId];
+  if (currentChatId === chatId) {
+    const remainingChats = Object.keys(chatStore);
+    if (remainingChats.length > 0) {
+      switchToChat(remainingChats[0]);
+    } else {
+      startNewChat();
+    }
+  } else {
+    renderHistoryList();
+  }
 }
 
 
@@ -486,7 +621,6 @@ function resetSidebarState() {
   topBar.classList.remove('flex');
 }
 
-// Keep model selection in sync across sidebar and top bar
 document.addEventListener('change', (e) => {
   if (e.target.id === 'model-select-sidebar' || e.target.id === 'model-select-top') {
     selectedModel = e.target.value;
@@ -502,7 +636,6 @@ document.addEventListener('change', (e) => {
 function openModal(id) {
   const modal = document.getElementById(id);
   modal.classList.remove('hidden');
-  // Force reflow for transition
   requestAnimationFrame(() => {
     modal.querySelector('.modal-overlay').style.opacity = '1';
     modal.querySelector('.modal-panel').style.opacity = '1';
@@ -516,6 +649,30 @@ function closeModal(id) {
   modal.querySelector('.modal-panel').style.opacity = '0';
   modal.querySelector('.modal-panel').style.transform = 'scale(0.95)';
   setTimeout(() => modal.classList.add('hidden'), 200);
+}
+
+
+/* ============================================================
+   THEME TOGGLE LOGIC
+============================================================ */
+function toggleTheme() {
+  const html = document.documentElement;
+  html.classList.toggle('light-mode');
+  const isLight = html.classList.contains('light-mode');
+  localStorage.setItem('moonwi_theme', isLight ? 'light' : 'dark');
+  
+  // Update settings modal text
+  const themeStatus = document.getElementById('theme-status');
+  if (themeStatus) themeStatus.textContent = isLight ? 'Light Mode' : 'Dark Mode';
+}
+
+function loadTheme() {
+  const savedTheme = localStorage.getItem('moonwi_theme');
+  if (savedTheme === 'light') {
+    document.documentElement.classList.add('light-mode');
+    const themeStatus = document.getElementById('theme-status');
+    if (themeStatus) themeStatus.textContent = 'Light Mode';
+  }
 }
 
 
@@ -545,6 +702,7 @@ landingForm.addEventListener('submit', (e) => {
 const chatForm = document.getElementById('chat-form');
 const chatInput = document.getElementById('chat-input');
 const chatMessages = document.getElementById('chat-messages');
+
 const chatSubmitBtn = chatForm.querySelector('button[type="submit"]');
 
 chatInput.addEventListener('input', () => {
@@ -563,17 +721,16 @@ chatForm.addEventListener('submit', (e) => {
 function addMessageToDOM(role, content, animate = true) {
   const chatMessages = document.getElementById('chat-messages');
   
-  // Clear the "How can I help you?" screen if present
   const emptyState = chatMessages.querySelector('.h-full.flex');
   if (emptyState) emptyState.remove();
   
   const wrapper = document.createElement('div');
-  wrapper.className = `flex gap-4 ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+  wrapper.className = `flex gap-4 msg-animate ${role === 'user' ? 'justify-end' : 'justify-start'}`;
   
   if (role === 'assistant') {
     wrapper.innerHTML = `
       <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs flex-shrink-0">AI</div>
-      <div class="assistant-msg bg-[#2f2f2f] text-white p-4 rounded-2xl max-w-[80%] whitespace-pre-wrap break-words">${content}</div>
+      <div class="assistant-msg p-4 rounded-2xl max-w-[80%] whitespace-pre-wrap break-words" style="background-color: var(--bg-tertiary); color: var(--text-primary);">${content}</div>
     `;
   } else {
     wrapper.innerHTML = `
@@ -589,7 +746,6 @@ function addMessageToDOM(role, content, animate = true) {
 async function sendChatMessage(text) {
   const chatData = getChat(currentChatId);
   
-  // Update title if it's the first message
   if (chatData.messages.length === 0) {
     chatData.title = text.substring(0, 30) + (text.length > 30 ? '...' : '');
     renderHistoryList();
@@ -647,7 +803,7 @@ async function sendChatMessage(text) {
               assistantBubble.textContent = fullResponse;
               chatMessages.scrollTop = chatMessages.scrollHeight;
             }
-          } catch (e) { /* Ignore keep-alive errors */ }
+          } catch (e) { /* Ignore */ }
         }
       }
     }
@@ -661,7 +817,7 @@ async function sendChatMessage(text) {
 }
 
 /* ============================================================
-   CUSTOM JS VIDEO FADE SYSTEM (Simplified Loop)
+   CUSTOM JS VIDEO FADE SYSTEM
 ============================================================ */
 (function() {
   const video = document.getElementById('hero-video');
@@ -699,11 +855,10 @@ async function sendChatMessage(text) {
 
   if (video.readyState >= 2) startPlayback();
   else video.addEventListener('loadeddata', startPlayback, { once: true });
-  
-  // Simple native loop handling - no custom fade out logic needed since loop attribute is set
 })();
 
-// Initialize app state on load
+// Initialize
+loadTheme();
 handleRoute();
 </script>
 </body>
