@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MoonWi - Intelligent Deployment Platform</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<style>
+    /* Core Design System */
+    :root {
+        --bg-cream: #F3F3EF;
+        --color-black: #111111;
+        --color-white: #FFFFFF;
+        --color-border: #000000;
+        --shadow-hard: 4px 4px 0px 0px rgba(0,0,0,1);
+        --shadow-hard-sm: 2px 2px 0px 0px rgba(0,0,0,1);
+        --shadow-hard-hover: 6px 6px 0px 0px rgba(0,0,0,1);
+        --transition-hard: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+        font-family: 'Newsreader', serif;
+        background-color: var(--bg-cream);
+        color: var(--color-black);
+        font-feature-settings: "liga", "kern";
+    }
+
+    .font-mono {
+        font-family: 'IBM Plex Mono', monospace;
+    }
+
+    ::selection {
+        background-color: #000;
+        color: #fff;
+    }
+
+    .bg-dot-pattern {
+        background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+        background-size: 20px 20px;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #111;
+        border: 2px solid var(--bg-cream);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #333;
+    }
+
+    /* Components */
+    .shadow-hard { box-shadow: var(--shadow-hard); }
+    .shadow-hard-sm { box-shadow: var(--shadow-hard-sm); }
+    .shadow-hard-hover { box-shadow: var(--shadow-hard-hover); }
+    .transition-hard { transition: var(--transition-hard); }
+    
+    .btn-primary {
+        background: #000;
+        color: #fff;
+        border: 1px solid #000;
+        box-shadow: var(--shadow-hard-sm);
+        transition: var(--transition-hard);
+    }
+    .btn-primary:hover {
+        transform: translate(2px, 2px);
+        box-shadow: none;
+    }
+    .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: var(--shadow-hard-sm);
+    }
+
+    .btn-secondary {
+        background: #fff;
+        color: #000;
+        border: 1px solid #000;
+        box-shadow: var(--shadow-hard-sm);
+        transition: var(--transition-hard);
+    }
+    .btn-secondary:hover {
+        transform: translate(2px, 2px);
+        box-shadow: none;
+        background: #f0f0f0;
+    }
+
+    /* Navigation */
+    .nav-item {
+        transition: var(--transition-hard);
+    }
+    .nav-item:hover {
+        background-color: #e5e5e0;
+    }
+    .nav-item.active {
+        background-color: #111;
+        color: #fff;
+    }
+    .nav-item.active svg {
+        color: #fff;
+    }
+
+    /* Table Interactions */
+    .data-table tbody tr {
+        transition: background-color 0.1s ease;
+    }
+    .data-table tbody tr:hover {
+        background-color: #f0f0f0;
+    }
+
+    /* Terminal Interface */
+    .terminal-container {
+        background: #000;
+        color: #fff;
+    }
+    .terminal-line {
+        white-space: pre-wrap;
+        word-break: break-all;
+        line-height: 1.6;
+    }
+
+    /* Code Editor Mock */
+    .code-editor {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+    .code-line-number {
+        color: #999;
+        text-align: right;
+        user-select: none;
+        padding-right: 12px;
+        border-right: 1px solid #eee;
+        margin-right: 12px;
+    }
+    
+    /* Animations */
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+    }
+    .cursor-blink::after {
+        content: '_';
+        animation: blink 1s infinite;
+    }
+
+    @keyframes pulse-hard {
+        0% { box-shadow: 0 0 0 0 rgba(0,0,0,0.4); }
+        70% { box-shadow: 0 0 0 6px rgba(0,0,0,0); }
+        100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); }
+    }
+    .pulse-hard {
+        animation: pulse-hard 2s infinite;
+    }
+
+    /* Hide scrollbar but allow scroll for sidebar */
+    .sidebar-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: #000 #F3F3EF;
+    }
+    
+    /* Mobile Menu Toggle */
+    .sidebar-mobile-open {
+        transform: translateX(0);
+    }
+    
+    /* Modal */
+    .modal-overlay {
+        background-color: rgba(0,0,0,0.4);
+        backdrop-filter: blur(2px);
+    }
+
+    /* Auth Tabs */
+    .auth-tab {
+        transition: all 0.2s ease;
+        border-bottom: 2px solid transparent;
+    }
+    .auth-tab.active {
+        border-bottom: 2px solid #000;
+        font-weight: 600;
+    }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400..800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+    <!-- Auth View (Login / Register / Forgot) -->
+    <div id="auth-view" class="fixed inset-0 z-[100] bg-[#F3F3EF] flex items-center justify-center p-4">
+        <div class="w-full max-w-md">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-medium tracking-tight mb-2 cursor-pointer" onclick="showAuthView('login')">MoonWi</h1>
+                <p class="font-mono text-xs text-neutral-600">Deploy Anything. Own Everything.</p>
+            </div>
+            
+            <div class="bg-white border border-black p-8 shadow-hard">
+                <!-- Tabs -->
+                <div class="flex border-b border-neutral-200 mb-6">
+                    <button id="tab-login" class="auth-tab active flex-1 py-2 font-mono text-xs uppercase tracking-wide" onclick="showAuthView('login')">Sign In</button>
+                    <button id="tab-register" class="auth-tab flex-1 py-2 font-mono text-xs uppercase tracking-wide" onclick="showAuthView('register')">Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form" class="space-y-4">
+                    <div>
+                        <label class="font-mono text-xs text-neutral-500 block mb-1">Email</label>
+                        <input type="email" id="login-email" required class="w-full bg-white border border-black px-3 py-2 font-mono text-sm placeholder:text-neutral-400 outline-none focus:ring-1 focus:ring-black transition-all shadow-sm">
+                    </div>
+                    <div>
+                        <label class="font-mono text-xs text-neutral-500 block mb-1">Password</label>
+                        <input type="password" id="login-password" required class="w-full bg-white border border-black px-3 py-2 font-mono text-sm placeholder:text-neutral-400 outline-none focus:ring-1 focus:ring-black transition-all shadow-sm">
+                    </div>
+                    
+                    <div id="auth-error" class="hidden font-mono text-xs text-red-600 bg-red-50 border border-red-200 p-2"></div>
+                    
+                    <button type="submit" class="btn-primary w-full py-3 font-mono text-sm uppercase tracking-wide">Sign In</button>
+                    <button type="button" class="w-full text-center font-mono text-xs text-neutral-500 hover:text-black hover:underline" onclick="showAuthView('forgot')">Forgot Password?</button>
+                </form>
+
+                <!-- Register Form -->
+                <form id="register-form" class="space-y-4 hidden">
+                    <div>
+                        <label class="font-mono text-xs text-neutral-500 block mb-1">Full Name</label>
+                        <input type="text" id="register-name" required class="w-full bg-white border border-black px-3 py-2 font-mono text-sm outline-none focus:ring-1 focus:ring-black transition-all shadow-sm">
+                    </div>
+                    <div>
+                        <label class="font-mono text-xs text-neutral-500 block mb-1">Email</label>
+                        <input type="email" id="register-email" required class="w-full bg-white border border-black px-3 py-2 font-mono text-sm outline-none focus:ring-1 focus:ring-black transition-all shadow-sm">
+                    </div>
+                    <div>
+                        <label class="font-mono text-xs text-neutral-500 block mb-1">Password</label>
+                        <input type="password" id="register-password" required class="w-full bg-white border border-black px-3 py-2 font-mono text-sm outline-none focus:ring-1 focus:ring-black transition-all shadow-sm">
+                    </div>
+                    
+                    <button type="submit" class="btn-primary w-full py-3 font-mono text-sm uppercase tracking-wide">Create Account</button>
+                </form>
+
+                <!-- Forgot Password Form -->
+                <form id="forgot-form" class="space-y-4 hidden">
+                    <div class="mb-4 border-b border-neutral-200 pb-4">
+                        <h2 class="font-mono text-xs uppercase tracking-wide text-neutral-500">— Reset Password</h2>
+                    </div>
+                    <div>
+                        <label class="font-mono text-xs text-neutral-500 block mb-1">Email</label>
+                        <input type="email" id="forgot-email" required class="w-full bg-white border border-black px-3 py-2 font-mono text-sm outline-none focus:ring-1 focus:ring-black transition-all shadow-sm">
+                    </div>
+                    <button type="submit" class="btn-primary w-full py-3 font-mono text-sm uppercase tracking-wide">Send Reset Link</button>
+                    <button type="button" class="w-full text-center font-mono text-xs text-neutral-500 hover:text-black hover:underline" onclick="showAuthView('login')">Back to Login</button>
+                </form>
+            </div>
+            
+            <div class="text-center mt-8 font-mono text-xs text-neutral-500">
+                © 2025 MoonWi Inc.
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App View -->
+    <div id="app-view" class="hidden flex-grow flex flex-col">
+    
+        <!-- Top Header -->
+        <header class="w-full h-[72px] border-b border-black bg-[#F3F3EF] flex items-center justify-between px-4 md:px-8 fixed top-0 left-0 right-0 z-50">
+            <div class="flex items-center gap-4 md:gap-12">
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-toggle" class="md:hidden p-2 border border-black">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg>
+                </button>
+                
+                <h1 class="text-2xl font-medium tracking-tight cursor-pointer" data-page="dashboard">MoonWi</h1>
+                
+                <div class="hidden md:flex items-center gap-2 border border-black bg-white px-3 py-1.5 w-72 shadow-hard-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                    <input type="text" placeholder="Search projects, repos..." class="bg-transparent outline-none font-mono text-xs w-full placeholder:text-neutral-400">
+                    <span class="font-mono text-[10px] text-neutral-400 border border-neutral-300 px-1">⌘K</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4 md:gap-6">
+                <button class="hover:opacity-70 transition-opacity relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+                    <span class="absolute -top-1 -right-1 w-2 h-2 bg-black border border-[#F3F3EF]"></span>
+                </button>
+                <div class="flex items-center gap-2 cursor-pointer border-l border-black pl-4 md:pl-6">
+                    <div id="header-avatar" class="w-8 h-8 bg-black text-white flex items-center justify-center font-mono text-xs">U</div>
+                    <span id="header-username" class="font-mono text-xs hidden md:block">user</span>
+                </div>
+                <button id="logout-btn" class="p-2 border border-black hover:bg-black hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>
+                </button>
+            </div>
+        </header>
+
+        <div class="flex flex-grow pt-[72px]">
+            
+            <!-- Left Sidebar -->
+            <aside id="sidebar" class="w-[260px] border-r border-black fixed left-0 top-[72px] bottom-0 flex flex-col justify-between bg-[#F3F3EF] z-40 transition-transform duration-300 -translate-x-full md:translate-x-0 sidebar-scroll overflow-y-auto">
+                <nav class="p-4 flex flex-col gap-1">
+                    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2 font-mono text-sm active" data-page="dashboard">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-dashboard"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
+                        Dashboard
+                    </a>
+                    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2 font-mono text-sm" data-page="projects">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path></svg>
+                        Projects
+                    </a>
+                    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2 font-mono text-sm" data-page="repo">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-marked"><path d="M10 2v8l-3-3-3 3V2"></path><path d="M4 2h13a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path></svg>
+                        Repositories
+                    </a>
+                    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2 font-mono text-sm" data-page="deployments">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rocket"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
+                        Deployments
+                    </a>
+                    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2 font-mono text-sm" data-page="domains">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+                        Domains
+                    </a>
+                    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2 font-mono text-sm" data-page="activity">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-activity"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"></path></svg>
+                        Activity
+                    </a>
+                    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2 font-mono text-sm" data-page="settings">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        Settings
+                    </a>
+                </nav>
+                
+                <div class="p-4 border-t border-black bg-white">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div id="sidebar-avatar" class="w-10 h-10 bg-black text-white flex items-center justify-center font-mono text-sm">U</div>
+                        <div class="flex-grow overflow-hidden">
+                            <div id="sidebar-username" class="font-mono text-sm truncate">user</div>
+                            <div id="sidebar-email" class="font-mono text-[10px] text-neutral-500 truncate">user@moonwi.app</div>
+                        </div>
+                    </div>
+                    <div class="border-t border-black/10 pt-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-mono text-xs">Projects Created</span>
+                            <span id="sidebar-project-count" class="font-mono text-xs">0 / 10</span>
+                        </div>
+                        <div class="w-full h-2 border border-black bg-white">
+                            <div id="sidebar-progress-bar" class="h-full bg-black transition-all" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Mobile Overlay -->
+            <div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden"></div>
+
+            <!-- Main Content Area -->
+            <main class="flex-grow md:ml-[260px] p-4 md:p-10 max-w-[1400px]">
+                
+                <!-- DASHBOARD -->
+                <section id="page-dashboard" class="page-content">
+                    <div class="mb-12 border-b border-black pb-8">
+                        <div class="font-mono text-xs uppercase tracking-wider text-neutral-500 mb-4">— Issue 01 / Volume 2025</div>
+                        <h2 class="text-4xl md:text-6xl font-normal leading-[1.05] tracking-tight max-w-4xl mb-4">
+                            Deploy Anything.<br>Own Everything.
+                        </h2>
+                        <p class="font-mono text-sm text-neutral-600 max-w-2xl">Your infrastructure, simplified and refined. A canvas for your code, ready for the world.</p>
+                    </div>
+
+                    <!-- Statistics Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                        <div class="bg-white border border-black p-6 shadow-hard transition-hard hover:-translate-y-1 hover:shadow-hard-hover">
+                            <div class="flex justify-between items-start mb-6 border-b border-neutral-200 pb-3">
+                                <span class="font-mono text-xs uppercase tracking-wide text-neutral-500">01. Projects</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path></svg>
+                            </div>
+                            <div id="stat-projects" class="text-5xl font-medium tracking-tight">0</div>
+                            <div class="font-mono text-xs text-neutral-500 mt-2 flex items-center gap-2">
+                                <span class="w-2 h-2 bg-black"></span> 0 active this week
+                            </div>
+                        </div>
+                        <div class="bg-white border border-black p-6 shadow-hard transition-hard hover:-translate-y-1 hover:shadow-hard-hover">
+                            <div class="flex justify-between items-start mb-6 border-b border-neutral-200 pb-3">
+                                <span class="font-mono text-xs uppercase tracking-wide text-neutral-500">02. Repositories</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-marked"><path d="M10 2v8l-3-3-3 3V2"></path><path d="M4 2h13a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path></svg>
+                            </div>
+                            <div id="stat-repos" class="text-5xl font-medium tracking-tight">0</div>
+                            <div class="font-mono text-xs text-neutral-500 mt-2 flex items-center gap-2">
+                                <span class="w-2 h-2 bg-black"></span> 0 commits today
+                            </div>
+                        </div>
+                        <div class="bg-white border border-black p-6 shadow-hard transition-hard hover:-translate-y-1 hover:shadow-hard-hover">
+                            <div class="flex justify-between items-start mb-6 border-b border-neutral-200 pb-3">
+                                <span class="font-mono text-xs uppercase tracking-wide text-neutral-500">03. Deployments</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rocket"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
+                            </div>
+                            <div id="stat-deployments" class="text-5xl font-medium tracking-tight">0</div>
+                            <div class="font-mono text-xs text-neutral-500 mt-2 flex items-center gap-2">
+                                <span class="w-2 h-2 bg-black animate-pulse"></span> 0 building now
+                            </div>
+                        </div>
+                        <div class="bg-white border border-black p-6 shadow-hard transition-hard hover:-translate-y-1 hover:shadow-hard-hover">
+                            <div class="flex justify-between items-start mb-6 border-b border-neutral-200 pb-3">
+                                <span class="font-mono text-xs uppercase tracking-wide text-neutral-500">04. Domains</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+                            </div>
+                            <div id="stat-domains" class="text-5xl font-medium tracking-tight">0</div>
+                            <div class="font-mono text-xs text-neutral-500 mt-2 flex items-center gap-2">
+                                <span class="w-2 h-2 bg-black"></span> All SSL verified
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Deployments Table -->
+                    <div class="mb-12">
+                        <div class="flex justify-between items-baseline mb-6">
+                            <h3 class="text-2xl font-medium tracking-tight">Recent Deployments</h3>
+                            <a href="#" data-page="deployments" class="nav-item font-mono text-xs uppercase tracking-wide hover:underline">View All →</a>
+                        </div>
+                        <div class="bg-white border border-black shadow-hard overflow-x-auto">
+                            <table class="w-full data-table">
+                                <thead>
+                                    <tr class="border-b border-black">
+                                        <th class="text-left font-mono text-xs uppercase tracking-wide p-4">Project</th>
+                                        <th class="text-left font-mono text-xs uppercase tracking-wide p-4">Status</th>
+                                        <th class="text-left font-mono text-xs uppercase tracking-wide p-4">Branch</th>
+                                        <th class="text-left font-mono text-xs uppercase tracking-wide p-4 hidden md:table-cell">Domain</th>
+                                        <th class="text-left font-mono text-xs uppercase tracking-wide p-4 hidden md:table-cell">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dashboard-deployments">
+                                    <tr><td colspan="5" class="p-4 text-center font-mono text-xs text-neutral-500">No deployments yet.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div>
+                        <div class="flex justify-between items-baseline mb-6">
+                            <h3 class="text-2xl font-medium tracking-tight">Quick Actions</h3>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <button data-action="new-project" class="bg-white border border-black p-6 shadow-hard transition-hard hover:-translate-y-1 hover:shadow-hard-hover text-left">
+                                <div class="flex justify-between items-start mb-6 border-b border-neutral-200 pb-3">
+                                    <span class="font-mono text-xs uppercase tracking-wide text-neutral-500">Action 01</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                                </div>
+                                <div class="text-xl font-medium tracking-tight mb-2">Create Project</div>
+                                <p class="font-mono text-xs text-neutral-600">Start a new deployment from scratch.</p>
+                            </button>
+                            <button data-page="repo" class="nav-item bg-white border border-black p-6 shadow-hard transition-hard hover:-translate-y-1 hover:shadow-hard-hover text-left">
+                                <div class="flex justify-between items-start mb-6 border-b border-neutral-200 pb-3">
+                                    <span class="font-mono text-xs uppercase tracking-wide text-neutral-500">Action 02</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-upload"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg>
+                                </div>
+                                <div class="text-xl font-medium tracking-tight mb-2">Upload ZIP</div>
+                                <p class="font-mono text-xs text-neutral-600">Deploy a compressed archive directly.</p>
+                            </button>
+                            <button data-action="new-domain" class="bg-white border border-black p-6 shadow-hard transition-hard hover:-translate-y-1 hover:shadow-hard-hover text-left">
+                                <div class="flex justify-between items-start mb-6 border-b border-neutral-200 pb-3">
+                                    <span class="font-mono text-xs uppercase tracking-wide text-neutral-500">Action 03</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+                                </div>
+                                <div class="text-xl font-medium tracking-tight mb-2">Connect Domain</div>
+                                <p class="font-mono text-xs text-neutral-600">Map a custom domain to a project.</p>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PROJECTS -->
+                <section id="page-projects" class="page-content hidden">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-baseline mb-12 border-b border-black pb-8 gap-4">
+                        <div>
+                            <div class="font-mono text-xs uppercase tracking-wider text-neutral-500 mb-4">— Workspace / Projects</div>
+                            <h2 class="text-4xl md:text-6xl font-normal leading-[1.05] tracking-tight mb-3">Projects</h2>
+                            <p class="font-mono text-sm text-neutral-600"><span id="project-count-text">0</span> active projects · 0 archived</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn-secondary px-4 py-2 font-mono text-xs uppercase tracking-wide flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>
+                                Import
+                            </button>
+                            <button data-action="new-project" class="btn-primary px-4 py-2 font-mono text-xs uppercase tracking-wide flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                                New Project
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="border border-dashed border-black p-6 flex flex-col items-center justify-center text-center min-h-[300px] hover:bg-neutral-100/50 cursor-pointer transition-hard" onclick="openNewProjectModal()">
+                            <div class="w-12 h-12 border border-black flex items-center justify-center mb-4">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-medium tracking-tight mb-2">New Project</h3>
+                            <p class="font-mono text-xs text-neutral-600">Deploy a new site or app</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- REPOSITORY -->
+                <section id="page-repo" class="page-content hidden">
+                    <div class="mb-8 border-b border-black pb-8">
+                        <div class="flex items-center gap-2 font-mono text-xs text-neutral-500 mb-4">
+                            <span class="cursor-pointer hover:text-black" data-page="projects">Projects</span> <span>/</span> <span id="repo-title">ui-core</span> <span>/</span> <span class="text-black">main</span>
+                        </div>
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h2 class="text-3xl md:text-4xl font-medium tracking-tight mb-2">ui-core</h2>
+                                <p class="font-mono text-xs text-neutral-600">A modern UI component library built for speed and accessibility.</p>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <button class="btn-secondary px-3 py-2 font-mono text-xs uppercase flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-archive"><path d="M10 2v8l-3-3-3 3V2"></path><path d="M4 2h13a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path></svg>
+                                    Upload ZIP
+                                </button>
+                                <button class="btn-secondary px-3 py-2 font-mono text-xs uppercase flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-upload"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg>
+                                    Upload Files
+                                </button>
+                                <button class="btn-secondary px-3 py-2 font-mono text-xs uppercase flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-plus"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M12 18H9v-3"></path><path d="M9 14h6"></path><path d="M9 18h6"></path></svg>
+                                    New File
+                                </button>
+                                <button class="btn-primary px-3 py-2 font-mono text-xs uppercase flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-git-commit-horizontal"><circle cx="12" cy="12" r="3"></circle><line x1="2" x2="9" y1="12" y2="12"></line><line x1="15" x2="22" y1="12" y2="12"></line></svg>
+                                    Commit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-12 gap-6 h-[700px]">
+                        <!-- File Explorer -->
+                        <div class="col-span-12 md:col-span-4 lg:col-span-3 bg-white border border-black shadow-hard flex flex-col">
+                            <div class="border-b border-black p-4 font-mono text-xs uppercase tracking-wide flex justify-between items-center">
+                                <span>Explorer</span>
+                                <span class="text-neutral-500">main</span>
+                            </div>
+                            <div class="flex-grow p-2 font-mono text-sm overflow-y-auto">
+                                <div class="flex items-center gap-2 p-1 hover:bg-neutral-100 cursor-pointer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path></svg>
+                                    src
+                                </div>
+                                <div class="flex items-center gap-2 p-1 hover:bg-neutral-100 cursor-pointer pl-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path></svg>
+                                    components
+                                </div>
+                                <div class="flex items-center gap-2 p-1 bg-black text-white cursor-pointer pl-8">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-code"><path d="M10 12H8v4h4v-2z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"></path></svg>
+                                    Button.tsx
+                                </div>
+                                <div class="flex items-center gap-2 p-1 hover:bg-neutral-100 cursor-pointer pl-8">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-code"><path d="M10 12H8v4h4v-2z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"></path></svg>
+                                    Modal.tsx
+                                </div>
+                                <div class="flex items-center gap-2 p-1 hover:bg-neutral-100 cursor-pointer pl-8">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-code"><path d="M10 12H8v4h4v-2z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"></path></svg>
+                                    Input.tsx
+                                </div>
+                                <div class="flex items-center gap-2 p-1 hover:bg-neutral-100 cursor-pointer pl-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path></svg>
+                                    utils
+                                </div>
+                                <div class="flex items-center gap-2 p-1 hover:bg-neutral-100 cursor-pointer pl-8">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-code"><path d="M10 12H8v4h4v-2z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"></path></svg>
+                                    cn.ts
+                                </div>
+                                <div class="flex items-center gap-2 p-1 hover:bg-neutral-100 cursor-pointer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path></svg>
+                                    package.json
+                                </div>
+                                <div class="flex items-center gap-2 p-1 hover:bg-neutral-100 cursor-pointer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path></svg>
+                                    tailwind.config.js
+                                </div>
+                                <div class="flex items-center gap-2 p-1 hover:bg-neutral-100 cursor-pointer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path></svg>
+                                    README.md
+                                </div>
+                                <div class="flex items-center gap-2 p-1 hover:bg-neutral-100 cursor-pointer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path></svg>
+                                    .gitignore
+                                </div>
+                            </div>
+                            <div class="border-t border-black p-4 font-mono text-xs">
+                                <div class="flex justify-between mb-2"><span class="text-neutral-500">Branch:</span> <span>main</span></div>
+                                <div class="flex justify-between"><span class="text-neutral-500">Commit:</span> <span>a1b2c3d</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Code Viewer -->
+                        <div class="col-span-12 md:col-span-8 lg:col-span-9 bg-white border border-black shadow-hard flex flex-col">
+                            <div class="border-b border-black flex justify-between items-center">
+                                <div class="p-4 border-r border-black font-mono text-xs bg-neutral-100 flex items-center gap-2">
+                                    Button.tsx
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+                                </div>
+                                <div class="p-2 flex gap-2">
+                                    <button class="p-1 hover:bg-neutral-100"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-split"><path d="M16 3h5v5"></path><path d="M8 3H3v5"></path><path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L1 1"></path><path d="m21 3-9.5 9.5"></path></svg></button>
+                                    <button class="p-1 hover:bg-neutral-100"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-more-horizontal"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
+                                </div>
+                            </div>
+                            <div class="flex-grow font-mono text-sm p-4 bg-white overflow-auto grid grid-cols-[40px_1fr] gap-0 code-editor">
+                                <div class="code-line-number">
+                                    1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18<br>19<br>20
+                                </div>
+                                <div class="text-black pr-4">
+                                    <span class="text-purple-600">import</span> React <span class="text-purple-600">from</span> <span class="text-green-600">'react'</span>;<br>
+                                    <span class="text-purple-600">import</span> { cn } <span class="text-purple-600">from</span> <span class="text-green-600">'@/utils/cn'</span>;<br><br>
+                                    <span class="text-purple-600">interface</span> <span class="text-blue-600">ButtonProps</span> <span class="text-purple-600">extends</span> React.ButtonHTMLAttributes&lt;HTMLButtonElement&gt; {<br>
+                                    &nbsp;&nbsp;variant?: <span class="text-green-600">'primary'</span> | <span class="text-green-600">'secondary'</span>;<br>
+                                    &nbsp;&nbsp;size?: <span class="text-green-600">'sm'</span> | <span class="text-green-600">'md'</span> | <span class="text-green-600">'lg'</span>;<br>
+                                    }<br><br>
+                                    <span class="text-purple-600">export const</span> <span class="text-blue-600">Button</span>: React.FC&lt;ButtonProps&gt; = ({<br>
+                                    &nbsp;&nbsp;className,<br>
+                                    &nbsp;&nbsp;variant = <span class="text-green-600">'primary'</span>,<br>
+                                    &nbsp;&nbsp;size = <span class="text-green-600">'md'</span>,<br>
+                                    &nbsp;&nbsp;...props<br>
+                                    }) => {<br>
+                                    &nbsp;&nbsp;<span class="text-purple-600">return</span> (<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&lt;button<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;className={cn(baseStyles, variants[variant], sizes[size], className)}<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{...props}<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;/&gt;<br>
+                                    &nbsp;&nbsp;);<br>
+                                    };<br><br>
+                                    <span class="text-neutral-500">// Export button variants and sizes for reuse</span>
+                                </div>
+                            </div>
+                            <div class="border-t border-black p-2 bg-neutral-100 font-mono text-xs flex justify-between items-center">
+                                <div class="flex gap-4">
+                                    <span>Ln 18, Col 3</span>
+                                    <span>Spaces: 2</span>
+                                    <span>UTF-8</span>
+                                </div>
+                                <div class="flex gap-4">
+                                    <span>TypeScript</span>
+                                    <span>LF</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- DEPLOYMENTS -->
+                <section id="page-deployments" class="page-content hidden">
+                    <div class="mb-12 border-b border-black pb-8">
+                        <div class="font-mono text-xs uppercase tracking-wider text-neutral-500 mb-4">— Workspace / Deployments</div>
+                        <h2 class="text-4xl md:text-6xl font-normal leading-[1.05] tracking-tight mb-3">Deployments</h2>
+                        <p class="font-mono text-sm text-neutral-600">History of all past deployments.</p>
+                    </div>
+
+                    <div id="deployments-list" class="flex flex-col gap-6">
+                        <div class="bg-white border border-dashed border-black p-8 text-center font-mono text-sm text-neutral-500">
+                            No deployments yet.
+                        </div>
+                    </div>
+                </section>
+
+                <!-- DEPLOYMENT LOGS -->
+                <section id="page-logs" class="page-content hidden">
+                    <div class="mb-8 border-b border-black pb-8">
+                        <div class="flex items-center gap-2 font-mono text-xs text-neutral-500 mb-4">
+                            <span class="cursor-pointer hover:text-black" data-page="deployments">Deployments</span> <span>/</span> <span id="log-project-name">project</span> <span>/</span> <span class="text-black" id="log-commit-hash">commit</span>
+                        </div>
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h2 class="text-3xl md:text-4xl font-medium tracking-tight mb-2">Deployment Logs</h2>
+                                <p id="log-commit-msg" class="font-mono text-xs text-neutral-600">Commit: "None"</p>
+                            </div>
+                            <div class="flex gap-2">
+                                 <span id="log-status-badge" class="font-mono text-xs border border-black bg-black text-white px-2 py-1">Status</span>
+                                 <span id="log-duration-badge" class="font-mono text-xs border border-black bg-white text-black px-2 py-1">0s</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Terminal Interface -->
+                    <div class="bg-black text-white border border-black shadow-hard">
+                        <div class="border-b border-neutral-800 p-3 flex items-center gap-2">
+                            <div class="w-3 h-3 border border-neutral-700"></div>
+                            <div class="w-3 h-3 border border-neutral-700"></div>
+                            <div class="w-3 h-3 border border-neutral-700"></div>
+                            <span class="font-mono text-xs text-neutral-500 ml-4">moonwi/build-console — bash</span>
+                        </div>
+                        <div class="p-6 font-mono text-xs leading-relaxed terminal-line">
+                            <span class="text-neutral-500">No logs available.</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- DOMAINS -->
+                <section id="page-domains" class="page-content hidden">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-baseline mb-12 border-b border-black pb-8 gap-4">
+                        <div>
+                            <div class="font-mono text-xs uppercase tracking-wider text-neutral-500 mb-4">— Workspace / Domains</div>
+                            <h2 class="text-4xl md:text-6xl font-normal leading-[1.05] tracking-tight mb-3">Domains</h2>
+                            <p class="font-mono text-sm text-neutral-600">Manage your custom domains and SSL certificates.</p>
+                        </div>
+                        <button data-action="new-domain" class="btn-primary px-4 py-2 font-mono text-xs uppercase tracking-wide flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                            Add Domain
+                        </button>
+                    </div>
+
+                    <div class="bg-white border border-black shadow-hard overflow-x-auto">
+                        <table class="w-full data-table">
+                            <thead>
+                                <tr class="border-b border-black">
+                                    <th class="text-left font-mono text-xs uppercase tracking-wide p-4">Domain</th>
+                                    <th class="text-left font-mono text-xs uppercase tracking-wide p-4">Project</th>
+                                    <th class="text-left font-mono text-xs uppercase tracking-wide p-4">SSL</th>
+                                    <th class="text-left font-mono text-xs uppercase tracking-wide p-4">Status</th>
+                                    <th class="text-right font-mono text-xs uppercase tracking-wide p-4">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="domains-table-body">
+                                <tr><td colspan="5" class="p-4 text-center font-mono text-xs text-neutral-500">No domains connected yet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- ACTIVITY -->
+                <section id="page-activity" class="page-content hidden">
+                    <div class="mb-12 border-b border-black pb-8">
+                        <div class="font-mono text-xs uppercase tracking-wider text-neutral-500 mb-4">— Workspace / Activity Feed</div>
+                        <h2 class="text-4xl md:text-6xl font-normal leading-[1.05] tracking-tight mb-3">Activity</h2>
+                        <p class="font-mono text-sm text-neutral-600">A timeline of events across your workspace.</p>
+                    </div>
+
+                    <div id="activity-timeline" class="relative pl-8 border-l border-black ml-4 space-y-12">
+                        <div class="relative">
+                            <div class="absolute -left-[37px] top-1 w-4 h-4 bg-white border border-black"></div>
+                            <div class="font-mono text-xs text-neutral-500 mb-2">JUST NOW</div>
+                            <h3 class="text-2xl font-medium tracking-tight mb-2">Account Created</h3>
+                            <p class="font-mono text-sm text-neutral-700 mb-2">Welcome to MoonWi! Your workspace is ready.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SETTINGS -->
+                <section id="page-settings" class="page-content hidden">
+                    <div class="mb-12 border-b border-black pb-8">
+                        <div class="font-mono text-xs uppercase tracking-wider text-neutral-500 mb-4">— Account / Settings</div>
+                        <h2 class="text-4xl md:text-6xl font-normal leading-[1.05] tracking-tight mb-3">Settings</h2>
+                        <p class="font-mono text-sm text-neutral-600">Manage your workspace, security, and integrations.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Profile -->
+                        <div class="bg-white border border-black p-6 shadow-hard">
+                            <div class="flex justify-between items-start mb-6 border-b border-neutral-200 pb-4">
+                                <h3 class="font-mono text-xs uppercase tracking-wide">Profile</h3>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="font-mono text-xs text-neutral-500 block mb-1">Name</label>
+                                    <input id="setting-name" type="text" class="w-full bg-transparent border-b border-black pb-1 font-mono text-sm outline-none focus:border-b-2">
+                                </div>
+                                <div>
+                                    <label class="font-mono text-xs text-neutral-500 block mb-1">Email</label>
+                                    <input id="setting-email" type="email" disabled class="w-full bg-transparent border-b border-black pb-1 font-mono text-sm outline-none focus:border-b-2 text-neutral-500">
+                                </div>
+                                <div>
+                                    <label class="font-mono text-xs text-neutral-500 block mb-1">Role</label>
+                                    <div class="border-b border-black pb-1 font-mono text-sm">Admin</div>
+                                </div>
+                                 <button onclick="saveSettings()" class="btn-primary w-full mt-4 py-2 font-mono text-xs uppercase">Save Changes</button>
+                            </div>
+                        </div>
+
+                        <!-- Security -->
+                        <div class="bg-white border border-black p-6 shadow-hard">
+                            <div class="flex justify-between items-start mb-6 border-b border-neutral-200 pb-4">
+                                <h3 class="font-mono text-xs uppercase tracking-wide">Security</h3>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center pb-4 border-b border-neutral-200">
+                                    <div>
+                                        <div class="font-mono text-sm">Two-Factor Auth</div>
+                                        <div class="font-mono text-xs text-neutral-500">Protect your account</div>
+                                    </div>
+                                    <span class="font-mono text-xs border border-black bg-white text-black px-2 py-1">Disabled</span>
+                                </div>
+                                <div class="flex justify-between items-center pb-4 border-b border-neutral-200">
+                                    <div>
+                                        <div class="font-mono text-sm">Password</div>
+                                        <div class="font-mono text-xs text-neutral-500">Change your password</div>
+                                    </div>
+                                    <button onclick="showAuthView('forgot')" class="font-mono text-xs underline hover:no-underline">Change</button>
+                                </div>
+                                 <button class="btn-secondary w-full mt-4 py-2 font-mono text-xs uppercase">Review Logins</button>
+                            </div>
+                        </div>
+
+                        <!-- Integrations -->
+                        <div class="bg-white border border-black p-6 shadow-hard">
+                            <div class="flex justify-between items-start mb-6 border-b border-neutral-200 pb-4">
+                                <h3 class="font-mono text-xs uppercase tracking-wide">Integrations</h3>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-blocks"><rect width="7" height="7" x="14" y="3" rx="1"></rect><path d="M10 21V8a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1z"></path><path d="M14 4h3"></path><path d="M14 7h3"></path><path d="M5 12h3"></path><path d="M5 18h3"></path></svg>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center pb-4 border-b border-neutral-200">
+                                    <div class="font-mono text-sm">GitHub</div>
+                                    <button class="font-mono text-xs border border-black bg-white text-black px-2 py-1 hover:bg-neutral-100">Connect</button>
+                                </div>
+                                <div class="flex justify-between items-center pb-4 border-b border-neutral-200">
+                                    <div class="font-mono text-sm">Slack</div>
+                                    <button class="font-mono text-xs border border-black bg-white text-black px-2 py-1 hover:bg-neutral-100">Connect</button>
+                                </div>
+                                <div class="flex justify-between items-center pb-4 border-b border-neutral-200">
+                                    <div class="font-mono text-sm">Cloudflare</div>
+                                    <button class="font-mono text-xs border border-black bg-white text-black px-2 py-1 hover:bg-neutral-100">Connect</button>
+                                </div>
+                                 <button class="btn-secondary w-full mt-4 py-2 font-mono text-xs uppercase">Browse Marketplace</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <footer class="mt-24 pt-8 border-t border-black/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <div class="text-lg tracking-tight">MoonWi Inc.</div>
+                    <div class="flex flex-col md:flex-row gap-4 md:gap-8 font-mono text-xs text-neutral-500">
+                        <span>© 2025 MoonWi</span>
+                        <a href="#" class="hover:text-black hover:underline">Privacy Policy</a>
+                        <a href="#" class="hover:text-black hover:underline">Terms of Service</a>
+                        <a href="#" class="hover:text-black hover:underline">Status</a>
+                    </div>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal Container -->
+    <div id="modal-container" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 modal-overlay">
+        <div class="bg-white border border-black shadow-hard w-full max-w-md">
+            <div class="p-6 border-b border-black flex justify-between items-center">
+                <h2 id="modal-title" class="text-xl font-medium tracking-tight">Modal Title</h2>
+                <button id="modal-close" class="p-1 hover:bg-neutral-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+                </button>
+            </div>
+            <div id="modal-body" class="p-6"></div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // FIREBASE INITIALIZATION
+        // ==========================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyA4AEH2TgHM2J8xBjAenmgRchsYOU8GeJc",
+    authDomain: "moonwi.firebaseapp.com",
+    projectId: "moonwi",
+    storageBucket: "moonwi.firebasestorage.app",
+    messagingSenderId: "867489903662",
+    appId: "1:867489903662:web:7f091ba43c27bfe1809bbf",
+    measurementId: "G-BKCFWKB35C"
+  };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // ==========================================
+        // STATE MANAGEMENT
+        // ==========================================
+        const state = {
+            user: null,
+            userData: null,
+            stats: {
+                projectLimit: 10
+            },
+            projects: [],
+            deployments: [],
+            domains: [],
+            activity: []
+        };
+
+        // ==========================================
+        // AUTHENTICATION & SESSION
+        // ==========================================
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                state.user = user;
+                
+                // Fetch user data from Firestore
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists) {
+                    state.userData = userDoc.data();
+                } else {
+                    // Create user doc if it doesn't exist (fallback)
+                    state.userData = {
+                        uid: user.uid,
+                        name: user.email.split('@')[0],
+                        email: user.email,
+                        createdAt: new Date().toISOString()
+                    };
+                    await db.collection('users').doc(user.uid).set(state.userData);
+                }
+
+                // Update UI
+                document.getElementById('auth-view').classList.add('hidden');
+                document.getElementById('app-view').classList.remove('hidden');
+                document.getElementById('app-view').classList.add('flex');
+                
+                // Update Sidebar/Header Info
+                const initials = state.userData.name.substring(0, 2).toUpperCase();
+                document.getElementById('header-avatar').innerText = initials;
+                document.getElementById('header-username').innerText = state.userData.name;
+                document.getElementById('sidebar-avatar').innerText = initials;
+                document.getElementById('sidebar-username').innerText = state.userData.name;
+                document.getElementById('sidebar-email').innerText = state.userData.email;
+
+                // Settings pre-fill
+                document.getElementById('setting-name').value = state.userData.name;
+                document.getElementById('setting-email').value = state.userData.email;
+
+                // Load user data
+                loadUserData();
+            } else {
+                state.user = null;
+                state.userData = null;
+                document.getElementById('auth-view').classList.remove('hidden');
+                document.getElementById('app-view').classList.add('hidden');
+                document.getElementById('app-view').classList.remove('flex');
+            }
+        });
+
+        // ==========================================
+        // AUTH VIEW SWITCHER
+        // ==========================================
+        function showAuthView(view) {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const forgotForm = document.getElementById('forgot-form');
+            const tabLogin = document.getElementById('tab-login');
+            const tabRegister = document.getElementById('tab-register');
+            const errorDiv = document.getElementById('auth-error');
+            
+            errorDiv.classList.add('hidden');
+            
+            loginForm.classList.add('hidden');
+            registerForm.classList.add('hidden');
+            forgotForm.classList.add('hidden');
+            tabLogin.classList.remove('active');
+            tabRegister.classList.remove('active');
+
+            if (view === 'login') {
+                loginForm.classList.remove('hidden');
+                tabLogin.classList.add('active');
+            } else if (view === 'register') {
+                registerForm.classList.remove('hidden');
+                tabRegister.classList.add('active');
+            } else if (view === 'forgot') {
+                forgotForm.classList.remove('hidden');
+            }
+        }
+
+        // ==========================================
+        // AUTH EVENT LISTENERS
+        // ==========================================
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errorDiv = document.getElementById('auth-error');
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .catch((error) => {
+                    errorDiv.innerText = error.message;
+                    errorDiv.classList.remove('hidden');
+                });
+        });
+
+        document.getElementById('register-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const errorDiv = document.getElementById('auth-error');
+            
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Send data to Firestore
+                    return db.collection('users').doc(userCredential.user.uid).set({
+                        uid: userCredential.user.uid,
+                        name: name,
+                        email: email,
+                        createdAt: new Date().toISOString()
+                    });
+                })
+                .catch((error) => {
+                    errorDiv.innerText = error.message;
+                    errorDiv.classList.remove('hidden');
+                });
+        });
+
+        document.getElementById('forgot-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('forgot-email').value;
+            const errorDiv = document.getElementById('auth-error');
+            
+            auth.sendPasswordResetEmail(email)
+                .then(() => {
+                    errorDiv.innerText = "Password reset email sent! Check your inbox.";
+                    errorDiv.classList.remove('hidden');
+                    errorDiv.classList.remove('text-red-600', 'bg-red-50', 'border-red-200');
+                    errorDiv.classList.add('text-green-600', 'bg-green-50', 'border-green-200');
+                })
+                .catch((error) => {
+                    errorDiv.innerText = error.message;
+                    errorDiv.classList.remove('hidden');
+                });
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            auth.signOut();
+        });
+
+        // ==========================================
+        // FIRESTORE DATA LOADING
+        // ==========================================
+        async function loadUserData() {
+            // In a real app with multiple users, you'd query by ownerId
+            // For this single-user MVP setup, we'll just load all data
+            // to demonstrate the UI, but wrap it in try/catch.
+            try {
+                await loadProjects();
+                await loadDeployments();
+                await loadDomains();
+                await loadActivity();
+                renderAll();
+            } catch (error) {
+                console.error("Error loading data: ", error);
+            }
+        }
+
+        async function loadProjects() {
+            const snapshot = await db.collection('projects').get();
+            state.projects = snapshot.docs.map(doc => doc.data());
+        }
+
+        async function loadDeployments() {
+            const snapshot = await db.collection('deployments').get();
+            state.deployments = snapshot.docs.map(doc => doc.data());
+        }
+
+        async function loadDomains() {
+            const snapshot = await db.collection('domains').get();
+            state.domains = snapshot.docs.map(doc => doc.data());
+        }
+
+        async function loadActivity() {
+            const snapshot = await db.collection('activity').get();
+            state.activity = snapshot.docs.map(doc => doc.data());
+        }
+
+        // ==========================================
+        // RENDER FUNCTIONS
+        // ==========================================
+        function renderAll() {
+            renderStats();
+            renderSidebar();
+            renderDashboard();
+            renderProjects();
+            renderDeployments();
+            renderDomains();
+            renderActivity();
+        }
+
+        function renderStats() {
+            document.getElementById('stat-projects').innerText = state.projects.length;
+            document.getElementById('stat-repos').innerText = state.projects.length; 
+            document.getElementById('stat-deployments').innerText = state.deployments.length;
+            document.getElementById('stat-domains').innerText = state.domains.length;
+            document.getElementById('project-count-text').innerText = state.projects.length;
+        }
+
+        function renderSidebar() {
+            const count = state.projects.length;
+            const limit = state.stats.projectLimit;
+            const pct = (count / limit) * 100;
+            document.getElementById('sidebar-project-count').innerText = `${count} / ${limit}`;
+            document.getElementById('sidebar-progress-bar').style.width = `${pct}%`;
+        }
+
+        function renderDashboard() {
+            const tbody = document.getElementById('dashboard-deployments');
+            if (state.deployments.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center font-mono text-xs text-neutral-500">No deployments yet.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = state.deployments.slice(0, 5).map(d => {
+                const project = state.projects.find(p => p.id === d.projectId);
+                const statusClass = d.status === 'Success' ? 'bg-black text-white' : 'bg-white text-black';
+                return `
+                <tr class="border-b border-neutral-200 cursor-pointer" onclick="viewDeployment('${d.id}')">
+                    <td class="p-4 font-mono text-sm">${project ? project.name : 'Unknown'}</td>
+                    <td class="p-4"><span class="font-mono text-xs border border-black ${statusClass} px-2 py-1 ${d.status === 'Building' ? 'animate-pulse' : ''}">${d.status}</span></td>
+                    <td class="p-4 font-mono text-sm">${project ? project.branch : 'main'}</td>
+                    <td class="p-4 font-mono text-sm hidden md:table-cell">${state.domains.find(dom => dom.projectId === d.projectId)?.domain || 'N/A'}</td>
+                    <td class="p-4 font-mono text-xs text-neutral-500 hidden md:table-cell">${d.date || 'Just now'}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function renderProjects() {
+            const grid = document.getElementById('projects-grid');
+            let html = state.projects.map(p => `
+                <div class="bg-white border border-black p-6 shadow-hard transition-hard hover:-translate-y-1 hover:shadow-hard-hover flex flex-col">
+                    <div class="flex justify-between items-start mb-4 border-b border-neutral-200 pb-4">
+                        <h3 class="text-xl font-medium tracking-tight cursor-pointer" onclick="navigateTo('repo')">${p.name}</h3>
+                        <span class="font-mono text-xs border border-black ${p.status === 'Active' ? 'bg-black text-white' : 'bg-white text-black'} px-2 py-1 ${p.status === 'Building' ? 'animate-pulse' : ''}">${p.status}</span>
+                    </div>
+                    <p class="font-mono text-xs leading-relaxed text-neutral-700 mb-6 flex-grow">${p.description}</p>
+                    <div class="font-mono text-xs space-y-1 mb-6 border-l-2 border-black pl-3">
+                        <div class="flex justify-between"><span class="text-neutral-500">Repo:</span> <span>${p.repo || 'moonwi-cloud/' + p.name}</span></div>
+                        <div class="flex justify-between"><span class="text-neutral-500">Last Deploy:</span> <span>${p.lastDeploy || 'Never'}</span></div>
+                        <div class="flex justify-between"><span class="text-neutral-500">Branch:</span> <span>${p.branch || 'main'}</span></div>
+                    </div>
+                    <div class="flex gap-2 border-t border-neutral-200 pt-4">
+                        <button onclick="navigateTo('repo')" class="flex-1 border border-black py-2 font-mono text-xs uppercase hover:bg-neutral-100">Open</button>
+                        <button onclick="deployProject('${p.id}')" class="flex-1 bg-black text-white border border-black py-2 font-mono text-xs uppercase hover:bg-neutral-800">Deploy</button>
+                        <button onclick="deleteProject('${p.id}')" class="border border-black p-2 hover:bg-neutral-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            html += `
+                <div onclick="openNewProjectModal()" class="border border-dashed border-black p-6 flex flex-col items-center justify-center text-center min-h-[300px] hover:bg-neutral-100/50 cursor-pointer transition-hard">
+                    <div class="w-12 h-12 border border-black flex items-center justify-center mb-4">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-medium tracking-tight mb-2">New Project</h3>
+                    <p class="font-mono text-xs text-neutral-600">Deploy a new site or app</p>
+                </div>
+            `;
+            grid.innerHTML = html;
+        }
+
+        function renderDeployments() {
+            const list = document.getElementById('deployments-list');
+            if (state.deployments.length === 0) {
+                list.innerHTML = `<div class="bg-white border border-dashed border-black p-8 text-center font-mono text-sm text-neutral-500">No deployments yet.</div>`;
+                return;
+            }
+            list.innerHTML = state.deployments.map((d, idx) => {
+                const project = state.projects.find(p => p.id === d.projectId);
+                const statusClass = d.status === 'Success' ? 'bg-black text-white' : 'bg-white text-black';
+                return `
+                <div onclick="viewDeployment('${d.id}')" class="nav-item bg-white border border-black p-6 shadow-hard transition-hard hover:-translate-y-1 hover:shadow-hard-hover flex flex-col md:flex-row md:items-center gap-6 cursor-pointer">
+                    <div class="flex-grow flex flex-col md:flex-row gap-6 md:items-center">
+                        <div class="flex items-center gap-4 flex-grow">
+                            <div class="font-mono text-4xl text-neutral-300 w-12">${String(idx + 1).padStart(2, '0')}</div>
+                            <div>
+                                <h3 class="text-xl font-medium tracking-tight mb-1">${project ? project.name : 'Unknown'}</h3>
+                                <div class="font-mono text-xs text-neutral-500">commit: ${d.commit} "${d.message}"</div>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 md:gap-8 font-mono text-xs">
+                            <div>
+                                <div class="text-neutral-500 mb-1">Status</div>
+                                <span class="border border-black ${statusClass} px-2 py-1 ${d.status === 'Building' ? 'animate-pulse' : ''}">${d.status}</span>
+                            </div>
+                            <div>
+                                <div class="text-neutral-500 mb-1">Duration</div>
+                                <span>${d.duration || '0s'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                </div>`;
+            }).join('');
+        }
+
+        function renderDomains() {
+            const tbody = document.getElementById('domains-table-body');
+            if (state.domains.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center font-mono text-xs text-neutral-500">No domains connected yet.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = state.domains.map(dom => {
+                const project = state.projects.find(p => p.id === dom.projectId);
+                return `
+                <tr class="border-b border-neutral-200">
+                    <td class="p-4 font-mono text-sm">${dom.domain}</td>
+                    <td class="p-4 font-mono text-sm">${project ? project.name : 'Unknown'}</td>
+                    <td class="p-4"><span class="font-mono text-xs border border-black ${dom.ssl === 'Verified' ? 'bg-black text-white' : 'bg-white text-black'} px-2 py-1">${dom.ssl}</span></td>
+                    <td class="p-4"><span class="font-mono text-xs border border-black ${dom.status === 'Active' ? 'bg-black text-white' : 'bg-white text-black'} px-2 py-1">${dom.status}</span></td>
+                    <td class="p-4 text-right"><button onclick="deleteDomain('${dom.id}')" class="font-mono text-xs underline hover:no-underline">Remove</button></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function renderActivity() {
+            const timeline = document.getElementById('activity-timeline');
+            if (state.activity.length === 0) {
+                timeline.innerHTML = `
+                    <div class="relative">
+                        <div class="absolute -left-[37px] top-1 w-4 h-4 bg-white border border-black"></div>
+                        <div class="font-mono text-xs text-neutral-500 mb-2">JUST NOW</div>
+                        <h3 class="text-2xl font-medium tracking-tight mb-2">Account Created</h3>
+                        <p class="font-mono text-sm text-neutral-700 mb-2">Welcome to MoonWi! Your workspace is ready.</p>
+                    </div>
+                `;
+                return;
+            }
+            timeline.innerHTML = state.activity.map(a => `
+                <div class="relative">
+                    <div class="absolute -left-[37px] top-1 w-4 h-4 bg-white border border-black"></div>
+                    <div class="font-mono text-xs text-neutral-500 mb-2">${a.time || 'RECENTLY'}</div>
+                    <h3 class="text-2xl font-medium tracking-tight mb-2">${a.type}</h3>
+                    <p class="font-mono text-sm text-neutral-700 mb-2">${a.message}</p>
+                    <span class="font-mono text-xs text-neutral-500">by ${a.author || 'system'}</span>
+                </div>
+            `).join('');
+        }
+
+        // ==========================================
+        // MODAL SYSTEM
+        // ==========================================
+        const modalContainer = document.getElementById('modal-container');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+        
+        function openModal(title, contentHtml) {
+            modalTitle.innerText = title;
+            modalBody.innerHTML = contentHtml;
+            modalContainer.classList.remove('hidden');
+            modalContainer.classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            modalContainer.classList.add('hidden');
+            modalContainer.classList.remove('flex');
+        }
+
+        document.getElementById('modal-close').addEventListener('click', closeModal);
+        modalContainer.addEventListener('click', (e) => {
+            if (e.target === modalContainer) closeModal();
+        });
+
+        // ==========================================
+        // ACTIONS (FIRESTORE WRITES)
+        // ==========================================
+        function openNewProjectModal() {
+            openModal('Create New Project', `
+                <form id="new-project-form" class="space-y-4">
+                    <div>
+                        <label class="font-mono text-xs text-neutral-500 block mb-1">Project Name</label>
+                        <input id="new-project-name" type="text" required class="w-full bg-white border border-black px-3 py-2 font-mono text-sm outline-none focus:ring-1 focus:ring-black transition-all shadow-sm">
+                    </div>
+                    <div>
+                        <label class="font-mono text-xs text-neutral-500 block mb-1">Description</label>
+                        <textarea id="new-project-desc" required rows="3" class="w-full bg-white border border-black px-3 py-2 font-mono text-sm outline-none focus:ring-1 focus:ring-black transition-all shadow-sm"></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary w-full py-2 font-mono text-xs uppercase">Create Project</button>
+                </form>
+            `);
+            document.getElementById('new-project-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = document.getElementById('new-project-name').value;
+                const desc = document.getElementById('new-project-desc').value;
+                await createProject(name, desc);
+            });
+        }
+
+        async function createProject(name, desc) {
+            const id = 'p' + Date.now();
+            const newProject = {
+                id, 
+                name, 
+                description: desc, 
+                repo: 'moonwi-cloud/' + name.toLowerCase().replace(/\s+/g, '-'),
+                branch: 'main',
+                lastDeploy: 'Never', 
+                status: 'Active',
+                ownerId: state.user.uid,
+                createdAt: new Date().toISOString()
+            };
+            
+            await db.collection('projects').doc(id).set(newProject);
+            state.projects.unshift(newProject);
+            
+            // Add activity
+            const activityId = 'a' + Date.now();
+            const newActivity = {
+                id: activityId,
+                type: 'Repository Created',
+                message: `New repository <span class="text-black border-b border-black">${name}</span> initialized.`,
+                author: state.userData.name,
+                time: 'JUST NOW'
+            };
+            await db.collection('activity').doc(activityId).set(newActivity);
+            state.activity.unshift(newActivity);
+
+            renderAll();
+            closeModal();
+            navigateTo('projects');
+        }
+
+        async function deleteProject(id) {
+            await db.collection('projects').doc(id).delete();
+            state.projects = state.projects.filter(p => p.id !== id);
+            renderAll();
+        }
+
+        async function deployProject(id) {
+            const project = state.projects.find(p => p.id === id);
+            if (!project) return;
+            
+            const newDeploy = {
+                id: 'd' + Date.now(),
+                projectId: id,
+                commit: Math.random().toString(36).substring(2, 9),
+                message: 'Manual deployment triggered',
+                status: 'Building',
+                duration: '00:00s',
+                date: 'Just now',
+                createdAt: new Date().toISOString()
+            };
+            
+            await db.collection('deployments').doc(newDeploy.id).set(newDeploy);
+            state.deployments.unshift(newDeploy);
+            
+            project.status = 'Building';
+            project.lastDeploy = 'Just now';
+            await db.collection('projects').doc(id).update({ status: 'Building', lastDeploy: 'Just now' });
+
+            const activityId = 'a' + Date.now();
+            const newActivity = {
+                id: activityId,
+                type: 'Deployment Started',
+                message: `Project <span class="text-black border-b border-black">${project.name}</span> is currently building.`,
+                author: state.userData.name,
+                time: 'JUST NOW'
+            };
+            await db.collection('activity').doc(activityId).set(newActivity);
+            state.activity.unshift(newActivity);
+
+            renderAll();
+            navigateTo('deployments');
+        }
+
+        function viewDeployment(id) {
+            const d = state.deployments.find(dep => dep.id === id);
+            if (!d) return;
+            const p = state.projects.find(pr => pr.id === d.projectId);
+            
+            document.getElementById('log-project-name').innerText = p ? p.name : 'Unknown';
+            document.getElementById('log-commit-hash').innerText = d.commit;
+            document.getElementById('log-commit-msg').innerText = `Commit: "${d.message}"`;
+            document.getElementById('log-status-badge').innerText = d.status;
+            document.getElementById('log-status-badge').className = `font-mono text-xs border border-black ${d.status === 'Success' ? 'bg-black text-white' : 'bg-white text-black'} px-2 py-1`;
+            document.getElementById('log-duration-badge').innerText = d.duration;
+            
+            navigateTo('logs');
+        }
+
+        function openNewDomainModal() {
+            openModal('Add Domain', `
+                <form id="new-domain-form" class="space-y-4">
+                    <div>
+                        <label class="font-mono text-xs text-neutral-500 block mb-1">Domain Name</label>
+                        <input id="new-domain-name" type="text" placeholder="example.com" required class="w-full bg-white border border-black px-3 py-2 font-mono text-sm outline-none focus:ring-1 focus:ring-black transition-all shadow-sm">
+                    </div>
+                    <div>
+                        <label class="font-mono text-xs text-neutral-500 block mb-1">Project</label>
+                        <select id="new-domain-project" required class="w-full bg-white border border-black px-3 py-2 font-mono text-sm outline-none focus:ring-1 focus:ring-black transition-all shadow-sm">
+                            ${state.projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('')}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary w-full py-2 font-mono text-xs uppercase">Connect Domain</button>
+                </form>
+            `);
+            document.getElementById('new-domain-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const domain = document.getElementById('new-domain-name').value;
+                const projectId = document.getElementById('new-domain-project').value;
+                await addDomain(domain, projectId);
+            });
+        }
+
+        async function addDomain(domain, projectId) {
+            const id = 'dom' + Date.now();
+            const newDomain = {
+                id, domain, projectId, ssl: 'Pending', status: 'Active'
+            };
+            await db.collection('domains').doc(id).set(newDomain);
+            state.domains.push(newDomain);
+            
+            const project = state.projects.find(p => p.id === projectId);
+            const activityId = 'a' + Date.now();
+            const newActivity = {
+                id: activityId,
+                type: 'Domain Connected',
+                message: `Custom domain <span class="text-black border-b border-black">${domain}</span> connected to project <span class="text-black border-b border-black">${project ? project.name : 'Unknown'}</span>.`,
+                author: state.userData.name,
+                time: 'JUST NOW'
+            };
+            await db.collection('activity').doc(activityId).set(newActivity);
+            state.activity.unshift(newActivity);
+
+            renderAll();
+            closeModal();
+        }
+
+        async function deleteDomain(id) {
+            await db.collection('domains').doc(id).delete();
+            state.domains = state.domains.filter(d => d.id !== id);
+            renderAll();
+        }
+
+        async function saveSettings() {
+            const name = document.getElementById('setting-name').value;
+            state.userData.name = name;
+            await db.collection('users').doc(state.user.uid).update({ name: name });
+            
+            document.getElementById('header-username').innerText = name;
+            document.getElementById('sidebar-username').innerText = name;
+            document.getElementById('header-avatar').innerText = name.substring(0, 2).toUpperCase();
+            document.getElementById('sidebar-avatar').innerText = name.substring(0, 2).toUpperCase();
+            
+            alert('Settings saved!');
+        }
+
+        // ==========================================
+        // ROUTER & INIT
+        // ==========================================
+        const navItems = document.querySelectorAll('.nav-item, [data-page]');
+        const pages = document.querySelectorAll('.page-content');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobile-overlay');
+        
+        function setActivePage(pageName) {
+            pages.forEach(page => {
+                if (page.id === `page-${pageName}`) {
+                    page.classList.remove('hidden');
+                } else {
+                    page.classList.add('hidden');
+                }
+            });
+
+            document.querySelectorAll('aside .nav-item').forEach(item => {
+                if (item.dataset.page === pageName) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
+            if (window.innerWidth < 768) {
+                sidebar.classList.remove('translate-x-0');
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+            window.scrollTo(0, 0);
+        }
+
+        function navigateTo(page) {
+            setActivePage(page);
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                if(item.tagName === 'A' && item.getAttribute('href') === '#') e.preventDefault();
+                const pageName = item.dataset.page;
+                if (pageName) {
+                    setActivePage(pageName);
+                }
+            });
+        });
+
+        document.querySelectorAll('[data-action]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const action = btn.dataset.action;
+                if (action === 'new-project') openNewProjectModal();
+                if (action === 'new-domain') openNewDomainModal();
+            });
+        });
+
+        document.getElementById('mobile-menu-toggle').addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+            sidebar.classList.toggle('translate-x-0');
+            overlay.classList.toggle('hidden');
+        });
+        
+        overlay.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+            sidebar.classList.remove('translate-x-0');
+            overlay.classList.add('hidden');
+        });
+
+        // Initialize Icons
+        lucide.createIcons({ attrs: { strokeWidth: 1.5 } });
+
+    </script>
+</body>
+</html>
