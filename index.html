@@ -589,8 +589,8 @@
 /* ============================================================
    GLOBAL STATE & API CONFIG
 ============================================================ */
-const GOOGLE_API_KEY = "AQ.Ab8RN6Iy1gpUCsgFf11q3aWWefMLfAbiFMM8Iw9UXANeTwRw7g";
-const OPENROUTER_API_KEY = "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";
+// API Keys removed from frontend. Now securely routed via Cloudflare Worker.
+const BACKEND_URL = "https://my-ai-backend.luviio.workers.dev";
 
 const MODELS = [
   { id: "gemini-flash-latest", name: "Gemini Flash", desc: "Google · Fast · Advanced", provider: "google" },
@@ -892,48 +892,24 @@ document.addEventListener('click', (e) => {
    AI TITLE GENERATION
 ============================================================ */
 async function generateChatTitle(firstMessage) {
-  const modelObj = MODELS.find(x => x.id === selectedModel);
   try {
-    let data;
-    if (modelObj.provider === 'google') {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GOOGLE_API_KEY}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: "Create a very short title (3-6 words max) for a chat that starts with this user message. Reply with ONLY the title, no quotes, no punctuation at the end. Use Title Case." }] },
-          contents: [{ parts: [{ text: firstMessage.substring(0, 500) }] }],
-          generationConfig: { temperature: 0.3, maxOutputTokens: 30 }
-        })
-      });
-      data = await response.json();
-      const title = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
-      if (title) return title.replace(/^["']|["']$/g, '').replace(/\.$/, '').substring(0, 50);
-      return null;
-    } else {
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": window.location.href,
-          "X-Title": "MoonWi AI"
-        },
-        body: JSON.stringify({
-          model: selectedModel,
-          messages: [
-            { role: "system", content: "Create a very short title (3-6 words max) for a chat that starts with this user message. Reply with ONLY the title, no quotes, no punctuation at the end. Use Title Case." },
-            { role: "user", content: firstMessage.substring(0, 500) }
-          ],
-          temperature: 0.3,
-          max_tokens: 30
-        })
-      });
-      data = await response.json();
-      const title = data.choices?.[0]?.message?.content?.trim() || null;
-      if (title) return title.replace(/^["']|["']$/g, '').replace(/\.$/, '').substring(0, 50);
-      return null;
-    }
-  } catch (e) { return null; }
+    const response = await fetch(BACKEND_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: `Create a very short title (3-6 words max) for a chat that starts with this user message. Reply with ONLY the title, no quotes, no punctuation at the end. Use Title Case. Message: ${firstMessage.substring(0, 500)}`
+      })
+    });
+
+    const data = await response.json();
+    const title = data.reply?.trim() || null;
+    if (title) return title.replace(/^["']|["']$/g, '').replace(/\.$/, '').substring(0, 50);
+    return null;
+  } catch (e) {
+    return null;
+  }
 }
 
 /* ============================================================
@@ -1508,7 +1484,7 @@ function showTypingIndicator(bubble) {
 }
 
 /* ============================================================
-   SEND MESSAGE — No plugins (free), uses client-side web search
+   SEND MESSAGE — Secured via Backend (Cloudflare Worker)
 ============================================================ */
 async function sendChatMessage(text, isRegenerate = false) {
   const chatData = getChat(currentChatId);
@@ -1577,145 +1553,37 @@ async function sendChatMessage(text, isRegenerate = false) {
   }
 
   const systemPrompt = getSystemPrompt(searchContext);
+  
+  // Formulate the prompt to send to the backend
+  const promptMessages = [
+    { role: 'system', content: systemPrompt },
+    ...chatData.messages.map(m => ({ role: m.role, content: m.content }))
+  ];
+
   let fullResponse = '';
-  let firstChunkReceived = false;
 
   try {
-    const modelObj = MODELS.find(x => x.id === selectedModel);
-    let response;
+    const response = await fetch(BACKEND_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: promptMessages, // Send array so backend can handle full context
+        model: selectedModel
+      }),
+      signal: abortController.signal
+    });
 
-    if (modelObj.provider === 'google') {
-      // Structure data for Google Gemini API
-      const contents = chatData.messages.map(msg => ({
-        role: msg.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: msg.content }]
-      }));
-
-      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:streamGenerateContent?key=${GOOGLE_API_KEY}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: systemPrompt }] },
-          contents: contents,
-          generationConfig: { temperature: 0.7 },
-          safetySettings: [
-            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-          ]
-        }),
-        signal: abortController.signal
-      });
-
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errText.substring(0, 200)}`);
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        
-        // Gemini streams chunks as JSON arrays, so we parse them carefully
-        try {
-          // Clean up the buffer to be a valid JSON array
-          let cleanBuffer = buffer.trim();
-          if (cleanBuffer.startsWith('[')) {
-            // Find complete array objects
-            const jsonChunks = cleanBuffer.match(/\{[^{}]*\}/g);
-            if (jsonChunks) {
-              buffer = ''; // Clear buffer, we'll process what we can
-              
-              for (const chunkStr of jsonChunks) {
-                try {
-                  const json = JSON.parse(chunkStr);
-                  const chunk = json.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                  if (chunk) {
-                    if (!firstChunkReceived) {
-                      firstChunkReceived = true;
-                      assistantBubble.innerHTML = '';
-                      if (avatarEl) avatarEl.classList.remove('thinking-avatar');
-                    }
-                    fullResponse += chunk;
-                    throttledRender(assistantBubble, fullResponse);
-                  }
-                } catch (e) { /* skip */ }
-              }
-            }
-          }
-        } catch (e) { /* skip */ }
-      }
-
-    } else {
-      // Fallback to OpenRouter for other models
-      const apiMessages = [
-        { role: 'system', content: systemPrompt },
-        ...chatData.messages.map(m => ({ role: m.role, content: m.content }))
-      ];
-
-      response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": window.location.href,
-          "X-Title": "MoonWi AI"
-        },
-        body: JSON.stringify({
-          model: selectedModel,
-          messages: apiMessages,
-          stream: true,
-          temperature: 0.7
-        }),
-        signal: abortController.signal
-      });
-
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errText.substring(0, 200)}`);
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop();
-
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed.startsWith('data:')) continue;
-          const data = trimmed.slice(5).trim();
-          if (data === '[DONE]') continue;
-          try {
-            const json = JSON.parse(data);
-            const chunk = json.choices?.[0]?.delta?.content || '';
-            if (chunk) {
-              if (!firstChunkReceived) {
-                firstChunkReceived = true;
-                assistantBubble.innerHTML = '';
-                if (avatarEl) avatarEl.classList.remove('thinking-avatar');
-              }
-              fullResponse += chunk;
-              throttledRender(assistantBubble, fullResponse);
-            }
-          } catch (e) { /* skip */ }
-        }
-      }
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errText.substring(0, 200)}`);
     }
 
-    // Final render
-    if (renderThrottle) { clearTimeout(renderThrottle); renderThrottle = null; }
+    const data = await response.json();
+    fullResponse = data.reply || "";
+
+    // Render the response
     assistantBubble.innerHTML = renderMarkdown(fullResponse);
     enhanceCodeBlocks(assistantBubble);
     if (window.Prism) Prism.highlightAllUnder(assistantBubble);
@@ -1742,8 +1610,8 @@ async function sendChatMessage(text, isRegenerate = false) {
         chatData.messages.push({ role: 'assistant', content: '*Generation stopped.*', feedback: null });
       }
     } else {
-      console.error("API Error:", error);
-      assistantBubble.innerHTML = `<div style="color: #ef4444;"><strong>Error:</strong> ${error.message}</div><div style="color: var(--text-secondary); margin-top: 8px; font-size: 13px;">Please check your API key, network connection, or try a different model.</div>`;
+      console.error("Backend Error:", error);
+      assistantBubble.innerHTML = `<div style="color: #ef4444;"><strong>Error:</strong> ${error.message}</div><div style="color: var(--text-secondary); margin-top: 8px; font-size: 13px;">Please check your network connection or try again later.</div>`;
       chatData.messages.push({ role: 'assistant', content: `Error: ${error.message}`, feedback: null });
     }
     const actionsEl = wrapper.querySelector('.msg-actions');
@@ -1752,19 +1620,6 @@ async function sendChatMessage(text, isRegenerate = false) {
     setGeneratingState(false);
     abortController = null;
   }
-}
-
-function throttledRender(bubble, text) {
-  if (renderThrottle) return;
-  renderThrottle = setTimeout(() => {
-    bubble.innerHTML = renderMarkdown(text);
-    const cursor = document.createElement('span');
-    cursor.className = 'streaming-cursor';
-    bubble.appendChild(cursor);
-    const sc = document.getElementById('chat-scroll');
-    sc.scrollTop = sc.scrollHeight;
-    renderThrottle = null;
-  }, 20);
 }
 
 /* ============================================================
