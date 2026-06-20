@@ -23,6 +23,9 @@
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+  
+  /* Sidebar Transitions */
+  .sidebar-collapsed { width: 0 !important; padding: 0 !important; border: none !important; overflow: hidden !important; }
 </style>
 </head>
 <body class="overflow-x-hidden bg-black">
@@ -119,22 +122,101 @@
 <div id="chat-view" class="hidden h-screen flex bg-[#212121] text-gray-100 font-schibsted">
   
   <!-- Sidebar -->
-  <aside class="w-64 bg-[#171717] p-2 flex flex-col border-r border-white/5">
-    <button onclick="navigateHome()" class="flex items-center gap-3 p-3 text-sm rounded hover:bg-white/5 transition-colors">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-      New chat
-    </button>
-    <div class="flex-1 mt-4 overflow-y-auto">
-      <p class="text-xs text-gray-500 px-3 mb-2 uppercase tracking-wider">History</p>
-      <div id="history-list">
-        <div class="px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded cursor-pointer truncate">Current Chat</div>
+  <aside id="chat-sidebar" class="w-64 bg-[#171717] flex flex-col border-r border-white/5 transition-all duration-300 ease-in-out">
+    
+    <!-- Sidebar Top: Close Toggle & Logo -->
+    <div class="p-3 flex items-center justify-between border-b border-white/5">
+      <div class="font-schibsted font-semibold text-white text-[18px] select-none cursor-pointer flex items-center gap-2" onclick="navigateHome()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-white">
+           <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+        MoonWi AI
       </div>
+      <button onclick="toggleSidebar()" class="p-1.5 rounded-md hover:bg-white/10 transition-colors">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="size-4.5 text-white rotate-180">
+          <path d="M6 2V14M5.2 2H10.8C11.9201 2 12.4802 2 12.908 2.21799C13.2843 2.40973 13.5903 2.71569 13.782 3.09202C14 3.51984 14 4.0799 14 5.2V10.8C14 11.9201 14 12.4802 13.782 12.908C13.5903 13.2843 13.2843 13.5903 12.908 13.782C12.4802 14 11.9201 14 10.8 14H5.2C4.07989 14 3.51984 14 3.09202 13.782C2.71569 13.5903 2.40973 13.2843 2.21799 12.908C2 12.4802 2 11.9201 2 10.8V5.2C2 4.07989 2 3.51984 2.21799 3.09202C2.40973 2.71569 2.71569 2.40973 3.09202 2.21799C3.51984 2 4.0799 2 5.2 2Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.33"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- New Chat Button -->
+    <div class="p-2">
+      <button onclick="navigateHome()" class="flex items-center gap-3 w-full p-3 text-sm rounded hover:bg-white/5 transition-colors text-left">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        New chat
+      </button>
+    </div>
+
+    <!-- History List -->
+    <div class="flex-1 mt-2 overflow-y-auto px-2">
+      <p class="text-xs text-gray-500 px-3 mb-2 uppercase tracking-wider">History</p>
+      <div id="history-list" class="space-y-1">
+        <div class="px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded cursor-pointer truncate">Current Chat</div>
+        <div class="px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded cursor-pointer truncate">Data Analysis Techniques</div>
+        <div class="px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded cursor-pointer truncate">Web Scraping Strategies</div>
+        <div class="px-3 py-2 text-sm text-gray-400 hover:bg-white/5 rounded cursor-pointer truncate">Machine Learning Basics</div>
+      </div>
+    </div>
+
+    <!-- Sidebar Bottom: User & Settings -->
+    <div class="p-2 border-t border-white/5 mt-auto">
+      <button class="flex items-center gap-3 w-full p-3 text-sm rounded hover:bg-white/5 transition-colors text-left">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center text-xs font-bold text-white">U</div>
+        <div class="flex-1 truncate">
+          <div class="text-white font-medium text-sm">User Account</div>
+          <div class="text-gray-500 text-xs">Free Plan</div>
+        </div>
+      </button>
+      <button class="flex items-center gap-3 w-full p-3 text-sm rounded hover:bg-white/5 transition-colors text-left">
+        <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </div>
+        <div class="flex-1 text-gray-300">Settings</div>
+      </button>
     </div>
   </aside>
 
   <!-- Main Chat Area -->
   <main class="flex-1 flex flex-col items-center relative">
     
+    <!-- Header Area for Mobile/Open Sidebar Toggle & Model Select -->
+    <div class="w-full max-w-3xl flex items-center justify-between p-4">
+      <button id="open-sidebar-btn" onclick="toggleSidebar()" class="p-2 rounded-md hover:bg-white/5 transition-colors hidden">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+      
+      <!-- Model Selection Dropdown -->
+      <div class="relative ml-auto">
+        <button id="model-dropdown-btn" class="flex items-center gap-2 bg-[#2f2f2f] hover:bg-[#3a3a3a] text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          <span id="selected-model-name">GPT-4o</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div id="model-dropdown-menu" class="hidden absolute right-0 mt-2 w-56 bg-[#2f2f2f] border border-white/10 rounded-xl shadow-xl z-50 overflow-hidden">
+          <div class="p-1">
+            <button onclick="selectModel('openai/gpt-4o', 'GPT-4o')" class="model-item flex items-center w-full text-left px-3 py-2.5 text-sm rounded-lg hover:bg-white/5 text-gray-200">
+              <span class="flex-1">GPT-4o</span>
+              <span class="text-xs text-gray-500">OpenAI</span>
+            </button>
+            <button onclick="selectModel('anthropic/claude-3.5-sonnet', 'Claude 3.5 Sonnet')" class="model-item flex items-center w-full text-left px-3 py-2.5 text-sm rounded-lg hover:bg-white/5 text-gray-200">
+              <span class="flex-1">Claude 3.5 Sonnet</span>
+              <span class="text-xs text-gray-500">Anthropic</span>
+            </button>
+            <button onclick="selectModel('google/gemini-flash-1.5', 'Gemini 1.5 Flash')" class="model-item flex items-center w-full text-left px-3 py-2.5 text-sm rounded-lg hover:bg-white/5 text-gray-200">
+              <span class="flex-1">Gemini 1.5 Flash</span>
+              <span class="text-xs text-gray-500">Google</span>
+            </button>
+            <button onclick="selectModel('meta-llama/llama-3.1-70b-instruct', 'Llama 3.1 70B')" class="model-item flex items-center w-full text-left px-3 py-2.5 text-sm rounded-lg hover:bg-white/5 text-gray-200">
+              <span class="flex-1">Llama 3.1 70B</span>
+              <span class="text-xs text-gray-500">Meta</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="chat-messages" class="w-full max-w-3xl flex-1 overflow-y-auto p-6 space-y-6 pb-32">
       <!-- Messages will be injected here -->
     </div>
@@ -142,7 +224,7 @@
     <!-- Input Area -->
     <div class="w-full max-w-3xl p-4 absolute bottom-0 bg-gradient-to-t from-[#212121] to-transparent">
       <form id="chat-form" class="relative">
-        <input id="chat-input" type="text" placeholder="Message AI..." class="w-full bg-[#2f2f2f] text-white border border-white/10 rounded-2xl py-4 pl-4 pr-14 outline-none focus:border-white/20 transition-colors" autocomplete="off">
+        <input id="chat-input" type="text" placeholder="Message MoonWi AI..." class="w-full bg-[#2f2f2f] text-white border border-white/10 rounded-2xl py-4 pl-4 pr-14 outline-none focus:border-white/20 transition-colors" autocomplete="off">
         <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-white text-black rounded-full hover:opacity-80 transition disabled:opacity-30" disabled>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
         </button>
@@ -159,6 +241,7 @@
 const OPENROUTER_API_KEY = "sk-or-v1-YOUR_OPENROUTER_API_KEY_HERE"; // <--- PASTE YOUR API KEY HERE
 
 let messages = []; // Holds the conversation history
+let selectedModel = "openai/gpt-4o"; // Default model
 
 /* ============================================================
    CUSTOM JS VIDEO FADE SYSTEM (From Original Code)
@@ -283,10 +366,51 @@ function openChatView(chatId, initialPrompt) {
   landingView.classList.add('hidden');
   chatView.classList.remove('hidden');
   
+  // Ensure sidebar is visible by default on open
+  document.getElementById('chat-sidebar').classList.remove('sidebar-collapsed');
+  document.getElementById('open-sidebar-btn').classList.add('hidden');
+  
   // If we have an initial prompt and the chat is empty, send it
   if (initialPrompt && messages.length === 0) {
     sendChatMessage(initialPrompt);
   }
+}
+
+/* ============================================================
+   CHAT UI INTERACTIONS (Sidebar & Models)
+============================================================ */
+function toggleSidebar() {
+  const sidebar = document.getElementById('chat-sidebar');
+  const openBtn = document.getElementById('open-sidebar-btn');
+  
+  if (sidebar.classList.contains('sidebar-collapsed')) {
+    sidebar.classList.remove('sidebar-collapsed');
+    openBtn.classList.add('hidden');
+  } else {
+    sidebar.classList.add('sidebar-collapsed');
+    openBtn.classList.remove('hidden');
+  }
+}
+
+// Model Dropdown Logic
+const modelBtn = document.getElementById('model-dropdown-btn');
+const modelMenu = document.getElementById('model-dropdown-menu');
+
+modelBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  modelMenu.classList.toggle('hidden');
+});
+
+document.addEventListener('click', (e) => {
+  if (!modelMenu.contains(e.target) && !modelBtn.contains(e.target)) {
+    modelMenu.classList.add('hidden');
+  }
+});
+
+function selectModel(apiName, displayName) {
+  selectedModel = apiName;
+  document.getElementById('selected-model-name').textContent = displayName;
+  modelMenu.classList.add('hidden');
 }
 
 
@@ -347,7 +471,7 @@ function addMessageToDOM(role, content) {
   
   chatMessages.appendChild(wrapper);
   chatMessages.scrollTop = chatMessages.scrollHeight;
-  return wrapper.querySelector('.bg-\\[\\#2f2f2f\\], .bg-blue-600'); // Return bubble for updating
+  return wrapper.querySelector('div:nth-child(2)'); // Return bubble for updating
 }
 
 async function sendChatMessage(text) {
@@ -367,10 +491,10 @@ async function sendChatMessage(text) {
         "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
         "HTTP-Referer": window.location.href, 
-        "X-Title": "HTML AI App"
+        "X-Title": "MoonWi AI"
       },
       body: JSON.stringify({
-        model: "openai/gpt-4o", // You can change this to 'anthropic/claude-3.5-sonnet' etc.
+        model: selectedModel, // Uses the globally selected model
         messages: messages,
         stream: true
       })
