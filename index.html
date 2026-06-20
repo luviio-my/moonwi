@@ -47,16 +47,15 @@
   html:not(.light-mode) .gradient-overlay { background: radial-gradient(ellipse 90% 80% at 50% 20%, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.05) 80%); }
   html.light-mode .gradient-overlay { background: radial-gradient(ellipse 90% 80% at 50% 20%, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.15) 40%, rgba(255,255,255,0.05) 80%); }
 
-  /* Scrollbar - positioned at very right edge */
-  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.35); border-radius: 10px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.55); }
-  * { scrollbar-width: thin; scrollbar-color: rgba(128,128,128,0.35) transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.3); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.5); }
+  * { scrollbar-width: thin; scrollbar-color: rgba(128,128,128,0.3) transparent; }
 
-  #sidebar { transition: width 0.3s ease, transform 0.3s ease; overflow: hidden; white-space: nowrap; }
+  #sidebar { transition: width 0.3s cubic-bezier(0.4,0,0.2,1), transform 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease; overflow: hidden; white-space: nowrap; }
   #sidebar.closed { width: 0px !important; padding: 0 !important; border: none !important; }
-  #sidebar-content { opacity: 1; transition: opacity 0.2s ease; }
+  #sidebar-content { opacity: 1; transition: opacity 0.15s ease; }
   #sidebar.closed #sidebar-content { opacity: 0; pointer-events: none; }
 
   .modal-overlay { transition: opacity 0.2s ease; }
@@ -65,7 +64,7 @@
   .chat-item { position: relative; display: flex; align-items: center; justify-content: space-between; }
   .chat-item-active { background: var(--bg-tertiary); color: var(--text-primary); }
   .chat-item-inactive:hover { background: var(--bg-hover); }
-  .chat-item-actions { opacity: 0; transition: opacity 0.2s ease; }
+  .chat-item-actions { opacity: 0; transition: opacity 0.15s ease; }
   .chat-item:hover .chat-item-actions { opacity: 1; }
   .chat-item-active .chat-item-actions { opacity: 1; }
 
@@ -77,7 +76,6 @@
   .typing-dot:nth-child(2) { animation-delay: 0.2s; }
   .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
-  /* Markdown content */
   .prose-content { line-height: 1.7; font-size: 15px; }
   .prose-content p { margin: 0.6em 0; }
   .prose-content p:first-child { margin-top: 0; }
@@ -96,7 +94,6 @@
   .prose-content th, .prose-content td { border: 1px solid var(--border-color); padding: 8px 12px; text-align: left; }
   .prose-content th { background: var(--bg-tertiary); font-weight: 600; }
 
-  /* Code block wrapper */
   .code-block-wrapper { margin: 12px 0; border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color); background: #1a1b26; }
   .code-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #16171f; border-bottom: 1px solid rgba(255,255,255,0.06); }
   .code-lang { color: #a9b1d6; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'JetBrains Mono', monospace; }
@@ -107,34 +104,63 @@
   .code-block-wrapper pre code { font-family: 'JetBrains Mono', monospace !important; font-size: 13px !important; padding: 14px 16px !important; display: block; }
   .html-preview-iframe { width: 100%; border: 0; background: white; border-top: 1px solid rgba(255,255,255,0.06); }
 
-  /* Action button cards */
   .action-card { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border: 1px solid var(--border-color); border-radius: 999px; background: var(--bg-secondary); color: var(--text-primary); font-size: 13px; cursor: pointer; transition: all 0.15s ease; }
   .action-card:hover { background: var(--bg-hover); border-color: rgba(255,255,255,0.2); }
 
-  /* Send/Stop button */
   .send-stop-btn { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease; cursor: pointer; border: none; }
   .send-stop-btn.send { background: var(--text-primary); color: var(--bg-primary); }
   .send-stop-btn.send:disabled { background: var(--bg-tertiary); color: var(--text-secondary); cursor: not-allowed; }
   .send-stop-btn.stop { background: var(--text-primary); color: var(--bg-primary); }
   .send-stop-btn.stop:hover { opacity: 0.85; }
 
-  /* Sidebar nav items */
   .nav-item { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; color: var(--text-secondary); font-size: 14px; cursor: pointer; transition: background 0.15s ease; }
   .nav-item:hover { background: var(--bg-hover); color: var(--text-primary); }
 
   html.light-mode .landing-form-shadow { box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
   html:not(.light-mode) .landing-form-shadow { box-shadow: 0 10px 40px rgba(0,0,0,0.4); }
 
-  /* Chat input auto-resize textarea */
   #chat-input { resize: none; min-height: 24px; max-height: 200px; }
   #landing-input { resize: none; }
 
-  /* Stop button pulse */
   @keyframes stopPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(0.9); } }
   .stop-icon-pulse { animation: stopPulse 1.2s ease-in-out infinite; }
+
+  /* Message action buttons */
+  .msg-actions { display: flex; align-items: center; gap: 2px; margin-top: 6px; opacity: 0; transition: opacity 0.15s ease; }
+  .msg-wrapper:hover .msg-actions { opacity: 1; }
+  .msg-actions.always-show { opacity: 1; }
+  .msg-action-btn { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 6px; border: none; background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.15s ease; }
+  .msg-action-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+  .msg-action-btn.liked { color: #10a37f; }
+  .msg-action-btn.disliked { color: #ef4444; }
+  .msg-action-btn.copied { color: #10a37f; }
+
+  /* Model dropdown */
+  .model-dropdown { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); width: 340px; border-radius: 16px; border: 1px solid var(--border-color); background: var(--bg-secondary); box-shadow: 0 16px 48px rgba(0,0,0,0.4); z-index: 100; padding: 6px; }
+  .model-option { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; cursor: pointer; transition: background 0.12s ease; border: none; background: transparent; width: 100%; text-align: left; color: var(--text-primary); font-family: 'Fustat', sans-serif; }
+  .model-option:hover { background: var(--bg-hover); }
+  .model-option.selected { background: var(--bg-tertiary); }
+
+  /* Top bar */
+  .chat-top-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; position: relative; z-index: 30; }
+
+  /* Toast */
+  .toast-item { padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; color: #fff; background: #333; box-shadow: 0 8px 24px rgba(0,0,0,0.3); transition: opacity 0.3s ease, transform 0.3s ease; animation: toastIn 0.3s ease forwards; font-family: 'Inter', sans-serif; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(-8px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+  /* Sidebar new chat btn */
+  .new-chat-btn { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); background: transparent; color: var(--text-primary); font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.15s ease; width: 100%; font-family: 'Fustat', sans-serif; }
+  .new-chat-btn:hover { background: var(--bg-hover); }
+
+  /* Share link input */
+  .share-link-input { flex: 1; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; color: var(--text-primary); font-size: 13px; font-family: 'JetBrains Mono', monospace; outline: none; }
+  .share-link-input:focus { border-color: var(--accent); }
 </style>
 </head>
 <body class="overflow-x-hidden">
+
+<!-- Toast container -->
+<div id="toast-container" class="fixed top-5 right-5 z-[200] flex flex-col items-end gap-2"></div>
 
 <!-- ============ MODALS ============ -->
 <div id="settings-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
@@ -155,10 +181,6 @@
         <label class="block text-sm mb-2">Display Name</label>
         <input id="display-name-input" type="text" placeholder="Your name" class="w-full border rounded-lg px-3 py-2 text-sm outline-none" style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color);">
         <button onclick="saveDisplayName()" class="mt-2 px-3 py-1.5 text-sm rounded-lg" style="background: var(--accent); color: white;">Save</button>
-      </div>
-      <div class="flex items-center justify-between p-3 rounded-xl bg-white/5">
-        <span>Notifications</span>
-        <div class="w-12 h-7 bg-gray-600 rounded-full relative cursor-pointer"><div class="absolute left-1 top-1 w-5 h-5 bg-white rounded-full shadow"></div></div>
       </div>
     </div>
   </div>
@@ -204,10 +226,26 @@
   </div>
 </div>
 
+<div id="share-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+  <div class="modal-overlay absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0" onclick="closeModal('share-modal')"></div>
+  <div class="modal-panel relative rounded-2xl p-8 w-full max-w-md shadow-2xl border opacity-0 scale-95" style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary);">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-xl font-bold">Share chat</h2>
+      <button onclick="closeModal('share-modal')" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <p class="text-sm mb-4" style="color: var(--text-secondary);">Anyone with the link can view this conversation.</p>
+    <div class="flex items-center gap-2">
+      <input id="share-link-input" type="text" readonly class="share-link-input">
+      <button onclick="copyShareLink()" class="px-4 py-2 rounded-lg text-sm font-medium text-white flex-shrink-0" style="background: var(--accent);">Copy link</button>
+    </div>
+  </div>
+</div>
+
 <div id="context-menu" class="hidden fixed z-50 w-48 border rounded-xl shadow-2xl py-2 text-sm" style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary);">
   <button data-action="share" class="w-full text-left px-4 py-2 hover:bg-white/10 flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share</button>
   <button data-action="rename" class="w-full text-left px-4 py-2 hover:bg-white/10 flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Rename</button>
-  <button data-action="pin" class="w-full text-left px-4 py-2 hover:bg-white/10 flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17z"/></svg> Pin chat</button>
   <hr class="my-2" style="border-color: var(--border-color);">
   <button data-action="delete" class="w-full text-left px-4 py-2 hover:bg-red-500/10 text-red-400 flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Delete</button>
 </div>
@@ -281,60 +319,62 @@
   </main>
 </div>
 
-<!-- ============ CHAT VIEW (ChatGPT-style) ============ -->
+<!-- ============ CHAT VIEW ============ -->
 <div id="chat-view" class="hidden h-screen flex font-schibsted" style="background-color: var(--bg-primary); color: var(--text-primary);">
   <!-- Sidebar -->
-  <aside id="sidebar" class="w-[260px] p-2 flex flex-col flex-shrink-0" style="background-color: var(--bg-primary);">
+  <aside id="sidebar" class="w-[260px] p-2 flex flex-col flex-shrink-0" style="background-color: var(--bg-primary); border-right: 1px solid var(--border-color);">
     <div id="sidebar-content" class="flex flex-col h-full">
-      <!-- Top: Toggle + New Chat -->
-      <div class="flex items-center justify-between p-2 gap-2">
-        <button onclick="toggleSidebar()" class="p-2 rounded-lg hover:bg-white/10 transition-colors" title="Close sidebar">
+      <!-- Logo + Close sidebar -->
+      <div class="flex items-center justify-between p-2 mb-1">
+        <div class="flex items-center gap-2.5 cursor-pointer" onclick="navigateHome()">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #10a37f, #1c6e5a);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.781 1.401 8.169L12 18.896l-7.335 3.864 1.401-8.169L.132 9.21l8.2-1.192z"/></svg>
+          </div>
+          <span class="font-schibsted font-semibold text-[17px]" style="letter-spacing: -0.5px;">MoonWi AI</span>
+        </div>
+        <button onclick="toggleSidebar()" class="p-1.5 rounded-lg hover:bg-white/10 transition-colors" title="Close sidebar">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
         </button>
-        <button onclick="startNewChat()" class="flex-1 flex items-center justify-center gap-2 p-2 text-sm rounded-lg hover:bg-white/5 transition-colors border" style="border-color: var(--border-color);">
+      </div>
+
+      <!-- New chat -->
+      <div class="px-2 mb-2">
+        <button onclick="startNewChat()" class="new-chat-btn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
           New chat
         </button>
       </div>
 
-      <!-- Nav items -->
-      <div class="mt-2 px-2 space-y-1">
-        <div class="nav-item" onclick="alert('Search chats - coming soon')">
+      <!-- Search & Library -->
+      <div class="px-2 space-y-0.5">
+        <div class="nav-item" onclick="showToast('Search coming soon')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
           Search chats
         </div>
-        <div class="nav-item" onclick="alert('Library - coming soon')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
-          Library
-        </div>
       </div>
 
-      <div class="my-3 mx-2 border-t" style="border-color: var(--border-color);"></div>
+      <!-- Divider -->
+      <div class="my-3 mx-3 border-t" style="border-color: var(--border-color);"></div>
 
-      <!-- History -->
+      <!-- Recent chats -->
       <div class="flex-1 overflow-y-auto px-2">
-        <p class="text-xs px-2 mb-2 uppercase tracking-wider" style="color: var(--text-secondary);">Chats</p>
+        <p class="text-[11px] px-3 mb-2 uppercase tracking-wider font-semibold" style="color: var(--text-secondary);">Recent</p>
         <div id="history-list" class="space-y-0.5"></div>
       </div>
 
-      <!-- Bottom: Upgrade + Theme + Account -->
-      <div class="mt-auto p-2 space-y-1 border-t" style="border-color: var(--border-color);">
-        <div class="nav-item" onclick="alert('Upgrade plan')">
-          <div class="w-7 h-7 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #10a37f, #1c6e5a);">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 2l1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5z"/></svg>
-          </div>
-          <div class="flex-1">
-            <div class="text-sm font-medium" style="color: var(--text-primary);">Upgrade plan</div>
-            <div class="text-xs" style="color: var(--text-secondary);">More access, more power</div>
-          </div>
-        </div>
+      <!-- Bottom -->
+      <div class="mt-auto pt-2 px-2 space-y-0.5 border-t" style="border-color: var(--border-color);">
         <div class="nav-item" onclick="toggleTheme()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
           <span id="theme-label-side">Dark mode</span>
         </div>
+        <div class="nav-item" onclick="openModal('settings-modal')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          Settings
+        </div>
         <div class="nav-item" onclick="openModal('account-modal')">
           <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style="background: linear-gradient(135deg, #10a37f, #1c6e5a);" id="sidebar-avatar">M</div>
-          <span id="sidebar-username">MoonWi User</span>
+          <span id="sidebar-username" class="truncate">MoonWi User</span>
         </div>
       </div>
     </div>
@@ -342,42 +382,58 @@
 
   <!-- Main Chat Area -->
   <main class="flex-1 flex flex-col h-screen relative min-w-0">
-    <!-- Top bar (when sidebar closed) -->
-    <div id="top-bar" class="hidden absolute top-0 left-0 w-full flex items-center justify-between p-3 z-20" style="background-color: var(--bg-primary);">
-      <div class="flex items-center gap-3">
-        <button onclick="toggleSidebar()" class="p-2 rounded-lg hover:bg-white/10 transition-colors">
+    <!-- Always-visible top bar -->
+    <div class="chat-top-bar" style="background-color: var(--bg-primary);">
+      <!-- Left buttons -->
+      <div class="flex items-center gap-1">
+        <button id="sidebar-toggle-btn" onclick="toggleSidebar()" class="p-2 rounded-lg hover:bg-white/10 transition-colors hidden" title="Open sidebar">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
         </button>
-        <button onclick="startNewChat()" class="p-2 rounded-lg hover:bg-white/10 transition-colors">
+        <button onclick="startNewChat()" class="p-2 rounded-lg hover:bg-white/10 transition-colors" title="New chat">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
         </button>
       </div>
-      <div class="relative">
-        <select id="model-select-top" class="appearance-none text-sm border rounded-lg py-1.5 pl-3 pr-8 outline-none cursor-pointer" style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color);"></select>
-        <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-70" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+
+      <!-- Model selector -->
+      <div class="relative" id="model-selector-wrap">
+        <button onclick="toggleModelDropdown()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors text-sm font-medium">
+          <span id="selected-model-label">GPT-OSS 120B</span>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="transition-transform" id="model-chevron"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <!-- Dropdown -->
+        <div id="model-dropdown" class="model-dropdown hidden"></div>
+      </div>
+
+      <!-- Right buttons -->
+      <div class="flex items-center gap-2">
+        <button onclick="openShareModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors text-sm" style="color: var(--text-secondary);" title="Share chat">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          Share
+        </button>
+        <button onclick="openModal('account-modal')" class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white hover:opacity-90 transition-opacity" style="background: linear-gradient(135deg, #10a37f, #1c6e5a);" id="top-avatar" title="Account">M</button>
       </div>
     </div>
 
-    <!-- Scrollable area (full width so scrollbar sits at very right edge) -->
+    <!-- Scrollable area -->
     <div id="chat-scroll" class="flex-1 overflow-y-auto overflow-x-hidden">
       <!-- Empty state -->
       <div id="empty-state" class="min-h-full flex flex-col items-center justify-center px-6 pt-20 pb-40">
         <div class="text-center mb-8">
-          <div class="w-16 h-16 mx-auto mb-5 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #10a37f, #1c6e5a);">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="white"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.781 1.401 8.169L12 18.896l-7.335 3.864 1.401-8.169L.132 9.21l8.2-1.192z"/></svg>
+          <div class="w-14 h-14 mx-auto mb-5 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #10a37f, #1c6e5a);">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.781 1.401 8.169L12 18.896l-7.335 3.864 1.401-8.169L.132 9.21l8.2-1.192z"/></svg>
           </div>
-          <h1 class="text-3xl font-semibold" style="color: var(--text-primary);">Good to see you, <span id="greeting-name">there</span></h1>
+          <h1 class="text-2xl font-semibold" style="color: var(--text-primary);">Good to see you, <span id="greeting-name">there</span></h1>
           <p class="mt-2 text-sm" style="color: var(--text-secondary);">How can I help you today?</p>
         </div>
       </div>
 
       <!-- Messages container -->
-      <div id="messages-container" class="hidden max-w-3xl mx-auto px-6 py-8 pb-44"></div>
+      <div id="messages-container" class="hidden max-w-3xl mx-auto px-4 sm:px-6 py-6 pb-44"></div>
     </div>
 
-    <!-- Bottom input area (always at bottom) -->
+    <!-- Bottom input area -->
     <div class="absolute bottom-0 left-0 right-0" style="background: linear-gradient(to top, var(--bg-primary) 70%, transparent);">
-      <div class="max-w-3xl mx-auto px-6 pb-3 pt-6">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 pb-3 pt-6">
         <form id="chat-form" class="relative flex items-end gap-2 rounded-[28px] px-4 py-3 border" style="background-color: var(--bg-input); border-color: var(--border-color);">
           <button type="button" class="p-1.5 rounded-full hover:bg-white/10 transition-colors flex-shrink-0" title="Attach file">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-secondary);"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
@@ -387,8 +443,6 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
           </button>
         </form>
-
-        <!-- Action buttons (only show when chat is empty) -->
         <div id="action-buttons" class="flex flex-wrap justify-center gap-2 mt-3">
           <button class="action-card" onclick="useActionPrompt('Create an image of ')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
@@ -407,7 +461,6 @@
             Write code
           </button>
         </div>
-
         <p class="text-center text-xs mt-3" style="color: var(--text-secondary);">MoonWi AI can make mistakes. Check important info. <span id="online-indicator" class="inline-flex items-center gap-1 ml-1"><span class="w-1.5 h-1.5 rounded-full" style="background: var(--accent);"></span>Web search ready</span></p>
       </div>
     </div>
@@ -448,6 +501,22 @@ When sharing code:
 - For Python code, make sure it is syntactically correct and includes necessary imports.
 
 Format responses with markdown: use **bold**, *italic*, lists, tables, blockquotes, and code blocks where appropriate. Keep responses concise but complete.`;
+}
+
+/* ============================================================
+   TOAST
+============================================================ */
+function showToast(message) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast-item';
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(-8px) scale(0.96)';
+    setTimeout(() => toast.remove(), 300);
+  }, 2200);
 }
 
 /* ============================================================
@@ -493,23 +562,64 @@ function openLandingView() { landingView.classList.remove('hidden'); chatView.cl
 function openChatView() {
   landingView.classList.add('hidden');
   chatView.classList.remove('hidden');
-  populateModelSelects();
+  buildModelDropdown();
+  updateModelLabel();
   renderHistoryList();
   resetSidebarState();
   updateGreetingName();
 }
 
 /* ============================================================
-   MODEL SELECT POPULATION
+   MODEL SELECTOR
 ============================================================ */
-function populateModelSelects() {
-  const sidebarSelect = document.getElementById('model-select-sidebar');
-  const topSelect = document.getElementById('model-select-top');
-  // Build sidebar select if not present (we'll add it dynamically into top area only for simplicity)
-  if (topSelect) {
-    topSelect.innerHTML = MODELS.map(m => `<option value="${m.id}" ${m.id === selectedModel ? 'selected' : ''}>${m.name}</option>`).join('');
-  }
+function buildModelDropdown() {
+  const dd = document.getElementById('model-dropdown');
+  dd.innerHTML = '<div class="px-3 pt-2 pb-1"><p class="text-[11px] font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Models</p></div>';
+  MODELS.forEach(m => {
+    const isSelected = m.id === selectedModel;
+    const btn = document.createElement('button');
+    btn.className = 'model-option' + (isSelected ? ' selected' : '');
+    btn.dataset.modelId = m.id;
+    btn.innerHTML = `
+      <div class="flex-1">
+        <div class="text-sm font-medium">${m.name}</div>
+        <div class="text-xs" style="color: var(--text-secondary);">${m.desc}</div>
+      </div>
+      ${isSelected ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10a37f" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+    `;
+    btn.onclick = () => selectModel(m.id);
+    dd.appendChild(btn);
+  });
 }
+
+function toggleModelDropdown() {
+  const dd = document.getElementById('model-dropdown');
+  const chevron = document.getElementById('model-chevron');
+  dd.classList.toggle('hidden');
+  chevron.style.transform = dd.classList.contains('hidden') ? '' : 'rotate(180deg)';
+}
+
+function selectModel(modelId) {
+  selectedModel = modelId;
+  updateModelLabel();
+  buildModelDropdown();
+  toggleModelDropdown();
+}
+
+function updateModelLabel() {
+  const m = MODELS.find(x => x.id === selectedModel);
+  document.getElementById('selected-model-label').textContent = m ? m.name : 'Select Model';
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('model-selector-wrap');
+  const dd = document.getElementById('model-dropdown');
+  if (wrap && dd && !wrap.contains(e.target)) {
+    dd.classList.add('hidden');
+    document.getElementById('model-chevron').style.transform = '';
+  }
+});
 
 /* ============================================================
    CHAT SWITCHING
@@ -550,7 +660,11 @@ function renderChatMessages() {
     actionButtons.classList.add('hidden');
     actionButtons.classList.remove('flex');
     messagesContainer.innerHTML = '';
-    chatData.messages.forEach(msg => addMessageToDOM(msg.role, msg.content, false, false));
+    chatData.messages.forEach((msg, idx) => {
+      const isLast = idx === chatData.messages.length - 1;
+      const isLastAssistant = isLast && msg.role === 'assistant';
+      addMessageToDOM(msg.role, msg.content, false, true, isLastAssistant, msg.feedback);
+    });
     setTimeout(() => {
       const sc = document.getElementById('chat-scroll');
       sc.scrollTop = sc.scrollHeight;
@@ -622,8 +736,9 @@ document.getElementById('context-menu').addEventListener('click', (e) => {
   } else if (action === 'rename') {
     const newName = prompt('Enter new chat name:', getChat(chatId).title);
     if (newName) { getChat(chatId).title = newName; renderHistoryList(); }
-  } else {
-    alert(`${action.charAt(0).toUpperCase() + action.slice(1)} functionality triggered for: ${getChat(chatId).title}`);
+  } else if (action === 'share') {
+    currentChatId = chatId;
+    openShareModal();
   }
   menu.classList.add('hidden');
 });
@@ -642,29 +757,24 @@ function deleteChat(chatId) {
 ============================================================ */
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
-  const topBar = document.getElementById('top-bar');
+  const toggleBtn = document.getElementById('sidebar-toggle-btn');
   sidebar.classList.toggle('closed');
   if (sidebar.classList.contains('closed')) {
-    topBar.classList.remove('hidden');
-    topBar.classList.add('flex');
+    toggleBtn.classList.remove('hidden');
+    toggleBtn.classList.add('flex');
   } else {
-    topBar.classList.add('hidden');
-    topBar.classList.remove('flex');
+    toggleBtn.classList.add('hidden');
+    toggleBtn.classList.remove('flex');
   }
 }
 
 function resetSidebarState() {
-  document.getElementById('sidebar').classList.remove('closed');
-  const topBar = document.getElementById('top-bar');
-  topBar.classList.add('hidden');
-  topBar.classList.remove('flex');
+  const sidebar = document.getElementById('sidebar');
+  sidebar.classList.remove('closed');
+  const toggleBtn = document.getElementById('sidebar-toggle-btn');
+  toggleBtn.classList.add('hidden');
+  toggleBtn.classList.remove('flex');
 }
-
-document.addEventListener('change', (e) => {
-  if (e.target.id === 'model-select-top') {
-    selectedModel = e.target.value;
-  }
-});
 
 /* ============================================================
    MODAL LOGIC
@@ -685,6 +795,29 @@ function closeModal(id) {
   modal.querySelector('.modal-panel').style.opacity = '0';
   modal.querySelector('.modal-panel').style.transform = 'scale(0.95)';
   setTimeout(() => modal.classList.add('hidden'), 200);
+}
+
+/* ============================================================
+   SHARE
+============================================================ */
+function openShareModal() {
+  if (!currentChatId) return;
+  const link = window.location.origin + '/c/' + currentChatId;
+  document.getElementById('share-link-input').value = link;
+  openModal('share-modal');
+}
+
+function copyShareLink() {
+  const input = document.getElementById('share-link-input');
+  navigator.clipboard.writeText(input.value).then(() => {
+    showToast('Link copied to clipboard');
+    closeModal('share-modal');
+  }).catch(() => {
+    input.select();
+    document.execCommand('copy');
+    showToast('Link copied to clipboard');
+    closeModal('share-modal');
+  });
 }
 
 /* ============================================================
@@ -717,11 +850,14 @@ function updateGreetingName() {
   const greeting = document.getElementById('greeting-name');
   const sideUser = document.getElementById('sidebar-username');
   const sideAvatar = document.getElementById('sidebar-avatar');
+  const topAvatar = document.getElementById('top-avatar');
   const accName = document.getElementById('account-name');
   const nameInput = document.getElementById('display-name-input');
+  const initial = name === 'there' ? 'G' : name.charAt(0).toUpperCase();
   if (greeting) greeting.textContent = name;
   if (sideUser) sideUser.textContent = name === 'there' ? 'Guest' : name;
-  if (sideAvatar) sideAvatar.textContent = (name === 'there' ? 'G' : name.charAt(0).toUpperCase());
+  if (sideAvatar) sideAvatar.textContent = initial;
+  if (topAvatar) topAvatar.textContent = initial;
   if (accName) accName.textContent = name === 'there' ? 'MoonWi User' : name;
   if (nameInput) nameInput.value = name === 'there' ? '' : name;
 }
@@ -812,14 +948,102 @@ function setGeneratingState(generating) {
 }
 
 function stopGeneration() {
-  if (abortController) {
-    abortController.abort();
-    abortController = null;
-  }
+  if (abortController) { abortController.abort(); abortController = null; }
   setGeneratingState(false);
 }
 
-function addMessageToDOM(role, content, animate = true, renderMd = true) {
+/* ============================================================
+   MESSAGE ACTIONS: Copy, Like, Dislike, Regenerate
+============================================================ */
+function copyMessage(btn) {
+  const wrapper = btn.closest('.msg-wrapper');
+  const msgEl = wrapper.querySelector('.assistant-msg');
+  const rawText = msgEl.innerText || msgEl.textContent;
+  navigator.clipboard.writeText(rawText).then(() => {
+    btn.classList.add('copied');
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+    showToast('Copied to clipboard');
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
+    }, 2000);
+  }).catch(() => {
+    showToast('Failed to copy');
+  });
+}
+
+function likeMessage(btn) {
+  const wrapper = btn.closest('.msg-wrapper');
+  const msgIdx = parseInt(wrapper.dataset.msgIndex);
+  const isLiked = btn.classList.contains('liked');
+
+  // Toggle like
+  if (isLiked) {
+    btn.classList.remove('liked');
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/><path d="M7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>';
+    if (!isNaN(msgIdx)) { const chatData = getChat(currentChatId); if (chatData.messages[msgIdx]) chatData.messages[msgIdx].feedback = null; }
+  } else {
+    btn.classList.add('liked');
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z" fill="currentColor"/><path d="M7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>';
+    // Remove dislike
+    const dislikeBtn = btn.nextElementSibling;
+    if (dislikeBtn && dislikeBtn.classList.contains('disliked')) {
+      dislikeBtn.classList.remove('disliked');
+      dislikeBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0122 4v7a2.31 2.31 0 01-2.33 2H17"/></svg>';
+    }
+    if (!isNaN(msgIdx)) { const chatData = getChat(currentChatId); if (chatData.messages[msgIdx]) chatData.messages[msgIdx].feedback = 'liked'; }
+    showToast('Thanks for your feedback');
+  }
+}
+
+function dislikeMessage(btn) {
+  const wrapper = btn.closest('.msg-wrapper');
+  const msgIdx = parseInt(wrapper.dataset.msgIndex);
+  const isDisliked = btn.classList.contains('disliked');
+
+  if (isDisliked) {
+    btn.classList.remove('disliked');
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0122 4v7a2.31 2.31 0 01-2.33 2H17"/></svg>';
+    if (!isNaN(msgIdx)) { const chatData = getChat(currentChatId); if (chatData.messages[msgIdx]) chatData.messages[msgIdx].feedback = null; }
+  } else {
+    btn.classList.add('disliked');
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z" fill="currentColor"/><path d="M17 2h2.67A2.31 2.31 0 0122 4v7a2.31 2.31 0 01-2.33 2H17"/></svg>';
+    // Remove like
+    const likeBtn = btn.previousElementSibling;
+    if (likeBtn && likeBtn.classList.contains('liked')) {
+      likeBtn.classList.remove('liked');
+      likeBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/><path d="M7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>';
+    }
+    if (!isNaN(msgIdx)) { const chatData = getChat(currentChatId); if (chatData.messages[msgIdx]) chatData.messages[msgIdx].feedback = 'disliked'; }
+    showToast('Thanks for your feedback');
+  }
+}
+
+function regenerateResponse() {
+  if (isGenerating) return;
+  const chatData = getChat(currentChatId);
+  if (chatData.messages.length === 0) return;
+
+  // Remove last assistant message if present
+  if (chatData.messages[chatData.messages.length - 1].role === 'assistant') {
+    chatData.messages.pop();
+  }
+
+  // Get last user message content
+  const lastUserMsg = [...chatData.messages].reverse().find(m => m.role === 'user');
+  if (!lastUserMsg) return;
+
+  // Re-render without the last assistant message
+  renderChatMessages();
+
+  // Re-send (isRegenerate = true)
+  sendChatMessage('', true);
+}
+
+/* ============================================================
+   ADD MESSAGE TO DOM
+============================================================ */
+function addMessageToDOM(role, content, animate = true, renderMd = true, isLastAssistant = false, feedback = null) {
   const messagesContainer = document.getElementById('messages-container');
   const emptyState = document.getElementById('empty-state');
   if (!emptyState.classList.contains('hidden')) {
@@ -830,14 +1054,45 @@ function addMessageToDOM(role, content, animate = true, renderMd = true) {
   }
 
   const wrapper = document.createElement('div');
-  wrapper.className = `msg-animate ${role === 'user' ? 'flex justify-end mb-6' : 'flex gap-3 mb-6'}`;
+  wrapper.className = `msg-wrapper ${animate ? 'msg-animate' : ''} ${role === 'user' ? 'flex justify-end mb-6' : 'flex gap-3 mb-6'}`;
+  wrapper.dataset.role = role;
+
+  // Set message index for feedback tracking
+  const chatData = getChat(currentChatId);
+  const msgIndex = chatData.messages.findIndex((m, i) => {
+    if (m.role !== role) return false;
+    // Count how many messages of this role we've seen so far
+    const countSoFar = chatData.messages.slice(0, i + 1).filter(x => x.role === role).length;
+    const countInDom = messagesContainer.querySelectorAll(`.msg-wrapper[data-role="${role}"]`).length + 1;
+    return countSoFar === countInDom;
+  });
+  wrapper.dataset.msgIndex = msgIndex;
 
   if (role === 'assistant') {
+    const feedbackLiked = feedback === 'liked';
+    const feedbackDisliked = feedback === 'disliked';
+
     wrapper.innerHTML = `
       <div class="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center" style="background: linear-gradient(135deg, #10a37f, #1c6e5a);">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.781 1.401 8.169L12 18.896l-7.335 3.864 1.401-8.169L.132 9.21l8.2-1.192z"/></svg>
       </div>
-      <div class="assistant-msg flex-1 min-w-0 prose-content" style="color: var(--text-primary);"></div>
+      <div class="flex flex-col flex-1 min-w-0">
+        <div class="assistant-msg prose-content" style="color: var(--text-primary);"></div>
+        <div class="msg-actions ${isLastAssistant ? 'always-show' : ''}" style="display: none;">
+          <button class="msg-action-btn" onclick="copyMessage(this)" title="Copy">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          </button>
+          <button class="msg-action-btn ${feedbackLiked ? 'liked' : ''}" onclick="likeMessage(this)" title="Good response">
+            ${feedbackLiked ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z" fill="currentColor"/><path d="M7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>' : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/><path d="M7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>'}
+          </button>
+          <button class="msg-action-btn ${feedbackDisliked ? 'disliked' : ''}" onclick="dislikeMessage(this)" title="Bad response">
+            ${feedbackDisliked ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z" fill="currentColor"/><path d="M17 2h2.67A2.31 2.31 0 0122 4v7a2.31 2.31 0 01-2.33 2H17"/></svg>' : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0122 4v7a2.31 2.31 0 01-2.33 2H17"/></svg>'}
+          </button>
+          ${isLastAssistant ? `<button class="msg-action-btn" onclick="regenerateResponse()" title="Regenerate response">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+          </button>` : ''}
+        </div>
+      </div>
     `;
   } else {
     wrapper.innerHTML = `<div class="max-w-[75%] px-4 py-2.5 rounded-3xl text-[15px] leading-relaxed whitespace-pre-wrap break-words" style="background-color: var(--user-bubble); color: var(--text-primary);"></div>`;
@@ -849,14 +1104,13 @@ function addMessageToDOM(role, content, animate = true, renderMd = true) {
   if (role === 'user') {
     target.textContent = content;
   } else {
-    if (renderMd) {
+    if (content) {
       target.innerHTML = renderMarkdown(content);
       enhanceCodeBlocks(target);
       if (window.Prism) Prism.highlightAllUnder(target);
-    } else {
-      target.innerHTML = renderMarkdown(content);
-      enhanceCodeBlocks(target);
-      if (window.Prism) Prism.highlightAllUnder(target);
+      // Show actions
+      const actionsEl = wrapper.querySelector('.msg-actions');
+      if (actionsEl) actionsEl.style.display = 'flex';
     }
   }
 
@@ -864,9 +1118,12 @@ function addMessageToDOM(role, content, animate = true, renderMd = true) {
     const sc = document.getElementById('chat-scroll');
     sc.scrollTop = sc.scrollHeight;
   }
-  return target;
+  return wrapper;
 }
 
+/* ============================================================
+   MARKDOWN & CODE BLOCKS
+============================================================ */
 function renderMarkdown(text) {
   try {
     marked.setOptions({ breaks: true, gfm: true });
@@ -899,7 +1156,6 @@ function enhanceCodeBlocks(container) {
     const btnGroup = document.createElement('div');
     btnGroup.className = 'code-btn-group';
 
-    // Copy button
     const copyBtn = document.createElement('button');
     copyBtn.className = 'code-action-btn';
     copyBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copy';
@@ -912,7 +1168,6 @@ function enhanceCodeBlocks(container) {
     };
     btnGroup.appendChild(copyBtn);
 
-    // Download button
     const downloadBtn = document.createElement('button');
     downloadBtn.className = 'code-action-btn';
     downloadBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Download';
@@ -931,7 +1186,6 @@ function enhanceCodeBlocks(container) {
     };
     btnGroup.appendChild(downloadBtn);
 
-    // Preview button (HTML only)
     if (lang.toLowerCase() === 'html' || lang.toLowerCase() === 'htm') {
       const previewBtn = document.createElement('button');
       previewBtn.className = 'code-action-btn';
@@ -944,11 +1198,8 @@ function enhanceCodeBlocks(container) {
       updateLabel(false);
       previewBtn.onclick = () => {
         const existing = wrapper.querySelector('.html-preview-iframe');
-        if (existing) {
-          existing.remove();
-          previewOpen = false;
-          updateLabel(false);
-        } else {
+        if (existing) { existing.remove(); previewOpen = false; updateLabel(false); }
+        else {
           const ifr = document.createElement('iframe');
           ifr.className = 'html-preview-iframe';
           ifr.style.height = '420px';
@@ -972,28 +1223,41 @@ function enhanceCodeBlocks(container) {
   });
 }
 
+/* ============================================================
+   TYPING INDICATOR
+============================================================ */
 function showTypingIndicator(bubble) {
   bubble.innerHTML = '<div class="flex items-center gap-1.5 py-1"><span class="typing-dot w-2 h-2 rounded-full bg-current opacity-40"></span><span class="typing-dot w-2 h-2 rounded-full bg-current opacity-40"></span><span class="typing-dot w-2 h-2 rounded-full bg-current opacity-40"></span></div>';
 }
 
-async function sendChatMessage(text) {
+/* ============================================================
+   SEND MESSAGE
+============================================================ */
+async function sendChatMessage(text, isRegenerate = false) {
   const chatData = getChat(currentChatId);
 
-  if (chatData.messages.length === 0) {
-    chatData.title = text.substring(0, 30) + (text.length > 30 ? '...' : '');
-    renderHistoryList();
+  if (!isRegenerate) {
+    if (chatData.messages.length === 0) {
+      chatData.title = text.substring(0, 30) + (text.length > 30 ? '...' : '');
+      renderHistoryList();
+    }
+    chatData.messages.push({ role: 'user', content: text, feedback: null });
+    addMessageToDOM('user', text);
   }
 
-  chatData.messages.push({ role: 'user', content: text });
-  addMessageToDOM('user', text);
+  // Remove regenerate button from previous last assistant message
+  const prevRegen = document.querySelector('.msg-actions .msg-action-btn[title="Regenerate response"]');
+  if (prevRegen) prevRegen.remove();
+  // Remove always-show from previous msg-actions
+  document.querySelectorAll('.msg-actions.always-show').forEach(el => el.classList.remove('always-show'));
 
-  const assistantBubble = addMessageToDOM('assistant', '');
+  const wrapper = addMessageToDOM('assistant', '', true, false, true);
+  const assistantBubble = wrapper.querySelector('.assistant-msg');
   showTypingIndicator(assistantBubble);
 
   setGeneratingState(true);
   abortController = new AbortController();
 
-  // Build messages with system prompt
   const apiMessages = [
     { role: 'system', content: getSystemPrompt() },
     ...chatData.messages
@@ -1047,10 +1311,7 @@ async function sendChatMessage(text) {
           const json = JSON.parse(data);
           const chunk = json.choices?.[0]?.delta?.content || '';
           if (chunk) {
-            if (!firstChunkReceived) {
-              firstChunkReceived = true;
-              assistantBubble.innerHTML = '';
-            }
+            if (!firstChunkReceived) { firstChunkReceived = true; assistantBubble.innerHTML = ''; }
             fullResponse += chunk;
             throttledRender(assistantBubble, fullResponse);
           }
@@ -1064,7 +1325,21 @@ async function sendChatMessage(text) {
     enhanceCodeBlocks(assistantBubble);
     if (window.Prism) Prism.highlightAllUnder(assistantBubble);
 
-    chatData.messages.push({ role: 'assistant', content: fullResponse });
+    chatData.messages.push({ role: 'assistant', content: fullResponse, feedback: null });
+
+    // Show actions and add regenerate button
+    const actionsEl = wrapper.querySelector('.msg-actions');
+    if (actionsEl) {
+      actionsEl.style.display = 'flex';
+      actionsEl.classList.add('always-show');
+      // Add regenerate button
+      const regenBtn = document.createElement('button');
+      regenBtn.className = 'msg-action-btn';
+      regenBtn.title = 'Regenerate response';
+      regenBtn.onclick = regenerateResponse;
+      regenBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>';
+      actionsEl.appendChild(regenBtn);
+    }
 
     const sc = document.getElementById('chat-scroll');
     sc.scrollTop = sc.scrollHeight;
@@ -1075,15 +1350,19 @@ async function sendChatMessage(text) {
         assistantBubble.innerHTML = renderMarkdown(fullResponse + '\n\n*[Stopped by user]*');
         enhanceCodeBlocks(assistantBubble);
         if (window.Prism) Prism.highlightAllUnder(assistantBubble);
-        chatData.messages.push({ role: 'assistant', content: fullResponse + '\n\n*[Stopped by user]*' });
+        chatData.messages.push({ role: 'assistant', content: fullResponse + '\n\n*[Stopped by user]*', feedback: null });
       } else {
         assistantBubble.innerHTML = '<span style="color: var(--text-secondary);">*Generation stopped.*</span>';
-        chatData.messages.push({ role: 'assistant', content: '*Generation stopped.*' });
+        chatData.messages.push({ role: 'assistant', content: '*Generation stopped.*', feedback: null });
       }
     } else {
       console.error("OpenRouter Error:", error);
       assistantBubble.innerHTML = `<div style="color: #ef4444;"><strong>Error:</strong> ${error.message}</div><div style="color: var(--text-secondary); margin-top: 8px; font-size: 13px;">Please check your API key, network connection, or try a different model.</div>`;
+      chatData.messages.push({ role: 'assistant', content: `Error: ${error.message}`, feedback: null });
     }
+    // Show actions
+    const actionsEl = wrapper.querySelector('.msg-actions');
+    if (actionsEl) { actionsEl.style.display = 'flex'; actionsEl.classList.add('always-show'); }
   } finally {
     setGeneratingState(false);
     abortController = null;
