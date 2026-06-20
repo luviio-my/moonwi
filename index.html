@@ -1554,11 +1554,12 @@ async function sendChatMessage(text, isRegenerate = false) {
 
   const systemPrompt = getSystemPrompt(searchContext);
   
-  // Formulate the prompt to send to the backend
-  const promptMessages = [
-    { role: 'system', content: systemPrompt },
-    ...chatData.messages.map(m => ({ role: m.role, content: m.content }))
-  ];
+  // Format conversation history as a plain string for the backend
+  let promptString = `System Instructions:\n${systemPrompt}\n\nConversation History:\n`;
+  chatData.messages.forEach(m => {
+    promptString += `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}\n`;
+  });
+  promptString += `Assistant:`;
 
   let fullResponse = '';
 
@@ -1569,8 +1570,7 @@ async function sendChatMessage(text, isRegenerate = false) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        message: promptMessages, // Send array so backend can handle full context
-        model: selectedModel
+        message: promptString // Sending a single string as expected by index.js
       }),
       signal: abortController.signal
     });
@@ -1581,7 +1581,7 @@ async function sendChatMessage(text, isRegenerate = false) {
     }
 
     const data = await response.json();
-    fullResponse = data.reply || "";
+    fullResponse = data.reply || "No response";
 
     // Render the response
     assistantBubble.innerHTML = renderMarkdown(fullResponse);
