@@ -290,7 +290,7 @@
       <div class="px-2 mb-2 mt-1">
         <div class="relative">
           <select id="model-select-sidebar" class="w-full appearance-none text-xs border rounded-lg py-2 pl-3 pr-8 outline-none cursor-pointer focus:border-white/20" style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color);">
-            <option value="nvidia/nemotron-3-ultra-550b-a55b:free">NVIDIA: Nemotron 3 Ultra (free)</option>
+            <option value="openai/gpt-oss-120b:free">OpenAI: gpt-oss-120b (free)</option>
           </select>
           <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-70" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-primary);"><path d="M6 9l6 6 6-6"/></svg>
         </div>
@@ -339,7 +339,7 @@
       <!-- Model Selection Top Bar -->
       <div class="relative">
         <select id="model-select-top" class="appearance-none text-sm border rounded-lg py-2 pl-4 pr-10 outline-none cursor-pointer focus:border-white/20" style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color);">
-          <option value="nvidia/nemotron-3-ultra-550b-a55b:free">NVIDIA: Nemotron 3 Ultra (free)</option>
+          <option value="openai/gpt-oss-120b:free">OpenAI: gpt-oss-120b (free)</option>
         </select>
         <svg class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-70" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-primary);"><path d="M6 9l6 6 6-6"/></svg>
       </div>
@@ -372,7 +372,7 @@
 const OPENROUTER_API_KEY = "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"; // <--- PASTE YOUR API KEY HERE
 
 let currentChatId = null;
-let selectedModel = "nvidia/nemotron-3-ultra-550b-a55b:free"; // Default model
+let selectedModel = "openai/gpt-oss-120b:free"; // Default model
 let chatStore = {}; 
 
 function getChat(chatId) {
