@@ -1147,7 +1147,7 @@ async function sendChatMessage(text) {
 
   video.style.opacity = '0';
 
-  const startPlayback = () => {
+  const startPlayback = () => 
     video.play().then(() => { fadeIn(); }).catch(() => {
       video.muted = true;
       video.play().then(() => { fadeIn(); }).catch(() => {});
