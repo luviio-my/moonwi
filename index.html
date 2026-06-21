@@ -12,7 +12,7 @@
 <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-<!-- Firebase SDKs (removed async so they load in order before the body script runs) -->
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
@@ -170,7 +170,6 @@
   </div>
 </div>
 
-<!-- Other Modals -->
 <div id="settings-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
   <div class="modal-overlay absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0" onclick="closeModal('settings-modal')"></div>
   <div class="modal-panel liquid-glass relative rounded-2xl p-8 w-full max-w-md opacity-0 scale-95" style="color: var(--text-primary);">
@@ -258,7 +257,6 @@
   <button data-action="delete" class="w-full text-left px-4 py-2 hover:bg-red-500/10 text-red-400 flex items-center gap-2 transition-colors"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Delete</button>
 </div>
 
-<!-- ============ LANDING VIEW ============ -->
 <div id="landing-view" class="relative w-full min-h-screen overflow-hidden">
   <div class="absolute inset-0 z-0">
     <div class="video-wrap">
@@ -332,7 +330,6 @@
   </main>
 </div>
 
-<!-- ============ CHAT VIEW ============ -->
 <div id="chat-view" class="hidden h-screen flex font-schibsted" style="background-color: var(--bg-primary); color: var(--text-primary);">
   <div id="sidebar-backdrop" class="fixed inset-0 bg-black/50 z-40 opacity-0 pointer-events-none" onclick="toggleSidebar()"></div>
 
@@ -461,11 +458,9 @@
 ============================================================ */
 const BACKEND_URL = "https://my-ai-backend.luviio.workers.dev";
 
-// OpenRouter Models
 const MODELS = [
-  { id: "google/gemini-2.0-flash-exp:free", name: "Gemini 2.0 Flash", desc: "Google · Fast · Advanced", provider: "openrouter" },
-  { id: "google/gemini-pro-1.5", name: "Gemini 1.5 Pro", desc: "Google · Pro · Clever", provider: "openrouter" },
-  { id: "openai/gpt-4o-mini", name: "GPT-4o Mini", desc: "OpenAI · Fast · Efficient", provider: "openrouter" }
+  { id: "openai/gpt-oss-120b:free", name: "OpenAI: gpt-oss-120b (free)", desc: "OpenAI · Fast · Advanced", provider: "openrouter" },
+  { id: "google/gemma-4-26b-a4b-it:free", name: "Google: Gemma 4 26B A4B (free)", desc: "Google · Pro · Clever", provider: "openrouter" }
 ];
 
 let currentChatId = null;
@@ -473,58 +468,33 @@ let selectedModel = MODELS[0].id;
 let chatStore = {};
 let isGenerating = false;
 let abortController = null;
-
-// Auth State
 let isLoginMode = true;
 let currentUser = null;
 
 /* ============================================================
-   FIREBASE INIT (Securely fetched from Worker)
+   FIREBASE INIT (Hardcoded securely in frontend)
 ============================================================ */
-let auth, db;
+const firebaseConfig = {
+  apiKey: "AIzaSyA4AEH2TgHM2J8xBjAenmgRchsYOU8GeJc",
+  authDomain: "moonwi.firebaseapp.com",
+  projectId: "moonwi",
+  storageBucket: "moonwi.firebasestorage.app",
+  messagingSenderId: "867489903662",
+  appId: "1:867489903662:web:7f091ba43c27bfe1809bbf"
+};
 
-async function initFirebase() {
-  try {
-    // 1. Wait for the core Firebase object to load
-    while (typeof firebase === 'undefined') {
-      await new Promise(resolve => setTimeout(resolve, 50));
-    }
-    
-    // 2. Wait specifically for the Auth module to load
-    while (typeof firebase.auth === 'undefined') {
-      await new Promise(resolve => setTimeout(resolve, 50));
-    }
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-    // 3. Fetch the secure config from your Cloudflare Worker
-    const res = await fetch(`${BACKEND_URL}/firebase-config`);
-    if (!res.ok) throw new Error(`Failed to fetch config: ${res.status}`);
-    
-    const config = await res.json();
-
-    // 4. Initialize Firebase
-    firebase.initializeApp(config);
-    auth = firebase.auth();
-    db = firebase.firestore();
-
-    console.log("Firebase initialized successfully!");
-
-    // 5. Listen for auth state changes
-    auth.onAuthStateChanged(handleAuthChange);
-
-  } catch (error) {
-    console.error("CRITICAL: Failed to initialize Firebase:", error);
-    showToast("Connection to authentication server failed. Check console for details.");
-  }
-}
+auth.onAuthStateChanged(handleAuthChange);
 
 async function handleAuthChange(user) {
   if (user) {
     currentUser = user;
-    // Update UI elements with user info
     const displayName = user.displayName || (user.email ? user.email.split('@')[0] : 'User');
     document.getElementById('account-email').textContent = user.email || 'No email';
     updateGreetingName(displayName);
-    // Load chats from Firestore
     loadUserChats(user.uid);
   } else {
     currentUser = null;
@@ -568,19 +538,6 @@ async function handleAuthSubmit(e) {
   const errorEl = document.getElementById('auth-error');
   errorEl.classList.add('hidden');
 
-  // Wait for auth to be ready if the user clicks too fast
-  let attempts = 0;
-  while (!auth && attempts < 20) {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    attempts++;
-  }
-
-  if (!auth) {
-    errorEl.textContent = "Authentication is still loading. Please wait a moment and try again.";
-    errorEl.classList.remove('hidden');
-    return;
-  }
-
   try {
     if (isLoginMode) {
       await auth.signInWithEmailAndPassword(email, password);
@@ -595,7 +552,7 @@ async function handleAuthSubmit(e) {
 }
 
 async function handleLogout() {
-  if (auth) await auth.signOut();
+  await auth.signOut();
   navigateHome();
 }
 
@@ -603,7 +560,7 @@ async function handleLogout() {
    FIRESTORE SYNC
 ============================================================ */
 async function saveChatToFirestore(chatId) {
-  if (!currentUser || !db) return;
+  if (!currentUser) return;
   const chat = chatStore[chatId];
   if (!chat) return;
 
@@ -615,7 +572,7 @@ async function saveChatToFirestore(chatId) {
 }
 
 async function deleteChatFromFirestore(chatId) {
-  if (!currentUser || !db) return;
+  if (!currentUser) return;
   await db.collection('users').doc(currentUser.uid).collection('chats').doc(chatId).delete();
 }
 
@@ -633,25 +590,6 @@ function showToast(message) {
     toast.style.transform = 'translateY(-8px) scale(0.96)';
     setTimeout(() => toast.remove(), 300);
   }, 2200);
-}
-
-/* ============================================================
-   MOBILE MENU
-============================================================ */
-function openMobileMenu() {
-  const menu = document.getElementById('mobile-menu');
-  menu.classList.remove('hidden');
-  requestAnimationFrame(() => {
-    menu.style.opacity = '1';
-    menu.classList.add('open');
-  });
-}
-
-function closeMobileMenu() {
-  const menu = document.getElementById('mobile-menu');
-  menu.style.opacity = '0';
-  menu.classList.remove('open');
-  setTimeout(() => menu.classList.add('hidden'), 350);
 }
 
 /* ============================================================
@@ -683,7 +621,7 @@ function handleRoute() {
 }
 
 function navigateToChat(prompt) {
-  const chatId = db.collection('temp').doc().id; // Generate random ID securely
+  const chatId = db.collection('temp').doc().id; 
   history.pushState({ chatId, prompt }, '', `/c/${chatId}`);
   getChat(chatId).title = prompt.substring(0, 30) + (prompt.length > 30 ? '...' : '');
   switchToChat(chatId, prompt);
@@ -1508,7 +1446,6 @@ Format responses with markdown: use **bold**, *italic*, lists, tables, blockquot
 
 // Init
 loadTheme();
-initFirebase();
 handleRoute();
 </script>
 </body>
