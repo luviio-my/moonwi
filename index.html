@@ -485,25 +485,30 @@ let auth, db;
 
 async function initFirebase() {
   try {
-    // 1. Wait for the Firebase library to fully load
+    // 1. Wait for the core Firebase object to load
     while (typeof firebase === 'undefined') {
       await new Promise(resolve => setTimeout(resolve, 50));
     }
+    
+    // 2. Wait specifically for the Auth module to load
+    while (typeof firebase.auth === 'undefined') {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
 
-    // 2. Fetch the secure config from your Cloudflare Worker
+    // 3. Fetch the secure config from your Cloudflare Worker
     const res = await fetch(`${BACKEND_URL}/firebase-config`);
     if (!res.ok) throw new Error(`Failed to fetch config: ${res.status}`);
     
     const config = await res.json();
 
-    // 3. Initialize Firebase
+    // 4. Initialize Firebase
     firebase.initializeApp(config);
     auth = firebase.auth();
     db = firebase.firestore();
 
     console.log("Firebase initialized successfully!");
 
-    // 4. Listen for auth state changes
+    // 5. Listen for auth state changes
     auth.onAuthStateChanged(handleAuthChange);
 
   } catch (error) {
@@ -563,6 +568,19 @@ async function handleAuthSubmit(e) {
   const errorEl = document.getElementById('auth-error');
   errorEl.classList.add('hidden');
 
+  // Wait for auth to be ready if the user clicks too fast
+  let attempts = 0;
+  while (!auth && attempts < 20) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    attempts++;
+  }
+
+  if (!auth) {
+    errorEl.textContent = "Authentication is still loading. Please wait a moment and try again.";
+    errorEl.classList.remove('hidden');
+    return;
+  }
+
   try {
     if (isLoginMode) {
       await auth.signInWithEmailAndPassword(email, password);
@@ -577,7 +595,7 @@ async function handleAuthSubmit(e) {
 }
 
 async function handleLogout() {
-  await auth.signOut();
+  if (auth) await auth.signOut();
   navigateHome();
 }
 
@@ -585,7 +603,7 @@ async function handleLogout() {
    FIRESTORE SYNC
 ============================================================ */
 async function saveChatToFirestore(chatId) {
-  if (!currentUser) return;
+  if (!currentUser || !db) return;
   const chat = chatStore[chatId];
   if (!chat) return;
 
@@ -597,7 +615,7 @@ async function saveChatToFirestore(chatId) {
 }
 
 async function deleteChatFromFirestore(chatId) {
-  if (!currentUser) return;
+  if (!currentUser || !db) return;
   await db.collection('users').doc(currentUser.uid).collection('chats').doc(chatId).delete();
 }
 
