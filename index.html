@@ -12,10 +12,10 @@
 <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+<!-- Firebase SDKs — Using COMPAT builds for global `firebase` object -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <style>
   :root {
     --bg-primary: #0d0d0d; --bg-secondary: #171717; --bg-tertiary: #212121; --bg-input: #2f2f2f; --bg-hover: #2a2a2a;
@@ -472,7 +472,11 @@ let isLoginMode = true;
 let currentUser = null;
 
 /* ============================================================
-   FIREBASE INIT (Hardcoded securely in frontend)
+   FIREBASE INIT — Using `let` with null guards to prevent TDZ
+   "Cannot access 'auth' before initialization" fix:
+   - Use compat SDK scripts (see <head>) for global `firebase` object
+   - Use `let` instead of `const` so failed init = null (not TDZ)
+   - Wrap in try-catch so one failure doesn't block everything
 ============================================================ */
 const firebaseConfig = {
   apiKey: "AIzaSyA4AEH2TgHM2J8xBjAenmgRchsYOU8GeJc",
@@ -483,12 +487,39 @@ const firebaseConfig = {
   appId: "1:867489903662:web:7f091ba43c27bfe1809bbf"
 };
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+let auth = null;
+let db = null;
 
-auth.onAuthStateChanged(handleAuthChange);
+try {
+  if (typeof firebase !== 'undefined') {
+    firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.firestore();
+    auth.onAuthStateChanged(handleAuthChange);
+  } else {
+    console.error('Firebase SDK not loaded — check script tags in <head>');
+  }
+} catch (e) {
+  console.error('Firebase initialization error:', e);
+}
 
+/* ============================================================
+   ID GENERATOR (fallback if Firestore isn't available)
+============================================================ */
+function generateId() {
+  if (db) {
+    try { return db.collection('temp').doc().id; } catch (e) { /* fall through */ }
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+/* ============================================================
+   AUTH STATE HANDLER
+============================================================ */
 async function handleAuthChange(user) {
   if (user) {
     currentUser = user;
@@ -505,16 +536,21 @@ async function handleAuthChange(user) {
 }
 
 async function loadUserChats(userId) {
-  const snapshot = await db.collection('users').doc(userId).collection('chats').orderBy('updatedAt', 'desc').get();
-  chatStore = {};
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    chatStore[doc.id] = {
-      title: data.title || "New Chat",
-      messages: data.messages || []
-    };
-  });
-  renderHistoryList();
+  if (!db) return;
+  try {
+    const snapshot = await db.collection('users').doc(userId).collection('chats').orderBy('updatedAt', 'desc').get();
+    chatStore = {};
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      chatStore[doc.id] = {
+        title: data.title || "New Chat",
+        messages: data.messages || []
+      };
+    });
+    renderHistoryList();
+  } catch (e) {
+    console.error('Failed to load chats:', e);
+  }
 }
 
 /* ============================================================
@@ -538,6 +574,12 @@ async function handleAuthSubmit(e) {
   const errorEl = document.getElementById('auth-error');
   errorEl.classList.add('hidden');
 
+  if (!auth) {
+    errorEl.textContent = 'Authentication service unavailable. Please refresh the page.';
+    errorEl.classList.remove('hidden');
+    return;
+  }
+
   try {
     if (isLoginMode) {
       await auth.signInWithEmailAndPassword(email, password);
@@ -552,7 +594,7 @@ async function handleAuthSubmit(e) {
 }
 
 async function handleLogout() {
-  await auth.signOut();
+  if (auth) await auth.signOut();
   navigateHome();
 }
 
@@ -560,20 +602,28 @@ async function handleLogout() {
    FIRESTORE SYNC
 ============================================================ */
 async function saveChatToFirestore(chatId) {
-  if (!currentUser) return;
+  if (!currentUser || !db) return;
   const chat = chatStore[chatId];
   if (!chat) return;
 
-  await db.collection('users').doc(currentUser.uid).collection('chats').doc(chatId).set({
-    title: chat.title,
-    messages: chat.messages,
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-  }, { merge: true });
+  try {
+    await db.collection('users').doc(currentUser.uid).collection('chats').doc(chatId).set({
+      title: chat.title,
+      messages: chat.messages,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+  } catch (e) {
+    console.error('Failed to save chat:', e);
+  }
 }
 
 async function deleteChatFromFirestore(chatId) {
-  if (!currentUser) return;
-  await db.collection('users').doc(currentUser.uid).collection('chats').doc(chatId).delete();
+  if (!currentUser || !db) return;
+  try {
+    await db.collection('users').doc(currentUser.uid).collection('chats').doc(chatId).delete();
+  } catch (e) {
+    console.error('Failed to delete chat:', e);
+  }
 }
 
 /* ============================================================
@@ -607,10 +657,10 @@ function handleRoute() {
   const path = window.location.pathname;
   const chatMatch = path.match(/^\/c\/([a-zA-Z0-9-]+)/);
   if (path === '/home') { openLandingView(); return; }
-  if (chatMatch) { 
+  if (chatMatch) {
     if (currentUser) switchToChat(chatMatch[1]);
     else openLandingView();
-    return; 
+    return;
   }
   if (path === '/') {
     if (currentUser) startNewChat();
@@ -621,7 +671,7 @@ function handleRoute() {
 }
 
 function navigateToChat(prompt) {
-  const chatId = db.collection('temp').doc().id; 
+  const chatId = generateId();
   history.pushState({ chatId, prompt }, '', `/c/${chatId}`);
   getChat(chatId).title = prompt.substring(0, 30) + (prompt.length > 30 ? '...' : '');
   switchToChat(chatId, prompt);
@@ -721,7 +771,8 @@ async function generateChatTitle(firstMessage) {
       body: JSON.stringify({
         messages: [{ role: 'user', content: `Create a very short title (3-6 words max) for a chat that starts with this user message. Reply with ONLY the title, no quotes, no punctuation at the end. Use Title Case. Message: ${firstMessage.substring(0, 500)}` }],
         model: selectedModel,
-        systemPrompt: "You are a title generator. Output only the title text."
+        systemPrompt: "You are a title generator. Output only the title text.",
+        webSearch: false
       })
     });
     const data = await response.json();
@@ -739,7 +790,7 @@ function startNewChat() {
     openAuthModal('login');
     return;
   }
-  const chatId = db.collection('temp').doc().id;
+  const chatId = generateId();
   history.pushState({}, '', `/c/${chatId}`);
   getChat(chatId);
   updateDocumentTitle(null);
@@ -1340,7 +1391,7 @@ When sharing code:
 - For Python code, make sure it is syntactically correct and includes necessary imports.
 
 Format responses with markdown: use **bold**, *italic*, lists, tables, blockquotes, and code blocks where appropriate.`;
-  
+
   let fullResponse = '';
 
   try {
@@ -1350,7 +1401,8 @@ Format responses with markdown: use **bold**, *italic*, lists, tables, blockquot
       body: JSON.stringify({
         messages: chatData.messages,
         model: selectedModel,
-        systemPrompt: systemPrompt
+        systemPrompt: systemPrompt,
+        webSearch: true
       }),
       signal: abortController.signal
     });
@@ -1368,7 +1420,7 @@ Format responses with markdown: use **bold**, *italic*, lists, tables, blockquot
     if (window.Prism) Prism.highlightAllUnder(assistantBubble);
 
     chatData.messages.push({ role: 'assistant', content: fullResponse, feedback: null });
-    saveChatToFirestore(thisChatId); // Save to Firestore
+    saveChatToFirestore(thisChatId);
 
     const actionsEl = wrapper.querySelector('.msg-actions');
     if (actionsEl) { actionsEl.style.display = 'flex'; actionsEl.classList.add('always-show'); }
