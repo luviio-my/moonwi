@@ -34,6 +34,13 @@
   .font-schibsted { font-family: 'Schibsted Grotesk', sans-serif; }
   .font-inter { font-family: 'Inter', sans-serif; }
   .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* Loading Splash */
+  #loading-splash { transition: opacity 0.4s ease; z-index: 9999; }
+  #loading-splash.fade-out { opacity: 0; pointer-events: none; }
+  @keyframes splashPulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
+  .splash-logo { animation: splashPulse 1.8s ease-in-out infinite; }
+
   .liquid-glass { background: var(--glass-bg); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow), var(--glass-inset); }
   .liquid-glass-subtle { background: var(--bg-secondary); backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%); border: 1px solid var(--border-color); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
   html.light-mode .liquid-glass-subtle { background: rgba(255,255,255,0.9); border: 1px solid var(--border-color); box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
@@ -41,18 +48,22 @@
   .video-wrap video { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
   html:not(.light-mode) .gradient-overlay { background: radial-gradient(ellipse 90% 80% at 50% 20%, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.05) 80%); }
   html.light-mode .gradient-overlay { background: radial-gradient(ellipse 90% 80% at 50% 20%, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.15) 40%, rgba(255,255,255,0.05) 80%); }
+
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.3); border-radius: 10px; }
   ::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.5); }
   * { scrollbar-width: thin; scrollbar-color: rgba(128,128,128,0.3) transparent; }
+
   #sidebar { transition: width 0.3s ease, transform 0.3s ease, opacity 0.2s ease; overflow: hidden; white-space: nowrap; }
   #sidebar.closed { width: 0px !important; padding: 0 !important; border: none !important; }
   #sidebar-content { opacity: 1; transition: opacity 0.15s ease; }
   #sidebar.closed #sidebar-content { opacity: 0; pointer-events: none; }
   #sidebar-backdrop { transition: opacity 0.3s ease; }
+
   .modal-overlay { transition: opacity 0.2s ease; }
   .modal-panel { transition: opacity 0.2s ease, transform 0.2s ease-out; }
+
   .chat-item { position: relative; display: flex; align-items: center; justify-content: space-between; transition: background 0.15s ease, transform 0.1s ease; }
   .chat-item:active { transform: scale(0.98); }
   .chat-item-active { background: var(--bg-tertiary); color: var(--text-primary); }
@@ -62,12 +73,12 @@
   .chat-item-active .chat-item-actions { opacity: 1; }
   .chat-item.pinned .pin-indicator { opacity: 1; }
   .pin-indicator { opacity: 0; color: var(--accent); transition: opacity 0.15s ease; }
+
   @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
   .msg-animate { animation: slideIn 0.3s ease-out forwards; will-change: transform, opacity; }
   @keyframes viewFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
   .view-transition { animation: viewFadeIn 0.3s ease-out; }
-  @keyframes chatAreaFade { from { opacity: 0.5; } to { opacity: 1; } }
-  .chat-area-refresh { animation: chatAreaFade 0.2s ease-out; }
+
   @keyframes pulse-dot { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.1); } }
   .typing-dot { animation: pulse-dot 1.4s infinite ease-in-out; }
   .typing-dot:nth-child(2) { animation-delay: 0.2s; }
@@ -79,6 +90,7 @@
   @keyframes stopPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(0.88); } }
   .stop-icon-pulse { animation: stopPulse 1.2s ease-in-out infinite; }
   @keyframes toastIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
   .prose-content { line-height: 1.75; font-size: 15px; word-wrap: break-word; overflow-wrap: break-word; }
   .prose-content p { margin: 0.7em 0; }
   .prose-content p:first-child { margin-top: 0; }
@@ -96,6 +108,7 @@
   .prose-content table { border-collapse: collapse; margin: 0.9em 0; width: 100%; display: block; overflow-x: auto; }
   .prose-content th, .prose-content td { border: 1px solid var(--border-color); padding: 8px 12px; text-align: left; }
   .prose-content th { background: var(--bg-tertiary); font-weight: 600; }
+
   .code-block-wrapper { margin: 12px 0; border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color); background: #1a1b26; }
   .code-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #16171f; border-bottom: 1px solid rgba(255,255,255,0.06); }
   .code-lang { color: #a9b1d6; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'JetBrains Mono', monospace; }
@@ -105,21 +118,32 @@
   .code-block-wrapper pre { margin: 0 !important; border-radius: 0 !important; background: #1a1b26 !important; overflow-x: auto; }
   .code-block-wrapper pre code { font-family: 'JetBrains Mono', monospace !important; font-size: 13px !important; padding: 14px 16px !important; display: block; }
   .html-preview-iframe { width: 100%; border: 0; background: white; border-top: 1px solid rgba(255,255,255,0.06); }
+
+  .suggestion-card { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--border-color); background: var(--bg-secondary); cursor: pointer; transition: all 0.2s ease; text-align: left; width: 100%; }
+  .suggestion-card:hover { background: var(--bg-hover); border-color: rgba(16,163,127,0.3); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+  .suggestion-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; background: var(--bg-tertiary); }
+  .suggestion-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+  .suggestion-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+
   .action-card { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border: 1px solid var(--glass-border); border-radius: 999px; background: var(--glass-bg); backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); color: var(--text-primary); font-size: 13px; cursor: pointer; transition: all 0.2s ease; }
   .action-card:hover { background: var(--bg-hover); border-color: rgba(255,255,255,0.2); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
   .action-card:active { transform: translateY(0) scale(0.97); }
-  .send-stop-btn { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; cursor: pointer; border: none; }
+
+  .send-stop-btn { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; cursor: pointer; border: none; }
   .send-stop-btn.send { background: var(--text-primary); color: var(--bg-primary); }
   .send-stop-btn.send:disabled { background: var(--bg-tertiary); color: var(--text-secondary); cursor: not-allowed; }
   .send-stop-btn.send:not(:disabled):hover { transform: scale(1.08); }
   .send-stop-btn.stop { background: var(--text-primary); color: var(--bg-primary); }
   .send-stop-btn.stop:hover { opacity: 0.85; transform: scale(1.05); }
+
   .nav-item { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; color: var(--text-secondary); font-size: 14px; cursor: pointer; transition: background 0.15s ease, color 0.15s ease; }
   .nav-item:hover { background: var(--bg-hover); color: var(--text-primary); }
   html.light-mode .landing-form-shadow { box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
   html:not(.light-mode) .landing-form-shadow { box-shadow: 0 10px 40px rgba(0,0,0,0.4); }
+
   #chat-input { resize: none; min-height: 24px; max-height: 200px; }
   #landing-input { resize: none; }
+
   .msg-actions { display: flex; align-items: center; gap: 2px; margin-top: 8px; opacity: 0; transition: opacity 0.2s ease; }
   .msg-wrapper:hover .msg-actions { opacity: 1; }
   .msg-actions.always-show { opacity: 1; }
@@ -130,17 +154,21 @@
   .msg-action-btn.copied { color: #10a37f; }
   .regen-count-badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; margin-left: 4px; font-size: 11px; font-weight: 500; color: var(--text-secondary); background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 999px; font-family: 'Inter', sans-serif; line-height: 1; }
   .regen-count-badge svg { width: 10px; height: 10px; }
+
   .model-dropdown { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%) translateY(-4px); width: 340px; border-radius: 16px; border: 1px solid var(--border-color); background: var(--bg-secondary); box-shadow: 0 16px 48px rgba(0,0,0,0.4); z-index: 100; padding: 6px; opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease-out; }
   .model-dropdown.open { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
   .model-option { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; cursor: pointer; transition: background 0.12s ease; border: none; background: transparent; width: 100%; text-align: left; color: var(--text-primary); font-family: 'Fustat', sans-serif; }
   .model-option:hover { background: var(--bg-hover); }
   .model-option.selected { background: var(--bg-tertiary); }
+
   .chat-top-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; position: relative; z-index: 30; background: rgba(13,13,13,0.6); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border-bottom: 1px solid var(--border-color); }
   html.light-mode .chat-top-bar { background: rgba(255,255,255,0.6); border-bottom: 1px solid var(--border-color); }
+
   #chat-form { background: rgba(47,47,47,0.5); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border: 1px solid var(--glass-border); box-shadow: 0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
   #chat-form:focus-within { border-color: rgba(16,163,127,0.3); box-shadow: 0 8px 32px rgba(0,0,0,0.2), 0 0 0 3px rgba(16,163,127,0.08), inset 0 1px 0 rgba(255,255,255,0.04); }
   html.light-mode #chat-form { background: rgba(255,255,255,0.6); }
   #chat-form.read-only { opacity: 0.5; pointer-events: none; }
+
   .toast-item { padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; color: #fff; background: #333; box-shadow: 0 8px 24px rgba(0,0,0,0.3); transition: opacity 0.3s ease, transform 0.3s ease; animation: toastIn 0.3s ease forwards; font-family: 'Inter', sans-serif; }
   .new-chat-btn { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); background: transparent; color: var(--text-primary); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; width: 100%; font-family: 'Fustat', sans-serif; }
   .new-chat-btn:hover { background: var(--bg-hover); transform: translateY(-1px); }
@@ -149,10 +177,12 @@
   .share-link-input:focus { border-color: var(--accent); }
   .user-bubble-glass { background: rgba(47,47,47,0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
   html.light-mode .user-bubble-glass { background: rgba(240,240,240,0.6); border: 1px solid rgba(0,0,0,0.04); }
+
   #mobile-menu { transition: opacity 0.3s ease; }
   #mobile-menu-panel { transition: transform 0.35s ease; }
   #mobile-menu.open #mobile-menu-panel { transform: translateX(0) !important; }
   .mobile-hamburger { display: none; }
+
   .settings-tab { padding: 10px 16px; border-radius: 8px; cursor: pointer; transition: background 0.15s ease; font-size: 14px; color: var(--text-secondary); }
   .settings-tab:hover { background: var(--bg-hover); color: var(--text-primary); }
   .settings-tab.active { background: var(--bg-tertiary); color: var(--text-primary); font-weight: 500; }
@@ -168,6 +198,7 @@
   .edit-btn.cancel { background: var(--bg-hover); color: var(--text-primary); }
   .invalid-link-content { text-align: center; padding: 8px; }
   .invalid-link-icon { width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 50%; background: rgba(239,68,68,0.1); display: flex; align-items: center; justify-content: center; color: #ef4444; }
+
   @media (min-width: 768px) and (max-width: 1023px) {
     .landing-nav { padding: 16px 40px !important; }
     .landing-nav-links { gap: 24px !important; }
@@ -220,6 +251,18 @@
 </style>
 </head>
 <body>
+
+<!-- Loading Splash Screen -->
+<div id="loading-splash" class="fixed inset-0 flex items-center justify-center" style="background: var(--bg-primary);">
+  <div class="flex flex-col items-center gap-5">
+    <img src="https://images.luviio.com/luviio-crop-img.png" alt="MoonWi AI" class="w-14 h-14 rounded-2xl object-cover splash-logo">
+    <div class="flex gap-1.5">
+      <span class="typing-dot w-2.5 h-2.5 rounded-full" style="background: var(--accent);"></span>
+      <span class="typing-dot w-2.5 h-2.5 rounded-full" style="background: var(--accent);"></span>
+      <span class="typing-dot w-2.5 h-2.5 rounded-full" style="background: var(--accent);"></span>
+    </div>
+  </div>
+</div>
 
 <div id="toast-container" class="fixed top-5 right-5 z-[200] flex flex-col items-end gap-2"></div>
 
@@ -513,11 +556,41 @@
     </div>
 
     <div id="chat-scroll" class="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth">
-      <div id="empty-state" class="min-h-full flex flex-col items-center justify-center px-6 pt-20 pb-40">
-        <div class="text-center mb-8">
+      <div id="empty-state" class="hidden min-h-full flex-col items-center justify-center px-6 pt-20 pb-40">
+        <div class="text-center mb-10">
           <img src="https://images.luviio.com/luviio-crop-img.png" alt="MoonWi AI" class="w-16 h-16 rounded-2xl object-cover mx-auto mb-5">
-          <h1 class="text-2xl font-semibold" style="color: var(--text-primary);">Good to see you, <span id="greeting-name">there</span></h1>
-          <p class="mt-2 text-sm" style="color: var(--text-secondary);">How can I help you today?</p>
+          <h1 class="text-3xl font-semibold mb-2" style="color: var(--text-primary);">Good to see you, <span id="greeting-name">there</span></h1>
+          <p class="text-sm" style="color: var(--text-secondary);">How can I help you today?</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl w-full">
+          <button class="suggestion-card" onclick="useActionPrompt('Write a Python function to ')">
+            <div class="suggestion-icon">💻</div>
+            <div>
+              <div class="suggestion-title">Write code</div>
+              <div class="suggestion-desc">Python, JavaScript, HTML & more</div>
+            </div>
+          </button>
+          <button class="suggestion-card" onclick="useActionPrompt('Help me write ')">
+            <div class="suggestion-icon">✍️</div>
+            <div>
+              <div class="suggestion-title">Write & edit</div>
+              <div class="suggestion-desc">Essays, emails, stories</div>
+            </div>
+          </button>
+          <button class="suggestion-card" onclick="useActionPrompt('Explain ')">
+            <div class="suggestion-icon">💡</div>
+            <div>
+              <div class="suggestion-title">Learn something</div>
+              <div class="suggestion-desc">Any topic explained simply</div>
+            </div>
+          </button>
+          <button class="suggestion-card" onclick="useActionPrompt('Create an image of ')">
+            <div class="suggestion-icon">🎨</div>
+            <div>
+              <div class="suggestion-title">Create an image</div>
+              <div class="suggestion-desc">Generate visuals from text</div>
+            </div>
+          </button>
         </div>
       </div>
       <div id="messages-container" class="hidden max-w-3xl mx-auto px-4 sm:px-6 py-6 pb-44"></div>
@@ -534,7 +607,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
           </button>
         </form>
-        <div id="action-buttons" class="flex flex-wrap justify-center gap-2 mt-3">
+        <div id="action-buttons" class="hidden flex-wrap justify-center gap-2 mt-3">
           <button class="action-card" onclick="useActionPrompt('Create an image of ')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
             Create an image
@@ -575,6 +648,18 @@ let currentUser = null;
 let isReadOnlyMode = false;
 let sharedChatOwnerId = null;
 let searchQuery = '';
+let authReady = false;
+
+/* ============================================================
+   LOADING SPLASH
+============================================================ */
+function hideLoadingSplash() {
+  const splash = document.getElementById('loading-splash');
+  if (splash) {
+    splash.classList.add('fade-out');
+    setTimeout(() => splash.style.display = 'none', 400);
+  }
+}
 
 /* ============================================================
    FIREBASE INIT
@@ -620,17 +705,27 @@ function generateId() {
 
 /* ============================================================
    AUTH STATE HANDLER
+   Key fix: Wait for auth to be ready before routing.
+   This prevents the login page from flashing on refresh.
 ============================================================ */
 async function handleAuthChange(user) {
   currentUser = user;
   updateLandingAuthUI();
-  
+
+  // Close any accidentally opened auth modal
+  if (user) {
+    const authModal = document.getElementById('auth-modal');
+    if (authModal && !authModal.classList.contains('hidden')) {
+      closeModal('auth-modal');
+    }
+  }
+
   if (user) {
     const displayName = user.displayName || (user.email ? user.email.split('@')[0] : 'User');
     const settingsEmail = document.getElementById('settings-email');
     if (settingsEmail) settingsEmail.value = user.email || 'No email';
     updateGreetingName(displayName);
-    
+
     if (db) {
       try {
         const snapshot = await db.collection('users').doc(user.uid).collection('chats').orderBy('updatedAt', 'desc').get();
@@ -649,11 +744,25 @@ async function handleAuthChange(user) {
         console.error('Failed to load chats:', e);
       }
     }
+
+    // Only hide splash and route once auth is ready
+    if (!authReady) {
+      authReady = true;
+      hideLoadingSplash();
+    }
     handleRoute();
   } else {
     chatStore = {};
     renderHistoryList();
-    if (window.location.pathname !== '/home' && !window.location.pathname.startsWith('/c/')) {
+
+    if (!authReady) {
+      authReady = true;
+      hideLoadingSplash();
+    }
+
+    // Handle routing based on current path
+    const path = window.location.pathname;
+    if (path !== '/home' && !path.startsWith('/c/')) {
        navigateHome();
     } else {
        handleRoute();
@@ -665,7 +774,7 @@ function updateLandingAuthUI() {
   const btnSignup = document.getElementById('btn-signup');
   const btnLogin = document.getElementById('btn-login');
   const btnProfile = document.getElementById('btn-profile');
-  
+
   if (currentUser) {
     if (btnSignup) btnSignup.classList.add('hidden');
     if (btnLogin) btnLogin.classList.add('hidden');
@@ -711,6 +820,7 @@ async function handleAuthSubmit(e) {
       await auth.createUserWithEmailAndPassword(email, password);
     }
     closeModal('auth-modal');
+    // handleAuthChange will be called by onAuthStateChanged and will handle routing
   } catch (error) {
     errorEl.textContent = error.message;
     errorEl.classList.remove('hidden');
@@ -768,7 +878,6 @@ async function deleteChatFromFirestore(chatId) {
   if (!currentUser || !db) return;
   try {
     await db.collection('users').doc(currentUser.uid).collection('chats').doc(chatId).delete();
-    // Also clean up any shared links for this chat
     const sharedSnapshot = await db.collection('sharedChats').where('originalChatId', '==', chatId).get();
     const batch = db.batch();
     sharedSnapshot.forEach(doc => batch.delete(doc.ref));
@@ -796,15 +905,13 @@ async function togglePinChat(chatId) {
 ============================================================ */
 async function createShareLink(chatId) {
   if (!currentUser || !db) return null;
-  
-  // Check if a shared link already exists for this chat
+
   try {
     const existing = await db.collection('sharedChats').where('originalChatId', '==', chatId).where('ownerId', '==', currentUser.uid).limit(1).get();
     if (!existing.empty) {
       return `${window.location.origin}/c/${existing.docs[0].id}`;
     }
-    
-    // Create new shared link
+
     const sharedId = generateId();
     await db.collection('sharedChats').doc(sharedId).set({
       ownerId: currentUser.uid,
@@ -835,7 +942,7 @@ function showToast(message) {
 }
 
 /* ============================================================
-   ROUTER - NEW ROUTE STRUCTURE
+   ROUTER
    /c/[user-id]/[document-id]  -> Private chat (owner only)
    /c/[document-id]            -> Shared read-only chat
 ============================================================ */
@@ -849,9 +956,9 @@ function updateDocumentTitle(title) {
 
 function handleRoute() {
   const path = window.location.pathname;
-  
+
   if (path === '/home') { openLandingView(); return; }
-  
+
   // Private chat: /c/[user-id]/[document-id]
   const privateMatch = path.match(/^\/c\/([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+)$/);
   if (privateMatch) {
@@ -859,7 +966,7 @@ function handleRoute() {
     handlePrivateChatAccess(routeUserId, docId);
     return;
   }
-  
+
   // Shared chat: /c/[document-id]
   const sharedMatch = path.match(/^\/c\/([a-zA-Z0-9_-]+)$/);
   if (sharedMatch) {
@@ -867,38 +974,37 @@ function handleRoute() {
     handleSharedChatAccess(docId);
     return;
   }
-  
+
   if (path === '/' || path === '/chat') {
     if (currentUser) startNewChat();
     else openLandingView();
     return;
   }
-  
+
   openLandingView();
 }
 
 async function handlePrivateChatAccess(routeUserId, docId) {
-  // Verify authenticated
+  // If not logged in, show auth modal (user needs to log in to see their private chat)
   if (!currentUser) {
     openAuthModal('login');
     return;
   }
-  
+
   // Verify user ID matches route user ID (owner validation)
   if (currentUser.uid !== routeUserId) {
     showInvalidLinkModal();
     return;
   }
-  
+
   // Valid owner — full chat functionality
   isReadOnlyMode = false;
   sharedChatOwnerId = null;
   setReadOnlyUI(false);
   currentChatId = docId;
-  
+
   // Ensure chat exists in store
   if (!chatStore[docId]) {
-    // Try to load from Firestore
     try {
       const doc = await db.collection('users').doc(currentUser.uid).collection('chats').doc(docId).get();
       if (doc.exists) {
@@ -910,14 +1016,13 @@ async function handlePrivateChatAccess(routeUserId, docId) {
           pinnedAt: data.pinnedAt || null
         };
       } else {
-        // New chat
         chatStore[docId] = { messages: [], title: "New Chat", pinned: false, pinnedAt: null };
       }
     } catch (e) {
       chatStore[docId] = { messages: [], title: "New Chat", pinned: false, pinnedAt: null };
     }
   }
-  
+
   openChatView();
   renderChatMessages();
   updateDocumentTitle(chatStore[docId].title);
@@ -929,27 +1034,24 @@ async function handleSharedChatAccess(docId) {
     showInvalidLinkModal();
     return;
   }
-  
+
   try {
-    // Look up shared chat record
     const sharedRef = await db.collection('sharedChats').doc(docId).get();
     if (!sharedRef.exists) {
       showInvalidLinkModal();
       return;
     }
-    
+
     const { ownerId, originalChatId } = sharedRef.data();
     sharedChatOwnerId = ownerId;
-    
-    // Fetch the actual chat data
+
     const chatRef = await db.collection('users').doc(ownerId).collection('chats').doc(originalChatId).get();
     if (!chatRef.exists) {
       showInvalidLinkModal();
       return;
     }
-    
+
     const data = chatRef.data();
-    // Load as read-only
     isReadOnlyMode = true;
     currentChatId = docId;
     chatStore[docId] = {
@@ -959,7 +1061,7 @@ async function handleSharedChatAccess(docId) {
       pinnedAt: null,
       _isShared: true
     };
-    
+
     setReadOnlyUI(true);
     openChatView();
     renderChatMessages();
@@ -979,19 +1081,22 @@ function setReadOnlyUI(readOnly) {
   const chatForm = document.getElementById('chat-form');
   const actionButtons = document.getElementById('action-buttons');
   const sidebar = document.getElementById('sidebar');
-  
+
   if (readOnly) {
     banner.classList.remove('hidden');
     chatForm.classList.add('read-only');
     actionButtons.classList.add('hidden');
+    actionButtons.classList.remove('flex');
     sidebar.classList.add('closed');
   } else {
     banner.classList.add('hidden');
     chatForm.classList.remove('read-only');
     if (document.getElementById('empty-state').classList.contains('hidden')) {
       actionButtons.classList.add('hidden');
+      actionButtons.classList.remove('flex');
     } else {
       actionButtons.classList.remove('hidden');
+      actionButtons.classList.add('flex');
     }
     if (window.innerWidth >= 768) {
       sidebar.classList.remove('closed');
@@ -1045,6 +1150,14 @@ function openChatView() {
   renderHistoryList();
   if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('closed');
   else if (!isReadOnlyMode) resetSidebarState();
+}
+
+/* ============================================================
+   MOBILE MENU
+============================================================ */
+function openMobileMenu() {
+  if (currentUser) navigateToChat();
+  else openAuthModal('login');
 }
 
 /* ============================================================
@@ -1134,7 +1247,7 @@ async function generateChatTitle(firstMessage) {
 }
 
 /* ============================================================
-   CHAT SWITCHING
+   CHAT SWITCHING — Smooth transitions without page refresh
 ============================================================ */
 function startNewChat() {
   if (!currentUser) {
@@ -1151,22 +1264,22 @@ function startNewChat() {
 }
 
 function switchToChat(chatId, initialPrompt) {
-  const isViewAlreadyOpen = !chatView.classList.contains('hidden');
   currentChatId = chatId;
-  
-  if (!isViewAlreadyOpen) {
+
+  if (chatView.classList.contains('hidden')) {
     openChatView();
   }
-  
+
   renderChatMessages();
-  
+
   const chatData = getChat(chatId);
   updateDocumentTitle(chatData.title);
-  
+
   if (window.innerWidth < 768) {
     document.getElementById('sidebar').classList.add('closed');
     document.getElementById('sidebar-backdrop').classList.remove('active');
   }
+
   if (initialPrompt && chatData.messages.length === 0 && !isReadOnlyMode) {
     setTimeout(() => sendChatMessage(initialPrompt), 100);
   }
@@ -1192,6 +1305,7 @@ function renderChatMessages() {
       actionButtons.classList.add('flex');
     } else {
       actionButtons.classList.add('hidden');
+      actionButtons.classList.remove('flex');
     }
   } else {
     emptyState.classList.add('hidden');
@@ -1199,21 +1313,19 @@ function renderChatMessages() {
     messagesContainer.classList.remove('hidden');
     actionButtons.classList.add('hidden');
     actionButtons.classList.remove('flex');
-    
-    messagesContainer.classList.remove('chat-area-refresh');
-    void messagesContainer.offsetWidth;
-    messagesContainer.classList.add('chat-area-refresh');
-    
+
+    // Clean render without flash animation
     messagesContainer.innerHTML = '';
     chatData.messages.forEach((msg, idx) => {
       const isLast = idx === chatData.messages.length - 1;
       const isLastAssistant = isLast && msg.role === 'assistant';
       addMessageToDOM(msg.role, msg.content, false, true, isLastAssistant, msg.feedback, msg.regenerateCount || 0);
     });
-    setTimeout(() => {
+    // Use requestAnimationFrame for smooth scroll after render
+    requestAnimationFrame(() => {
       const sc = document.getElementById('chat-scroll');
       sc.scrollTop = sc.scrollHeight;
-    }, 50);
+    });
   }
 }
 
@@ -1222,36 +1334,35 @@ function renderHistoryList() {
   const pinnedList = document.getElementById('pinned-list');
   const pinnedSection = document.getElementById('pinned-section');
   const noResults = document.getElementById('no-results');
-  
+
   if (!historyList || !pinnedList) return;
-  
+
   const chatIds = Object.keys(chatStore).filter(id => !chatStore[id]._isShared);
-  
+
   if (chatIds.length === 0) {
     historyList.innerHTML = '<div class="px-3 py-2 text-sm italic" style="color: var(--text-secondary);">No chats yet</div>';
     pinnedSection.classList.add('hidden');
     noResults.classList.add('hidden');
     return;
   }
-  
-  // Filter by search query
+
   const filtered = chatIds.filter(id => {
     if (!searchQuery) return true;
     return chatStore[id].title.toLowerCase().includes(searchQuery.toLowerCase());
   });
-  
+
   if (filtered.length === 0) {
     historyList.innerHTML = '';
     pinnedSection.classList.add('hidden');
     noResults.classList.remove('hidden');
     return;
   }
-  
+
   noResults.classList.add('hidden');
-  
+
   const pinned = filtered.filter(id => chatStore[id].pinned);
   const unpinned = filtered.filter(id => !chatStore[id].pinned);
-  
+
   if (pinned.length > 0) {
     pinnedSection.classList.remove('hidden');
     pinnedList.innerHTML = '';
@@ -1259,7 +1370,7 @@ function renderHistoryList() {
   } else {
     pinnedSection.classList.add('hidden');
   }
-  
+
   historyList.innerHTML = '';
   unpinned.forEach(id => historyList.appendChild(createChatItem(id)));
 }
@@ -1268,7 +1379,7 @@ function createChatItem(id) {
   const chat = chatStore[id];
   const isActive = id === currentChatId;
   const isPinned = chat.pinned;
-  
+
   const div = document.createElement('div');
   div.className = `chat-item px-3 py-2 text-sm rounded-lg cursor-pointer truncate ${isActive ? 'chat-item-active' : 'chat-item-inactive'} ${isPinned ? 'pinned' : ''}`;
   div.style.color = isActive ? 'var(--text-primary)' : 'var(--text-secondary)';
@@ -1316,8 +1427,7 @@ function showChatMenu(e, chatId) {
   menu.style.left = `${x}px`;
   menu.style.top = `${y}px`;
   menu.dataset.chatid = chatId;
-  
-  // Update pin label
+
   const chat = chatStore[chatId];
   const pinLabel = document.getElementById('pin-menu-label');
   if (pinLabel && chat) pinLabel.textContent = chat.pinned ? 'Unpin' : 'Pin';
@@ -1409,13 +1519,15 @@ async function openShareModal() {
   const loading = document.getElementById('share-loading');
   const input = document.getElementById('share-link-input');
   const copyBtn = input.nextElementSibling;
-  
+
   loading.classList.remove('hidden');
+  loading.textContent = 'Generating link...';
+  loading.style.color = '';
   input.value = '';
   copyBtn.disabled = true;
   copyBtn.style.opacity = '0.5';
   openModal('share-modal');
-  
+
   const link = await createShareLink(currentChatId);
   if (link) {
     input.value = link;
@@ -1576,7 +1688,7 @@ function stopGeneration() {
 function copyMessage(btn) {
   const msgEl = btn.closest('.msg-wrapper').querySelector('.assistant-msg, .user-bubble-glass');
   if (!msgEl) return;
-  const text = msgEl.classList.contains('assistant-msg') ? (msgEl.innerText || msgEl.textContent) : (msgEl.innerText || msgEl.textContent);
+  const text = msgEl.innerText || msgEl.textContent;
   navigator.clipboard.writeText(text).then(() => {
     btn.classList.add('copied');
     btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
@@ -1609,8 +1721,7 @@ function editMessage(btn) {
   if (!bubble) return;
   const originalText = bubble.textContent;
   const msgIndex = parseInt(wrapper.dataset.msgIndex);
-  
-  // Create edit UI
+
   const editContainer = document.createElement('div');
   editContainer.className = 'w-full';
   editContainer.innerHTML = `
@@ -1620,35 +1731,33 @@ function editMessage(btn) {
       <button class="edit-btn save">Save & Submit</button>
     </div>
   `;
-  
+
   bubble.replaceWith(editContainer);
   const textarea = editContainer.querySelector('.edit-textarea');
   textarea.focus();
   textarea.style.height = 'auto';
   textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
   textarea.addEventListener('input', () => autoResizeTextarea(textarea));
-  
+
   editContainer.querySelector('.cancel').onclick = () => {
     editContainer.replaceWith(bubble);
   };
-  
+
   editContainer.querySelector('.save').onclick = () => {
     const newText = textarea.value.trim();
     if (!newText || newText === originalText) {
       editContainer.replaceWith(bubble);
       return;
     }
-    
-    // Update message and truncate subsequent messages
+
     const chatData = getChat(currentChatId);
     chatData.messages[msgIndex].content = newText;
     chatData.messages[msgIndex].editedAt = Date.now();
     chatData.messages = chatData.messages.slice(0, msgIndex + 1);
-    
+
     saveChatToFirestore(currentChatId);
     renderChatMessages();
-    
-    // Trigger regeneration
+
     setTimeout(() => sendChatMessage('', true), 100);
   };
 }
@@ -1702,26 +1811,16 @@ function regenerateResponse(btn) {
   const wrapper = btn.closest('.msg-wrapper');
   const msgIdx = parseInt(wrapper.dataset.msgIndex);
   const chatData = getChat(currentChatId);
-  
-  // Find the message and its regenerate count
+
   const currentMsg = chatData.messages[msgIdx];
   if (!currentMsg || currentMsg.role !== 'assistant') return;
-  
-  // Remove this assistant message (and any messages after it that are part of the same exchange)
-  // Actually: remove just this assistant message, then regenerate
-  // Count how many times this has been regenerated
+
   const newRegenCount = (currentMsg.regenerateCount || 0) + 1;
-  
-  // Remove from store
+
   chatData.messages.splice(msgIdx, 1);
-  
-  // Remove from DOM
   wrapper.remove();
-  
-  // Re-render to update indices (or just continue)
+
   renderChatMessages();
-  
-  // Trigger regeneration with count
   sendChatMessage('', true, newRegenCount);
 }
 
@@ -1736,6 +1835,7 @@ function addMessageToDOM(role, content, animate = true, renderMd = true, isLastA
     emptyState.classList.remove('flex');
     messagesContainer.classList.remove('hidden');
     document.getElementById('action-buttons').classList.add('hidden');
+    document.getElementById('action-buttons').classList.remove('flex');
   }
 
   const wrapper = document.createElement('div');
@@ -1755,7 +1855,7 @@ function addMessageToDOM(role, content, animate = true, renderMd = true, isLastA
     const feedbackLiked = feedback === 'liked';
     const feedbackDisliked = feedback === 'disliked';
     const showRegenBadge = regenerateCount > 0;
-    
+
     wrapper.innerHTML = `
       <img src="https://images.luviio.com/luviio-crop-img.png" alt="MoonWi AI" class="w-8 h-8 rounded-full object-cover flex-shrink-0" style="background: linear-gradient(135deg, #10a37f, #1c6e5a);">
       <div class="flex flex-col flex-1 min-w-0">
@@ -1913,16 +2013,30 @@ function showTypingIndicator(bubble) {
 }
 
 /* ============================================================
-   STREAMING RENDER
+   STREAMING RENDER — Faster, smoother streaming
 ============================================================ */
 function streamRender(targetEl, fullText, onComplete) {
   let i = 0;
-  const CHUNK_SIZE = Math.max(2, Math.floor(fullText.length / 200));
+  // Larger chunks + shorter delay = faster perceived response
+  const CHUNK_SIZE = Math.max(4, Math.ceil(fullText.length / 80));
+  const DELAY = 8;
   const sc = document.getElementById('chat-scroll');
   let lastScrollHeight = 0;
-  
+  let userScrolled = false;
+
+  // Detect if user scrolls up during streaming
+  const onScroll = () => {
+    if (sc.scrollHeight - sc.scrollTop - sc.clientHeight > 200) {
+      userScrolled = true;
+    } else {
+      userScrolled = false;
+    }
+  };
+  sc.addEventListener('scroll', onScroll);
+
   function tick() {
     if (i >= fullText.length) {
+      sc.removeEventListener('scroll', onScroll);
       targetEl.innerHTML = renderMarkdown(fullText);
       enhanceCodeBlocks(targetEl);
       if (window.Prism) Prism.highlightAllUnder(targetEl);
@@ -1932,14 +2046,14 @@ function streamRender(targetEl, fullText, onComplete) {
     i = Math.min(i + CHUNK_SIZE, fullText.length);
     const partial = fullText.substring(0, i);
     targetEl.innerHTML = renderMarkdown(partial) + '<span class="streaming-cursor"></span>';
-    
-    // Auto-scroll if user is near bottom
-    if (sc.scrollHeight - sc.scrollTop - sc.clientHeight < 200) {
+
+    // Auto-scroll only if user hasn't scrolled up
+    if (!userScrolled) {
       sc.scrollTop = sc.scrollHeight;
     }
     lastScrollHeight = sc.scrollHeight;
-    
-    setTimeout(tick, 16);
+
+    setTimeout(tick, DELAY);
   }
   tick();
 }
@@ -2020,9 +2134,8 @@ Format responses with markdown: use **bold**, *italic*, lists, tables, blockquot
     const data = await response.json();
     fullResponse = data.reply || "No response";
 
-    // Stream the response
     if (avatarEl) avatarEl.classList.remove('thinking-avatar');
-    
+
     await new Promise((resolve) => {
       streamRender(assistantBubble, fullResponse, resolve);
     });
@@ -2103,10 +2216,39 @@ Format responses with markdown: use **bold**, *italic*, lists, tables, blockquot
   }, { once: false, passive: true });
 })();
 
-// Init
-loadTheme();
-updateLandingAuthUI();
-handleRoute();
+/* ============================================================
+   INITIALIZATION
+   Key fix: Do NOT call handleRoute() here.
+   Wait for Firebase auth state to be determined first.
+   The loading splash screen is shown until auth is ready.
+============================================================ */
+function init() {
+  loadTheme();
+  updateLandingAuthUI();
+
+  // Fallback: if Firebase doesn't initialize within 5 seconds,
+  // hide splash and proceed with routing (will show landing page)
+  setTimeout(() => {
+    if (!authReady) {
+      authReady = true;
+      hideLoadingSplash();
+      handleRoute();
+    }
+  }, 5000);
+
+  // handleAuthChange (triggered by onAuthStateChanged) will:
+  // 1. Set currentUser
+  // 2. Load chats from Firestore
+  // 3. Hide splash screen
+  // 4. Call handleRoute() — which opens the correct view
+  //
+  // This ensures that on refresh:
+  // - If user is logged in and on a chat URL → chat loads directly (NO LOGIN PAGE)
+  // - If user is not logged in and on /home → landing page shows
+  // - If user is on a shared chat link → shared chat loads (no login required)
+}
+
+init();
 </script>
 </body>
 </html>
