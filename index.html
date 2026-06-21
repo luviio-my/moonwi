@@ -56,6 +56,8 @@
   .msg-animate { animation: slideIn 0.3s ease-out forwards; will-change: transform, opacity; }
   @keyframes viewFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
   .view-transition { animation: viewFadeIn 0.3s ease-out; }
+  @keyframes chatAreaFade { from { opacity: 0.5; } to { opacity: 1; } }
+  .chat-area-refresh { animation: chatAreaFade 0.2s ease-out; }
   @keyframes pulse-dot { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.1); } }
   .typing-dot { animation: pulse-dot 1.4s infinite ease-in-out; } .typing-dot:nth-child(2) { animation-delay: 0.2s; } .typing-dot:nth-child(3) { animation-delay: 0.4s; }
   @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
@@ -182,14 +184,11 @@
       </button>
     </div>
     <div class="flex flex-col md:flex-row min-h-[400px]">
-      <!-- Settings Sidebar -->
       <div class="md:w-48 p-4 border-b md:border-b-0 md:border-r" style="border-color: var(--border-color);">
         <div class="settings-tab active" data-tab="account" onclick="switchSettingsTab('account')">Account</div>
         <div class="settings-tab" data-tab="general" onclick="switchSettingsTab('general')">General</div>
       </div>
-      <!-- Settings Content -->
       <div class="flex-1 p-6 overflow-y-auto">
-        <!-- Account Tab -->
         <div id="settings-tab-account" class="settings-content">
           <div class="mb-6">
             <label class="block text-xs uppercase tracking-wider mb-2" style="color: var(--text-secondary);">Name</label>
@@ -206,7 +205,6 @@
             <button onclick="handleDeleteAccount()" class="px-4 py-2 text-sm bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors font-medium">Delete account</button>
           </div>
         </div>
-        <!-- General Tab -->
         <div id="settings-tab-general" class="settings-content hidden">
           <div class="flex items-center justify-between p-3 rounded-xl cursor-pointer hover:bg-white/5 transition-colors" onclick="toggleTheme()">
             <span class="flex items-center gap-2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>Toggle Theme</span>
@@ -254,7 +252,7 @@
   <button data-action="delete" class="w-full text-left px-4 py-2 hover:bg-red-500/10 text-red-400 flex items-center gap-2 transition-colors"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Delete</button>
 </div>
 
-<div id="landing-view" class="relative w-full min-h-screen overflow-hidden">
+<div id="landing-view" class="hidden relative w-full min-h-screen overflow-hidden">
   <div class="absolute inset-0 z-0">
     <div class="video-wrap">
       <video id="hero-video" muted playsinline loop preload="auto" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260329_050842_be71947f-f16e-4a14-810c-06e83d23ddb5.mp4"></video>
@@ -274,8 +272,14 @@
       <li><a href="#" class="font-schibsted font-medium text-white text-[16px] hover:opacity-70 transition-opacity">Contact</a></li>
     </ul>
     <div class="flex items-center gap-3">
-      <button onclick="openAuthModal('signup')" class="landing-signup-btn font-schibsted font-medium text-white text-[14px] rounded-lg hover:bg-white/10 transition-colors" style="width: 82px; height: 40px;">Sign Up</button>
-      <button onclick="openAuthModal('login')" class="landing-login-btn font-schibsted font-medium text-white text-[14px] rounded-lg bg-black hover:opacity-90 transition-opacity" style="width: 101px; height: 40px; border: 1px solid rgba(255,255,255,0.12);">Log In</button>
+      <!-- Logged out buttons -->
+      <button id="btn-signup" onclick="openAuthModal('signup')" class="landing-signup-btn font-schibsted font-medium text-white text-[14px] rounded-lg hover:bg-white/10 transition-colors" style="width: 82px; height: 40px;">Sign Up</button>
+      <button id="btn-login" onclick="openAuthModal('login')" class="landing-login-btn font-schibsted font-medium text-white text-[14px] rounded-lg bg-black hover:opacity-90 transition-opacity" style="width: 101px; height: 40px; border: 1px solid rgba(255,255,255,0.12);">Log In</button>
+      <!-- Logged in profile button -->
+      <button id="btn-profile" onclick="navigateToChat()" class="landing-profile-btn hidden font-schibsted font-medium text-white text-[14px] rounded-lg bg-black hover:opacity-90 transition-opacity items-center gap-2" style="height: 40px; padding: 0 16px; border: 1px solid rgba(255,255,255,0.12);">
+        <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white" style="background: linear-gradient(135deg, #10a37f, #1c6e5a);" id="landing-avatar">M</div>
+        <span id="landing-username">Profile</span>
+      </button>
       <button class="mobile-hamburger p-2 rounded-lg hover:bg-white/10 transition-colors" onclick="openMobileMenu()" title="Menu">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
@@ -465,11 +469,7 @@ let isLoginMode = true;
 let currentUser = null;
 
 /* ============================================================
-   FIREBASE INIT — Using `let` with null guards to prevent TDZ
-   "Cannot access 'auth' before initialization" fix:
-   - Use compat SDK scripts (see <head>) for global `firebase` object
-   - Use `let` instead of `const` so failed init = null (not TDZ)
-   - Wrap in try-catch so one failure doesn't block everything
+   FIREBASE INIT
 ============================================================ */
 const firebaseConfig = {
   apiKey: "AIzaSyA4AEH2TgHM2J8xBjAenmgRchsYOU8GeJc",
@@ -497,7 +497,7 @@ try {
 }
 
 /* ============================================================
-   ID GENERATOR (fallback if Firestore isn't available)
+   ID GENERATOR
 ============================================================ */
 function generateId() {
   if (db) {
@@ -514,42 +514,70 @@ function generateId() {
    AUTH STATE HANDLER
 ============================================================ */
 async function handleAuthChange(user) {
+  currentUser = user;
+  updateLandingAuthUI();
+  
   if (user) {
-    currentUser = user;
     const displayName = user.displayName || (user.email ? user.email.split('@')[0] : 'User');
-    document.getElementById('account-email').textContent = user.email || 'No email';
     const settingsEmail = document.getElementById('settings-email');
     if (settingsEmail) settingsEmail.value = user.email || 'No email';
     updateGreetingName(displayName);
-    loadUserChats(user.uid);
-    // If on landing or root, redirect to new chat automatically
+    
+    // Load user chats
+    if (db) {
+      try {
+        const snapshot = await db.collection('users').doc(user.uid).collection('chats').orderBy('updatedAt', 'desc').get();
+        chatStore = {};
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          chatStore[doc.id] = {
+            title: data.title || "New Chat",
+            messages: data.messages || []
+          };
+        });
+        renderHistoryList();
+      } catch (e) {
+        console.error('Failed to load chats:', e);
+      }
+    }
+
+    // If on root, redirect properly
     const path = window.location.pathname;
-    if (path === '/' || path === '/home') {
-       startNewChat();
+    if (path === '/') {
+       navigateToChat(); // Goes to /chat
+    } else {
+       handleRoute(); // Re-evaluate current route
     }
   } else {
-    currentUser = null;
     chatStore = {};
     renderHistoryList();
-    navigateHome();
+    if (window.location.pathname !== '/home') {
+       navigateHome();
+    } else {
+       handleRoute();
+    }
   }
 }
 
-async function loadUserChats(userId) {
-  if (!db) return;
-  try {
-    const snapshot = await db.collection('users').doc(userId).collection('chats').orderBy('updatedAt', 'desc').get();
-    chatStore = {};
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      chatStore[doc.id] = {
-        title: data.title || "New Chat",
-        messages: data.messages || []
-      };
-    });
-    renderHistoryList();
-  } catch (e) {
-    console.error('Failed to load chats:', e);
+function updateLandingAuthUI() {
+  const btnSignup = document.getElementById('btn-signup');
+  const btnLogin = document.getElementById('btn-login');
+  const btnProfile = document.getElementById('btn-profile');
+  
+  if (currentUser) {
+    if (btnSignup) btnSignup.classList.add('hidden');
+    if (btnLogin) btnLogin.classList.add('hidden');
+    if (btnProfile) {
+      btnProfile.classList.remove('hidden');
+      btnProfile.classList.add('flex');
+    }
+  } else {
+    if (btnSignup) btnSignup.classList.remove('hidden');
+    if (btnLogin) btnLogin.classList.remove('hidden');
+    if (btnProfile) {
+      btnProfile.classList.add('hidden');
+      btnProfile.classList.remove('flex');
+    }
   }
 }
 
@@ -602,17 +630,13 @@ async function handleDeleteAccount() {
   if (!currentUser) return;
   if (confirm("Are you sure you want to permanently delete your account and all your chats? This action cannot be undone.")) {
     try {
-      // Delete all user chats first
       const chatsRef = db.collection('users').doc(currentUser.uid).collection('chats');
       const snapshot = await chatsRef.get();
       const batch = db.batch();
       snapshot.forEach(doc => batch.delete(doc.ref));
       await batch.commit();
       
-      // Delete user document
       await db.collection('users').doc(currentUser.uid).delete();
-      
-      // Delete user account
       await currentUser.delete();
       
       closeModal('settings-modal');
@@ -682,41 +706,61 @@ function updateDocumentTitle(title) {
 
 function handleRoute() {
   const path = window.location.pathname;
-  const chatMatch = path.match(/^\/c\/([a-zA-Z0-9-]+)/);
-  if (path === '/home') { openLandingView(); return; }
+  const chatMatch = path.match(/^\/c\/([a-zA-Z0-9_-]+)/);
+  
+  if (path === '/home') { 
+    openLandingView(); 
+    return; 
+  }
+  
   if (chatMatch) {
     if (currentUser) switchToChat(chatMatch[1]);
-    else openLandingView();
+    else openLandingView(); // Will show login options on landing
     return;
   }
-  if (path === '/' || path === '/chat/new') {
-    if (currentUser) startNewChat();
-    else openLandingView();
+  
+  if (path === '/' || path === '/chat' || path === '/chat/new') {
+    if (currentUser) {
+      // Create a new chat if going to /chat without ID, or just open the view
+      if (path === '/chat' || path === '/') startNewChat();
+      else openChatView();
+    } else {
+      openLandingView();
+    }
     return;
   }
+  
   openLandingView();
 }
 
 function navigateToChat(prompt) {
+  if (!currentUser) {
+    openAuthModal('login');
+    return;
+  }
   const chatId = generateId();
   history.pushState({ chatId, prompt }, '', `/c/${chatId}`);
-  getChat(chatId).title = prompt.substring(0, 30) + (prompt.length > 30 ? '...' : '');
+  getChat(chatId).title = prompt ? (prompt.substring(0, 30) + (prompt.length > 30 ? '...' : '')) : "New Chat";
   switchToChat(chatId, prompt);
 }
 
 function navigateHome() {
-  history.pushState({}, '', '/home');
+  if (window.location.pathname !== '/home') {
+    history.pushState({}, '', '/home');
+  }
   updateDocumentTitle(null);
   openLandingView();
-  document.getElementById('landing-input').value = '';
-  document.getElementById('char-count').textContent = '0/3,000';
+  const li = document.getElementById('landing-input');
+  const cc = document.getElementById('char-count');
+  if (li) li.value = '';
+  if (cc) cc.textContent = '0/3,000';
 }
 
 window.addEventListener('popstate', handleRoute);
 
 function openLandingView() {
-  landingView.classList.remove('hidden');
   chatView.classList.add('hidden');
+  landingView.classList.remove('hidden');
   landingView.classList.add('view-transition');
   setTimeout(() => landingView.classList.remove('view-transition'), 400);
   const video = document.getElementById('hero-video');
@@ -837,11 +881,18 @@ function startNewChat() {
 }
 
 function switchToChat(chatId, initialPrompt) {
+  const isViewAlreadyOpen = !chatView.classList.contains('hidden');
   currentChatId = chatId;
-  openChatView();
-  renderChatMessages();
+  
+  if (!isViewAlreadyOpen) {
+    openChatView();
+  }
+  
+  renderChatMessages(); // Only refreshes the messages area
+  
   const chatData = getChat(chatId);
   updateDocumentTitle(chatData.title);
+  
   if (window.innerWidth < 768) {
     document.getElementById('sidebar').classList.add('closed');
     document.getElementById('sidebar-backdrop').classList.remove('active');
@@ -874,6 +925,12 @@ function renderChatMessages() {
     messagesContainer.classList.remove('hidden');
     actionButtons.classList.add('hidden');
     actionButtons.classList.remove('flex');
+    
+    // Only refresh the inner chat area, leaving outer layout animations alone
+    messagesContainer.classList.remove('chat-area-refresh');
+    void messagesContainer.offsetWidth; // trigger reflow
+    messagesContainer.classList.add('chat-area-refresh');
+    
     messagesContainer.innerHTML = '';
     chatData.messages.forEach((msg, idx) => {
       const isLast = idx === chatData.messages.length - 1;
@@ -905,7 +962,10 @@ function renderHistoryList() {
     const titleSpan = document.createElement('span');
     titleSpan.className = 'truncate flex-1 text-[13px]';
     titleSpan.textContent = chat.title;
-    titleSpan.onclick = () => { history.pushState({}, '', `/c/${id}`); switchToChat(id); };
+    titleSpan.onclick = () => { 
+      history.pushState({}, '', `/c/${id}`); 
+      switchToChat(id); 
+    };
 
     const actionsDiv = document.createElement('div');
     actionsDiv.className = 'chat-item-actions flex-shrink-0 ml-2';
@@ -1056,6 +1116,8 @@ function updateGreetingName(name) {
   const su = document.getElementById('sidebar-username'); if (su) su.textContent = displayName === 'there' ? 'Guest' : displayName;
   const sa = document.getElementById('sidebar-avatar'); if (sa) sa.textContent = initial;
   const ta = document.getElementById('top-avatar'); if (ta) ta.textContent = initial;
+  const la = document.getElementById('landing-avatar'); if (la) la.textContent = initial;
+  const lu = document.getElementById('landing-username'); if (lu) lu.textContent = displayName === 'there' ? 'Profile' : displayName;
   const ni = document.getElementById('display-name-input'); if (ni) ni.value = displayName === 'there' ? '' : displayName;
 }
 
@@ -1077,15 +1139,19 @@ const landingForm = document.getElementById('landing-form');
 const landingInput = document.getElementById('landing-input');
 const charCount = document.getElementById('char-count');
 
-landingInput.addEventListener('input', (e) => { charCount.textContent = `${e.target.value.length}/3,000`; });
+if (landingInput) {
+  landingInput.addEventListener('input', (e) => { charCount.textContent = `${e.target.value.length}/3,000`; });
+}
 
-landingForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const prompt = landingInput.value.trim();
-  if (!prompt) return;
-  if (!currentUser) { openAuthModal('login'); return; }
-  navigateToChat(prompt);
-});
+if (landingForm) {
+  landingForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const prompt = landingInput.value.trim();
+    if (!prompt) return;
+    if (!currentUser) { openAuthModal('login'); return; }
+    navigateToChat(prompt);
+  });
+}
 
 const chatForm = document.getElementById('chat-form');
 const chatInput = document.getElementById('chat-input');
@@ -1093,25 +1159,29 @@ const sendBtn = document.getElementById('send-btn');
 
 function autoResizeTextarea(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 200) + 'px'; }
 
-chatInput.addEventListener('input', () => {
-  autoResizeTextarea(chatInput);
-  if (!isGenerating) sendBtn.disabled = chatInput.value.trim() === '';
-});
+if (chatInput) {
+  chatInput.addEventListener('input', () => {
+    autoResizeTextarea(chatInput);
+    if (!isGenerating) sendBtn.disabled = chatInput.value.trim() === '';
+  });
 
-chatInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); chatForm.requestSubmit(); }
-});
+  chatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); chatForm.requestSubmit(); }
+  });
+}
 
-chatForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  if (isGenerating) return;
-  const text = chatInput.value.trim();
-  if (!text) return;
-  chatInput.value = '';
-  autoResizeTextarea(chatInput);
-  sendBtn.disabled = true;
-  sendChatMessage(text);
-});
+if (chatForm) {
+  chatForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (isGenerating) return;
+    const text = chatInput.value.trim();
+    if (!text) return;
+    chatInput.value = '';
+    autoResizeTextarea(chatInput);
+    sendBtn.disabled = true;
+    sendChatMessage(text);
+  });
+}
 
 function useActionPrompt(prefix) {
   chatInput.value = prefix;
@@ -1227,9 +1297,10 @@ function addMessageToDOM(role, content, animate = true, renderMd = true, isLastA
   wrapper.dataset.role = role;
 
   const chatData = getChat(currentChatId);
+  // Fix: Use filter().length instead of invalid .count property
   const msgIndex = chatData.messages.findIndex((m, i) => {
     if (m.role !== role) return false;
-    const countSoFar = chatData.messages.slice(0, i + 1).filter(x => x.role === role).count;
+    const countSoFar = chatData.messages.slice(0, i + 1).filter(x => x.role === role).length;
     const countInDom = messagesContainer.querySelectorAll(`.msg-wrapper[data-role="${role}"]`).length + 1;
     return countSoFar === countInDom;
   });
@@ -1376,7 +1447,7 @@ function showTypingIndicator(bubble) {
 }
 
 /* ============================================================
-   SEND MESSAGE — Secured via Backend (Cloudflare Worker)
+   SEND MESSAGE
 ============================================================ */
 async function sendChatMessage(text, isRegenerate = false) {
   const chatData = getChat(currentChatId);
@@ -1532,6 +1603,7 @@ Format responses with markdown: use **bold**, *italic*, lists, tables, blockquot
 
 // Init
 loadTheme();
+updateLandingAuthUI();
 handleRoute();
 </script>
 </body>
